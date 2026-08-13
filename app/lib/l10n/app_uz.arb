@@ -1,0 +1,126 @@
+{
+  "@@locale": "uz",
+
+  "appTitle": "Uzun narda",
+  "@appTitle": { "description": "Название игры" },
+
+  "menuSubtitle": "Uzbek nardasi",
+  "@menuSubtitle": { "description": "Подзаголовок на главном экране" },
+
+  "menuPlayBot": "Bot bilan o'ynash",
+  "@menuPlayBot": { "description": "Кнопка: игра против бота" },
+
+  "menuPlayHotseat": "Bitta qurilmada",
+  "@menuPlayHotseat": { "description": "Кнопка: hotseat на одном устройстве" },
+
+  "menuSettings": "Sozlamalar",
+  "@menuSettings": { "description": "Кнопка настроек" },
+
+  "levelTitle": "Bot darajasi",
+  "@levelTitle": { "description": "Заголовок выбора уровня бота" },
+
+  "levelOson": "Oson",
+  "@levelOson": { "description": "Уровень бота: лёгкий" },
+
+  "levelOrta": "O'rta",
+  "@levelOrta": { "description": "Уровень бота: средний" },
+
+  "levelKuchli": "Kuchli",
+  "@levelKuchli": { "description": "Уровень бота: сильный" },
+
+  "settingAutoMove": "Avto-yurish",
+  "@settingAutoMove": { "description": "Настройка автохода" },
+
+  "settingAutoMoveHint": "Yagona variant qolganda yurish o'zi bajariladi",
+  "@settingAutoMoveHint": { "description": "Пояснение к автоходу" },
+
+  "settingShowPips": "Pip hisobi",
+  "@settingShowPips": { "description": "Настройка показа pip-счёта" },
+
+  "settingShowPipsHint": "Ikkala tomonning pip hisobi ko'rsatiladi",
+  "@settingShowPipsHint": { "description": "Пояснение к pip-счёту" },
+
+  "actionClose": "Yopish",
+  "@actionClose": { "description": "Закрыть" },
+
+  "statusRolling": "Zar tashlash",
+  "@statusRolling": { "description": "Статус: бросок костей" },
+
+  "statusYourTurn": "Sizning yurishingiz",
+  "@statusYourTurn": { "description": "Статус: ход игрока" },
+
+  "statusThinking": "Bot o'ylayapti",
+  "@statusThinking": { "description": "Статус: бот думает" },
+
+  "statusWhiteTurn": "Oq toshlar yuradi",
+  "@statusWhiteTurn": { "description": "Статус: ход белых (hotseat)" },
+
+  "statusBlackTurn": "Qora toshlar yuradi",
+  "@statusBlackTurn": { "description": "Статус: ход чёрных (hotseat)" },
+
+  "statusNoMoves": "Yurish yo'q",
+  "@statusNoMoves": { "description": "Статус: нет легальных ходов" },
+
+  "statusConfirmTurn": "Yurishni tasdiqlang",
+  "@statusConfirmTurn": { "description": "Статус: ход собран, нужно подтверждение" },
+
+  "hintSelectChecker": "Toshni tanlang",
+  "@hintSelectChecker": { "description": "Подсказка: выберите шашку" },
+
+  "actionConfirm": "Tasdiqlash",
+  "@actionConfirm": { "description": "Подтвердить ход" },
+
+  "actionUndo": "Bekor qilish",
+  "@actionUndo": { "description": "Отменить перемещение" },
+
+  "actionResign": "Taslim bo'lish",
+  "@actionResign": { "description": "Сдаться" },
+
+  "resignQuestion": "Partiyada taslim bo'lasizmi?",
+  "@resignQuestion": { "description": "Вопрос перед сдачей партии" },
+
+  "actionYes": "Ha",
+  "@actionYes": { "description": "Да" },
+
+  "actionNo": "Yo'q",
+  "@actionNo": { "description": "Нет" },
+
+  "sideWhite": "Oq",
+  "@sideWhite": { "description": "Белые" },
+
+  "sideBlack": "Qora",
+  "@sideBlack": { "description": "Чёрные" },
+
+  "labelPip": "pip",
+  "@labelPip": { "description": "Подпись pip-счёта" },
+
+  "labelBorneOff": "chiqdi",
+  "@labelBorneOff": { "description": "Подпись количества выброшенных шашек" },
+
+  "resultYouWin": "Siz yutdingiz!",
+  "@resultYouWin": { "description": "Итог: победа игрока" },
+
+  "resultYouLose": "Siz yutqazdingiz",
+  "@resultYouLose": { "description": "Итог: поражение игрока" },
+
+  "resultWhiteWins": "Oq toshlar yutdi",
+  "@resultWhiteWins": { "description": "Итог: выиграли белые" },
+
+  "resultBlackWins": "Qora toshlar yutdi",
+  "@resultBlackWins": { "description": "Итог: выиграли чёрные" },
+
+  "resultOyin": "Oyin — 1 ochko",
+  "@resultOyin": { "description": "Итог: обычная победа" },
+
+  "resultMars": "Mars — 2 ochko",
+  "@resultMars": { "description": "Итог: марс" },
+
+  "resultByResign": "Taslim bo'lish bilan",
+  "@resultByResign": { "description": "Пометка: победа из-за сдачи" },
+
+  "actionRematch": "Yana o'ynash",
+  "@actionRematch": { "description": "Сыграть ещё раз" },
+
+  "actionMenu": "Menyu",
+  "@actionMenu": { "description": "Выйти в меню" }
+}

@@ -1,0 +1,52 @@
+{
+  "@@locale": "ru",
+
+  "appTitle": "Длинные нарды",
+  "menuSubtitle": "Узбекские нарды",
+  "menuPlayBot": "Играть с ботом",
+  "menuPlayHotseat": "На одном устройстве",
+  "menuSettings": "Настройки",
+
+  "levelTitle": "Уровень бота",
+  "levelOson": "Лёгкий",
+  "levelOrta": "Средний",
+  "levelKuchli": "Сильный",
+
+  "settingAutoMove": "Автоход",
+  "settingAutoMoveHint": "Единственный возможный ход выполняется сам",
+  "settingShowPips": "Счёт pip",
+  "settingShowPipsHint": "Показывать счёт pip обоих игроков",
+  "actionClose": "Закрыть",
+
+  "statusRolling": "Бросок костей",
+  "statusYourTurn": "Ваш ход",
+  "statusThinking": "Бот думает",
+  "statusWhiteTurn": "Ход белых",
+  "statusBlackTurn": "Ход чёрных",
+  "statusNoMoves": "Хода нет",
+  "statusConfirmTurn": "Подтвердите ход",
+  "hintSelectChecker": "Выберите шашку",
+
+  "actionConfirm": "Подтвердить",
+  "actionUndo": "Отменить",
+  "actionResign": "Сдаться",
+  "resignQuestion": "Сдать партию?",
+  "actionYes": "Да",
+  "actionNo": "Нет",
+
+  "sideWhite": "Белые",
+  "sideBlack": "Чёрные",
+  "labelPip": "pip",
+  "labelBorneOff": "выброшено",
+
+  "resultYouWin": "Вы выиграли!",
+  "resultYouLose": "Вы проиграли",
+  "resultWhiteWins": "Выиграли белые",
+  "resultBlackWins": "Выиграли чёрные",
+  "resultOyin": "Ойин — 1 очко",
+  "resultMars": "Марс — 2 очка",
+  "resultByResign": "Сдача партии",
+
+  "actionRematch": "Ещё партия",
+  "actionMenu": "Меню"
+}
