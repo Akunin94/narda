@@ -4,6 +4,7 @@ import '../app.dart';
 import '../l10n/gen/app_text.dart';
 import '../theme/board_theme.dart';
 import '../theme/narda_theme.dart';
+import 'chrome.dart';
 
 /// Обучение «Qoidalar»: восемь разделов правил, у каждого — своя картинка
 /// (§P3). Картинки рисуются тем же способом, что и доска: CustomPaint.
@@ -29,11 +30,7 @@ class RulesScreen extends StatelessWidget {
       _RuleCard(text.rulesResultTitle, text.rulesResultBody, RuleFigure.result),
     ];
     return Scaffold(
-      appBar: AppBar(
-        title: Text(text.rulesTitle),
-        backgroundColor: NardaColors.surface,
-        foregroundColor: NardaColors.textPrimary,
-      ),
+      appBar: NardaAppBar(title: text.rulesTitle),
       body: ListView.separated(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
         itemCount: cards.length,

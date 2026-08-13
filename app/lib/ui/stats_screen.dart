@@ -4,6 +4,7 @@ import '../app.dart';
 import '../game/stats.dart';
 import '../l10n/gen/app_text.dart';
 import '../theme/narda_theme.dart';
+import 'chrome.dart';
 
 /// Локальная статистика: партии, винрейт, марсы, серии (§P3).
 class StatsScreen extends StatelessWidget {
@@ -14,11 +15,7 @@ class StatsScreen extends StatelessWidget {
     final AppText text = AppText.of(context);
     final StatsStore store = StatsScope.of(context);
     return Scaffold(
-      appBar: AppBar(
-        title: Text(text.statsTitle),
-        backgroundColor: NardaColors.surface,
-        foregroundColor: NardaColors.textPrimary,
-      ),
+      appBar: NardaAppBar(title: text.statsTitle),
       body: AnimatedBuilder(
         animation: store,
         builder: (BuildContext context, Widget? child) {
@@ -35,14 +32,7 @@ class StatsScreen extends StatelessWidget {
               _row(text.statsMatches, '${stats.matches}'),
               _row(text.statsMatchWins, '${stats.matchWins}'),
               const SizedBox(height: 16),
-              Text(
-                stats.games == 0 ? text.statsEmpty : text.statsNote,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: NardaColors.textMuted,
-                  fontSize: 13,
-                ),
-              ),
+              NardaHint(stats.games == 0 ? text.statsEmpty : text.statsNote),
             ],
           );
         },
@@ -83,13 +73,8 @@ class _WinRateCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AppText text = AppText.of(context);
-    return Container(
+    return NardaCard(
       padding: const EdgeInsets.symmetric(vertical: 24),
-      decoration: BoxDecoration(
-        color: NardaColors.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: NardaColors.goldDeep),
-      ),
       child: Column(
         children: <Widget>[
           SizedBox(

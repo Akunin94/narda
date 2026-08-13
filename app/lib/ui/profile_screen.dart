@@ -6,6 +6,7 @@ import '../online/online_backend.dart';
 import '../profile/profile.dart';
 import '../theme/narda_theme.dart';
 import 'avatar.dart';
+import 'chrome.dart';
 import 'online/leaderboard_screen.dart';
 
 /// Профиль: ник, аватар из набора и рейтинг Elo (§P5).
@@ -35,11 +36,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     final AppText text = AppText.of(context);
     return Scaffold(
-      appBar: AppBar(
-        title: Text(text.profileTitle),
-        backgroundColor: NardaColors.surface,
-        foregroundColor: NardaColors.textPrimary,
-      ),
+      appBar: NardaAppBar(title: text.profileTitle),
       body: AnimatedBuilder(
         animation: _profile,
         builder: (BuildContext context, Widget? child) => ListView(
@@ -116,14 +113,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               label: Text(text.leaderboardTitle),
             ),
             const SizedBox(height: 12),
-            Text(
-              text.profileRatingNote,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: NardaColors.textMuted,
-                fontSize: 13,
-              ),
-            ),
+            NardaHint(text.profileRatingNote),
           ],
         ),
       ),
@@ -140,13 +130,8 @@ class _RatingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AppText text = AppText.of(context);
-    return Container(
+    return NardaCard(
       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-      decoration: BoxDecoration(
-        color: NardaColors.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: NardaColors.goldDeep),
-      ),
       child: Column(
         children: <Widget>[
           Text(

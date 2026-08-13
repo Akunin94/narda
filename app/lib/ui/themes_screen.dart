@@ -8,6 +8,7 @@ import '../game/settings.dart';
 import '../l10n/gen/app_text.dart';
 import '../theme/board_theme.dart';
 import '../theme/narda_theme.dart';
+import 'chrome.dart';
 
 /// Оформление доски и костей. Классика доступна всегда, две другие темы
 /// открываются просмотром rewarded-ролика на 24 часа (§P3).
@@ -27,11 +28,7 @@ class _ThemesScreenState extends State<ThemesScreen> {
     final SettingsController settings = SettingsScope.of(context);
     final AdsController ads = AdsScope.of(context);
     return Scaffold(
-      appBar: AppBar(
-        title: Text(text.themesTitle),
-        backgroundColor: NardaColors.surface,
-        foregroundColor: NardaColors.textPrimary,
-      ),
+      appBar: NardaAppBar(title: text.themesTitle),
       body: AnimatedBuilder(
         animation: Listenable.merge(<Listenable>[settings, ads]),
         builder: (BuildContext context, Widget? child) => ListView(
@@ -49,14 +46,7 @@ class _ThemesScreenState extends State<ThemesScreen> {
                 onTap: () => _onTap(settings, ads, theme, text),
               ),
             const SizedBox(height: 12),
-            Text(
-              text.themeUnlockedHint,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: NardaColors.textMuted,
-                fontSize: 13,
-              ),
-            ),
+            NardaHint(text.themeUnlockedHint),
           ],
         ),
       ),

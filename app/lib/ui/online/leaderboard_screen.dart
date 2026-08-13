@@ -6,6 +6,7 @@ import '../../online/online_backend.dart';
 import '../../online/protocol.dart';
 import '../../theme/narda_theme.dart';
 import '../avatar.dart';
+import '../chrome.dart';
 import 'online_failure.dart';
 
 /// Таблица лидеров: верхушка общего рейтинга Elo (§P5).
@@ -59,11 +60,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
   Widget build(BuildContext context) {
     final AppText text = AppText.of(context);
     return Scaffold(
-      appBar: AppBar(
-        title: Text(text.leaderboardTitle),
-        backgroundColor: NardaColors.surface,
-        foregroundColor: NardaColors.textPrimary,
-      ),
+      appBar: NardaAppBar(title: text.leaderboardTitle),
       body: SafeArea(child: _body(text)),
     );
   }
