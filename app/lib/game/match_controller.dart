@@ -195,9 +195,7 @@ class MatchController extends ChangeNotifier {
     _phase = TurnPhase.rolling;
     _result = null;
     _abortReason = null;
-    _planner = null;
-    _selected = null;
-    _animated = null;
+    _clearDraft();
     _lastTurnMoves = const <Move>[];
     start();
   }
@@ -290,9 +288,7 @@ class MatchController extends ChangeNotifier {
     final Player resigning = _opponent.movesOnThisDevice
         ? _game.state.turn
         : setup.localPlayer;
-    _planner = null;
-    _selected = null;
-    _animated = null;
+    _clearDraft();
     _game.resign(resigning);
     unawaited(_coordinator?.publishResign());
     _finish(_game.result!);
@@ -328,10 +324,7 @@ class MatchController extends ChangeNotifier {
     }
     if (_isStale(generation)) return;
     _game.restore(state);
-    if (_game.isFinished) {
-      _finish(_game.result!);
-      return;
-    }
+    if (_finishIfOver()) return;
     unawaited(_runTurn());
   }
 
@@ -340,9 +333,7 @@ class MatchController extends ChangeNotifier {
     // досчитывал свои await'ы — новый ход тогда начинать нельзя.
     if (isOver) return;
     final int generation = _generation;
-    _planner = null;
-    _selected = null;
-    _animated = null;
+    _clearDraft();
     _phase = TurnPhase.rolling;
     _feedback.dice();
     _notify();
@@ -454,10 +445,7 @@ class MatchController extends ChangeNotifier {
     _lastTurnMoves = sequence.moves;
     _game.play(sequence);
     if (!await _publishLocal(before, sequence, generation)) return;
-    if (_game.isFinished) {
-      _finish(_game.result!);
-      return;
-    }
+    if (_finishIfOver()) return;
     unawaited(_runTurn());
   }
 
@@ -490,9 +478,7 @@ class MatchController extends ChangeNotifier {
       case FinishSignal(result: final GameResult result):
         if (isOver) return;
         _generation++;
-        _planner = null;
-        _selected = null;
-        _animated = null;
+        _clearDraft();
         _finish(result);
       case AbortSignal(reason: final MatchAbortReason reason):
         _abort(reason);
@@ -503,27 +489,36 @@ class MatchController extends ChangeNotifier {
   void _resync(GameState state) {
     if (isOver) return;
     _generation++;
-    _planner = null;
-    _selected = null;
-    _animated = null;
+    _clearDraft();
     _lastTurnMoves = const <Move>[];
     _game.restore(state);
-    if (_game.isFinished) {
-      _finish(_game.result!);
-      return;
-    }
+    if (_finishIfOver()) return;
     unawaited(_runTurn());
   }
 
   void _abort(MatchAbortReason reason) {
     if (isOver) return;
     _generation++;
-    _planner = null;
-    _selected = null;
-    _animated = null;
+    _clearDraft();
     _abortReason = reason;
     _phase = TurnPhase.aborted;
     _notify();
+  }
+
+  /// Забывает недособранный ход: план, выбранную шашку и анимацию.
+  /// Счёт серии, история последнего хода и фаза остаются на совести вызова.
+  void _clearDraft() {
+    _planner = null;
+    _selected = null;
+    _animated = null;
+  }
+
+  /// Партия закончилась выбросом — итог посчитан ядром. `true` — доигранa,
+  /// новый ход начинать не нужно.
+  bool _finishIfOver() {
+    if (!_game.isFinished) return false;
+    _finish(_game.result!);
+    return true;
   }
 
   void _finish(GameResult result) {
