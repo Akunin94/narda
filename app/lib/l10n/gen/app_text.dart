@@ -888,6 +888,96 @@ abstract class AppText {
   /// In uz, this message translates to:
   /// **'{seconds} s'**
   String onlineSecondsLeft(int seconds);
+
+  /// Кнопка: профиль игрока
+  ///
+  /// In uz, this message translates to:
+  /// **'Profil'**
+  String get menuProfile;
+
+  /// Заголовок экрана профиля
+  ///
+  /// In uz, this message translates to:
+  /// **'Profil'**
+  String get profileTitle;
+
+  /// Поле ника
+  ///
+  /// In uz, this message translates to:
+  /// **'Taxallus'**
+  String get profileName;
+
+  /// Подсказка поля ника
+  ///
+  /// In uz, this message translates to:
+  /// **'Taxallusingizni yozing'**
+  String get profileNameHint;
+
+  /// Заголовок выбора аватара
+  ///
+  /// In uz, this message translates to:
+  /// **'Avatar'**
+  String get profileAvatar;
+
+  /// Рейтинг Elo
+  ///
+  /// In uz, this message translates to:
+  /// **'Reyting'**
+  String get profileRating;
+
+  /// Сколько рейтинговых матчей сыграно
+  ///
+  /// In uz, this message translates to:
+  /// **'Reytingli matchlar'**
+  String get profileRatedGames;
+
+  /// Пояснение: рейтинг только за онлайн
+  ///
+  /// In uz, this message translates to:
+  /// **'Reyting faqat onlayn matchlarda o\'zgaradi'**
+  String get profileRatingNote;
+
+  /// Заголовок таблицы лидеров
+  ///
+  /// In uz, this message translates to:
+  /// **'Reyting jadvali'**
+  String get leaderboardTitle;
+
+  /// Таблица лидеров пуста
+  ///
+  /// In uz, this message translates to:
+  /// **'Jadval hozircha bo\'sh'**
+  String get leaderboardEmpty;
+
+  /// Пометка своей строки в таблице
+  ///
+  /// In uz, this message translates to:
+  /// **'Siz'**
+  String get leaderboardYou;
+
+  /// Кнопка: предложить реванш в онлайне
+  ///
+  /// In uz, this message translates to:
+  /// **'Revansh'**
+  String get actionRematchOnline;
+
+  /// Ждём, согласится ли соперник на реванш
+  ///
+  /// In uz, this message translates to:
+  /// **'Raqibning javobi kutilmoqda'**
+  String get rematchWaiting;
+
+  /// Соперник предложил реванш
+  ///
+  /// In uz, this message translates to:
+  /// **'Raqib revansh taklif qilyapti'**
+  String get rematchOffered;
+
+  /// Рейтинг после матча и его изменение
+  ///
+  /// In uz, this message translates to:
+  /// **'Reyting: {rating} ({delta})'**
+  String ratingResult(int rating, String delta);
 }
 
 class _AppTextDelegate extends LocalizationsDelegate<AppText> {

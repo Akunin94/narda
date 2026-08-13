@@ -407,5 +407,56 @@
   "@onlineSecondsLeft": {
     "description": "Сколько секунд осталось на ход",
     "placeholders": { "seconds": { "type": "int" } }
+  },
+
+  "menuProfile": "Profil",
+  "@menuProfile": { "description": "Кнопка: профиль игрока" },
+
+  "profileTitle": "Profil",
+  "@profileTitle": { "description": "Заголовок экрана профиля" },
+
+  "profileName": "Taxallus",
+  "@profileName": { "description": "Поле ника" },
+
+  "profileNameHint": "Taxallusingizni yozing",
+  "@profileNameHint": { "description": "Подсказка поля ника" },
+
+  "profileAvatar": "Avatar",
+  "@profileAvatar": { "description": "Заголовок выбора аватара" },
+
+  "profileRating": "Reyting",
+  "@profileRating": { "description": "Рейтинг Elo" },
+
+  "profileRatedGames": "Reytingli matchlar",
+  "@profileRatedGames": { "description": "Сколько рейтинговых матчей сыграно" },
+
+  "profileRatingNote": "Reyting faqat onlayn matchlarda o'zgaradi",
+  "@profileRatingNote": { "description": "Пояснение: рейтинг только за онлайн" },
+
+  "leaderboardTitle": "Reyting jadvali",
+  "@leaderboardTitle": { "description": "Заголовок таблицы лидеров" },
+
+  "leaderboardEmpty": "Jadval hozircha bo'sh",
+  "@leaderboardEmpty": { "description": "Таблица лидеров пуста" },
+
+  "leaderboardYou": "Siz",
+  "@leaderboardYou": { "description": "Пометка своей строки в таблице" },
+
+  "actionRematchOnline": "Revansh",
+  "@actionRematchOnline": { "description": "Кнопка: предложить реванш в онлайне" },
+
+  "rematchWaiting": "Raqibning javobi kutilmoqda",
+  "@rematchWaiting": { "description": "Ждём, согласится ли соперник на реванш" },
+
+  "rematchOffered": "Raqib revansh taklif qilyapti",
+  "@rematchOffered": { "description": "Соперник предложил реванш" },
+
+  "ratingResult": "Reyting: {rating} ({delta})",
+  "@ratingResult": {
+    "description": "Рейтинг после матча и его изменение",
+    "placeholders": {
+      "rating": { "type": "int" },
+      "delta": { "type": "String" }
+    }
   }
 }

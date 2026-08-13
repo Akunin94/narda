@@ -312,6 +312,12 @@ class MatchController extends ChangeNotifier {
   /// или восстановленная реплеем журнала после реконнекта (§6).
   Future<void> _startShared(TurnCoordinator coordinator, int generation) async {
     _phase = TurnPhase.rolling;
+    // Пока ведущий согласовывает первый ход, доске нужна хоть какая-то
+    // позиция: показываем стартовую расстановку. Ходить в ней нельзя —
+    // фаза `rolling` не пускает, а через мгновение придёт настоящая.
+    _game.restore(
+      GameState.initial(first: setup.localPlayer, roll: const DiceRoll(1, 1)),
+    );
     _notify();
     final GameState state;
     try {

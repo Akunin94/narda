@@ -33,6 +33,9 @@ class MemoryOnlineServer {
   final Map<String, void Function(String roomId)> waiting =
       <String, void Function(String roomId)>{};
 
+  /// Таблица лидеров: `users/{uid}` (§P5).
+  final Map<String, Object?> users = <String, Object?>{};
+
   int _roomCounter = 0;
 
   String newRoomId() => 'room${++_roomCounter}';
@@ -137,7 +140,7 @@ class MemoryOnlineBackend implements OnlineBackend {
   @override
   Future<RoomHandle> createRoom({
     required MatchTarget target,
-    required String name,
+    required PlayerCard card,
   }) async {
     final String roomId = server.newRoomId();
     final String code = server.newCode();
@@ -150,7 +153,11 @@ class MemoryOnlineBackend implements OnlineBackend {
         createdAt: server.now(),
       ).toJson(),
       'players': <String, Object?>{
-        uid: RoomPlayer(uid: uid, name: name, color: Player.white).toJson(),
+        uid: RoomPlayer.fromCard(
+          uid: uid,
+          color: Player.white,
+          card: card,
+        ).toJson(),
       },
       'presence': <String, Object?>{uid: true},
     });
@@ -158,7 +165,7 @@ class MemoryOnlineBackend implements OnlineBackend {
   }
 
   @override
-  Future<RoomHandle?> joinByCode(String code, {required String name}) async {
+  Future<RoomHandle?> joinByCode(String code, {required PlayerCard card}) async {
     final String? roomId = server.roomIdByCode(code);
     if (roomId == null) throw const OnlineUnavailable(OnlineFailure.roomNotFound);
     final RoomSnapshot snapshot = server.snapshot(roomId);
@@ -167,10 +174,10 @@ class MemoryOnlineBackend implements OnlineBackend {
     }
     if (snapshot.isFull) throw const OnlineUnavailable(OnlineFailure.roomFull);
     server.update(roomId, <String, Object?>{
-      'players/$uid': RoomPlayer(
+      'players/$uid': RoomPlayer.fromCard(
         uid: uid,
-        name: name,
         color: Player.black,
+        card: card,
       ).toJson(),
       'presence/$uid': true,
       'meta/status': RoomStatus.playing.name,
@@ -181,14 +188,14 @@ class MemoryOnlineBackend implements OnlineBackend {
   @override
   Future<RoomHandle?> quickMatch({
     required MatchTarget target,
-    required String name,
+    required PlayerCard card,
   }) async {
     for (final MapEntry<String, Map<String, Object?>> entry
         in server.queue.entries) {
       if (entry.key == uid) continue;
       if (entry.value['target'] != target.points) continue;
       if (entry.value['roomId'] != null) continue;
-      final RoomHandle host = await createRoom(target: target, name: name);
+      final RoomHandle host = await createRoom(target: target, card: card);
       // Ожидающий видит номер комнаты и входит в неё вторым.
       entry.value['roomId'] = host.roomId;
       server.waiting.remove(entry.key)?.call(host.roomId);
@@ -198,25 +205,45 @@ class MemoryOnlineBackend implements OnlineBackend {
     server.queue[uid] = <String, Object?>{'target': target.points, 'roomId': null};
     final Completer<RoomHandle?> completer = Completer<RoomHandle?>();
     _queueWait = completer;
-    server.waiting[uid] = (String roomId) => _pair(completer, roomId, name);
+    server.waiting[uid] = (String roomId) => _pair(completer, roomId, card);
     return completer.future;
   }
 
-  void _pair(Completer<RoomHandle?> completer, String roomId, String name) {
+  void _pair(Completer<RoomHandle?> completer, String roomId, PlayerCard card) {
     if (completer.isCompleted) return;
     _queueWait = null;
     server.queue.remove(uid);
     server.update(roomId, <String, Object?>{
-      'players/$uid': RoomPlayer(
+      'players/$uid': RoomPlayer.fromCard(
         uid: uid,
-        name: name,
         color: Player.black,
+        card: card,
       ).toJson(),
       'presence/$uid': true,
       'meta/status': RoomStatus.playing.name,
     });
     completer.complete(MemoryRoomHandle(server, roomId: roomId, uid: uid));
   }
+
+  @override
+  Future<void> publishProfile({
+    required PlayerCard card,
+    required int games,
+    required int wins,
+  }) async {
+    server.users[uid] = RatingEntry(
+      uid: uid,
+      name: card.name,
+      avatar: card.avatar,
+      rating: card.rating,
+      games: games,
+      wins: wins,
+    ).toJson()..['updatedAt'] = server.now();
+  }
+
+  @override
+  Future<List<RatingEntry>> leaderboard({int limit = 50}) async =>
+      ratingTable(server.users, limit: limit);
 
   @override
   Future<void> cancelQuickMatch() async {

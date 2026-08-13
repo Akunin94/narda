@@ -12,15 +12,23 @@
 ///   outcome:  {winnerUid, reason, gameIndex}
 ///   presence/{uid}: bool
 ///   chat/{uid}: {phrase, ts}
+///   rematch/{uid}: <номер партии, с которой игрок готов играть новый матч>
 /// ```
 /// Отличие от §6 одно: журнал ходов лежит внутри `games/{gameIndex}`, потому
 /// что комната играет серию до 3 / 5 / 7 очков (§3.4), а не одну партию.
 /// Розыгрыш первого хода тоже сетевой: каждый пишет свой кубик сам (§3.2.1).
+///
+/// Рядом с комнатами лежит таблица лидеров (§P5):
+/// ```
+/// users/{uid}: {name, avatar, rating, games, wins, updatedAt}
+/// ```
 library;
 
 import 'dart:math';
 
 import 'package:narda_core/narda_core.dart';
+
+import '../profile/elo.dart';
 
 /// Метка «поставь серверное время»; бэкенд подменяет её при записи.
 class ServerTimestamp {
@@ -35,17 +43,54 @@ enum RoomStatus { waiting, playing, finished }
 /// Почему партия закончилась не выбросом шашек.
 enum OutcomeReason { resign, timeout, disconnect, desync }
 
+/// Как игрок представляется в комнате и в таблице лидеров: ник, аватар и
+/// рейтинг на момент входа (§P5).
+class PlayerCard {
+  const PlayerCard({
+    required this.name,
+    this.avatar = 0,
+    this.rating = eloStartRating,
+  });
+
+  final String name;
+  final int avatar;
+  final int rating;
+}
+
 /// Игрок комнаты.
 class RoomPlayer {
-  const RoomPlayer({required this.uid, required this.name, required this.color});
+  const RoomPlayer({
+    required this.uid,
+    required this.name,
+    required this.color,
+    this.avatar = 0,
+    this.rating = eloStartRating,
+  });
+
+  RoomPlayer.fromCard({
+    required this.uid,
+    required this.color,
+    required PlayerCard card,
+  }) : name = card.name,
+       avatar = card.avatar,
+       rating = card.rating;
 
   final String uid;
   final String name;
   final Player color;
 
+  /// Номер аватара из набора.
+  final int avatar;
+
+  /// Рейтинг на момент входа в комнату: по нему обе стороны считают Elo
+  /// после матча и получают одинаковый результат (§P5).
+  final int rating;
+
   Map<String, Object?> toJson() => <String, Object?>{
     'name': name,
     'color': color.code,
+    'avatar': avatar,
+    'rating': rating,
   };
 
   static RoomPlayer? fromJson(String uid, Object? json) {
@@ -56,8 +101,64 @@ class RoomPlayer {
       uid: uid,
       name: json['name'] is String ? json['name'] as String : '',
       color: Player.fromCode(code),
+      avatar: asInt(json['avatar']) ?? 0,
+      rating: asInt(json['rating']) ?? eloStartRating,
     );
   }
+}
+
+/// Строка таблицы лидеров — она же публичная запись профиля `users/{uid}`.
+class RatingEntry {
+  const RatingEntry({
+    required this.uid,
+    required this.name,
+    this.avatar = 0,
+    this.rating = eloStartRating,
+    this.games = 0,
+    this.wins = 0,
+  });
+
+  final String uid;
+  final String name;
+  final int avatar;
+  final int rating;
+  final int games;
+  final int wins;
+
+  Map<String, Object?> toJson() => <String, Object?>{
+    'name': name,
+    'avatar': avatar,
+    'rating': rating,
+    'games': games,
+    'wins': wins,
+    'updatedAt': serverTimestamp,
+  };
+
+  static RatingEntry? fromJson(String uid, Object? json) {
+    if (json is! Map || json['name'] is! String) return null;
+    return RatingEntry(
+      uid: uid,
+      name: json['name'] as String,
+      avatar: asInt(json['avatar']) ?? 0,
+      rating: asInt(json['rating']) ?? eloStartRating,
+      games: asInt(json['games']) ?? 0,
+      wins: asInt(json['wins']) ?? 0,
+    );
+  }
+}
+
+/// Разбирает узел `users` и раскладывает по убыванию рейтинга.
+List<RatingEntry> ratingTable(Object? json, {int limit = 50}) {
+  final List<RatingEntry> entries = <RatingEntry>[];
+  childrenOf(json).forEach((String uid, Object? value) {
+    final RatingEntry? entry = RatingEntry.fromJson(uid, value);
+    if (entry != null) entries.add(entry);
+  });
+  entries.sort((RatingEntry a, RatingEntry b) {
+    final int byRating = b.rating.compareTo(a.rating);
+    return byRating != 0 ? byRating : a.name.compareTo(b.name);
+  });
+  return entries.length > limit ? entries.sublist(0, limit) : entries;
 }
 
 /// Шапка комнаты.
@@ -269,6 +370,7 @@ class RoomSnapshot {
     this.outcome,
     this.presence = const <String, bool>{},
     this.chat = const <String, String>{},
+    this.rematch = const <String, int>{},
   });
 
   final String roomId;
@@ -284,6 +386,10 @@ class RoomSnapshot {
 
   /// Последняя фраза каждого игрока.
   final Map<String, String> chat;
+
+  /// Заявки на реванш: uid -> номер партии, с которой игрок готов начать
+  /// новый матч в этой же комнате (§P5).
+  final Map<String, int> rematch;
 
   bool get isFull => players.length >= 2;
 
@@ -309,7 +415,17 @@ class RoomSnapshot {
       outcome: RoomOutcome.fromJson(json['outcome']),
       presence: _presence(json['presence']),
       chat: _chat(json['chat']),
+      rematch: _rematch(json['rematch']),
     );
+  }
+
+  static Map<String, int> _rematch(Object? json) {
+    final Map<String, int> result = <String, int>{};
+    childrenOf(json).forEach((String uid, Object? value) {
+      final int? index = asInt(value);
+      if (index != null) result[uid] = index;
+    });
+    return result;
   }
 
   static Map<int, RoomGame> _games(Object? json) {

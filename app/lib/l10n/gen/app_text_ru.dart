@@ -422,4 +422,51 @@ class AppTextRu extends AppText {
   String onlineSecondsLeft(int seconds) {
     return '$seconds с';
   }
+
+  @override
+  String get menuProfile => 'Профиль';
+
+  @override
+  String get profileTitle => 'Профиль';
+
+  @override
+  String get profileName => 'Ник';
+
+  @override
+  String get profileNameHint => 'Введите ник';
+
+  @override
+  String get profileAvatar => 'Аватар';
+
+  @override
+  String get profileRating => 'Рейтинг';
+
+  @override
+  String get profileRatedGames => 'Рейтинговые матчи';
+
+  @override
+  String get profileRatingNote => 'Рейтинг меняется только в онлайн-матчах';
+
+  @override
+  String get leaderboardTitle => 'Таблица лидеров';
+
+  @override
+  String get leaderboardEmpty => 'Таблица пока пуста';
+
+  @override
+  String get leaderboardYou => 'Вы';
+
+  @override
+  String get actionRematchOnline => 'Реванш';
+
+  @override
+  String get rematchWaiting => 'Ждём ответа соперника';
+
+  @override
+  String get rematchOffered => 'Соперник предлагает реванш';
+
+  @override
+  String ratingResult(int rating, String delta) {
+    return 'Рейтинг: $rating ($delta)';
+  }
 }

@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:narda_core/narda_core.dart';
 
 import '../game/turn_coordinator.dart';
+import '../profile/elo.dart';
 import 'online_backend.dart';
 import 'protocol.dart';
 
@@ -95,6 +96,14 @@ class OnlineMatch extends ChangeNotifier implements TurnCoordinator {
   String? get opponentUid => _snapshot?.opponentOf(localUid)?.uid;
 
   String get opponentName => _snapshot?.opponentOf(localUid)?.name ?? '';
+
+  /// Аватар соперника из набора (§P5).
+  int get opponentAvatar => _snapshot?.opponentOf(localUid)?.avatar ?? 0;
+
+  /// Рейтинг соперника на момент входа в комнату: по нему обе стороны
+  /// считают Elo после матча и получают один и тот же результат (§P5).
+  int get opponentRating =>
+      _snapshot?.opponentOf(localUid)?.rating ?? eloStartRating;
 
   /// Код приватной комнаты — его диктуют сопернику.
   String get roomCode => _snapshot?.meta?.code ?? '';
@@ -290,6 +299,28 @@ class OnlineMatch extends ChangeNotifier implements TurnCoordinator {
     }
     return sequence.isEmpty ? null : sequence;
   }
+
+  // --- Реванш (§P5) ----------------------------------------------------
+
+  /// Заявка на реванш: играем новый матч в этой же комнате, начиная со
+  /// следующей партии. Заявка «протухает» сама — как только новый матч
+  /// начался, её номер перестаёт быть больше текущего.
+  Future<void> requestRematch() => room.update(<String, Object?>{
+    'rematch/$localUid': _gameIndex + 1,
+  });
+
+  bool get rematchRequestedByMe => _wantsRematch(localUid);
+
+  bool get rematchRequestedByOpponent {
+    final String? uid = opponentUid;
+    return uid != null && _wantsRematch(uid);
+  }
+
+  /// Согласны оба — доска начинает новый матч.
+  bool get rematchAgreed => rematchRequestedByMe && rematchRequestedByOpponent;
+
+  bool _wantsRematch(String uid) =>
+      (_snapshot?.rematch[uid] ?? -1) > _gameIndex;
 
   /// Забрать победу, когда соперника нет дольше [absenceLimit] (§6).
   Future<void> claimWin() =>

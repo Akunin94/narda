@@ -5,9 +5,12 @@ import '../app.dart';
 import '../game/game_setup.dart';
 import '../game/settings.dart';
 import '../l10n/gen/app_text.dart';
+import '../profile/profile.dart';
 import '../theme/narda_theme.dart';
+import 'avatar.dart';
 import 'game_screen.dart';
 import 'online/online_screen.dart';
+import 'profile_screen.dart';
 import 'rules_screen.dart';
 import 'settings_sheet.dart';
 import 'stats_screen.dart';
@@ -30,6 +33,10 @@ class HomeScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
+              const Align(
+                alignment: Alignment.centerRight,
+                child: _ProfileButton(),
+              ),
               const Spacer(flex: 2),
               Text(
                 text.appTitle,
@@ -196,6 +203,47 @@ class HomeScreen extends StatelessWidget {
       builder: (BuildContext context) => GameScreen(setup: setup),
     ),
   );
+}
+
+/// Ник, аватар и рейтинг в углу главного экрана; тап открывает профиль (§P5).
+class _ProfileButton extends StatelessWidget {
+  const _ProfileButton();
+
+  @override
+  Widget build(BuildContext context) {
+    final ProfileController profile = ProfileScope.of(context);
+    return AnimatedBuilder(
+      animation: profile,
+      builder: (BuildContext context, Widget? child) => TextButton.icon(
+        onPressed: () => Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (BuildContext context) => const ProfileScreen(),
+          ),
+        ),
+        icon: NardaAvatar(index: profile.avatar, size: 30),
+        label: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Text(
+              profile.name,
+              style: const TextStyle(
+                color: NardaColors.textPrimary,
+                fontSize: 13,
+              ),
+            ),
+            Text(
+              '${AppText.of(context).profileRating} ${profile.rating}',
+              style: const TextStyle(
+                color: NardaColors.textMuted,
+                fontSize: 11,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 /// Переключатель формата матча: одиночная партия или серия до 3 / 5 / 7 (§3.4).

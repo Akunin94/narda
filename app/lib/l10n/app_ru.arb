@@ -276,5 +276,29 @@
   "@onlineSecondsLeft": {
     "description": "Сколько секунд осталось на ход",
     "placeholders": { "seconds": { "type": "int" } }
+  },
+
+  "menuProfile": "Профиль",
+  "profileTitle": "Профиль",
+  "profileName": "Ник",
+  "profileNameHint": "Введите ник",
+  "profileAvatar": "Аватар",
+  "profileRating": "Рейтинг",
+  "profileRatedGames": "Рейтинговые матчи",
+  "profileRatingNote": "Рейтинг меняется только в онлайн-матчах",
+  "leaderboardTitle": "Таблица лидеров",
+  "leaderboardEmpty": "Таблица пока пуста",
+  "leaderboardYou": "Вы",
+  "actionRematchOnline": "Реванш",
+  "rematchWaiting": "Ждём ответа соперника",
+  "rematchOffered": "Соперник предлагает реванш",
+
+  "ratingResult": "Рейтинг: {rating} ({delta})",
+  "@ratingResult": {
+    "description": "Рейтинг после матча и его изменение",
+    "placeholders": {
+      "rating": { "type": "int" },
+      "delta": { "type": "String" }
+    }
   }
 }

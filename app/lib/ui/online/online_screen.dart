@@ -12,6 +12,8 @@ import '../../online/online_backend.dart';
 import '../../theme/narda_theme.dart';
 import '../game_screen.dart';
 import '../home_screen.dart';
+import 'leaderboard_screen.dart';
+import 'online_failure.dart';
 
 /// Вход в онлайн: быстрый матч и приватная комната по 6-значному коду (§6).
 class OnlineScreen extends StatefulWidget {
@@ -25,11 +27,23 @@ class OnlineScreen extends StatefulWidget {
 }
 
 class _OnlineScreenState extends State<OnlineScreen> {
+  /// Лобби собирается лениво: профиль берётся из дерева, а к нему нельзя
+  /// обращаться раньше, чем завершится initState.
   late final LobbyController _lobby = LobbyController(
     backend: widget.backend ?? FirebaseOnlineBackend(),
-  )..addListener(_onLobbyChanged);
+    profile: ProfileScope.of(context),
+  );
 
   bool _opened = false;
+  bool _ready = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_ready) return;
+    _ready = true;
+    _lobby.addListener(_onLobbyChanged);
+  }
 
   @override
   void dispose() {
@@ -48,8 +62,11 @@ class _OnlineScreenState extends State<OnlineScreen> {
     _opened = true;
     Navigator.of(context).pushReplacement(
       MaterialPageRoute<void>(
-        builder: (BuildContext context) =>
-            GameScreen(setup: session.setup, online: session.match),
+        builder: (BuildContext context) => GameScreen(
+          setup: session.setup,
+          online: session.match,
+          rating: session.rating,
+        ),
       ),
     );
   }
@@ -108,10 +125,21 @@ class _OnlineScreenState extends State<OnlineScreen> {
         onPressed: () => _askCode(text),
         child: Text(text.onlineJoinRoom),
       ),
+      const SizedBox(height: 12),
+      OutlinedButton.icon(
+        onPressed: () => Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (BuildContext context) =>
+                LeaderboardScreen(backend: widget.backend),
+          ),
+        ),
+        icon: const Icon(Icons.leaderboard_outlined),
+        label: Text(text.leaderboardTitle),
+      ),
       if (_lobby.failure != null) ...<Widget>[
         const SizedBox(height: 24),
         Text(
-          _failureText(text, _lobby.failure!),
+          onlineFailureText(text, _lobby.failure!),
           textAlign: TextAlign.center,
           style: const TextStyle(color: NardaColors.gold),
         ),
@@ -246,11 +274,4 @@ class _OnlineScreenState extends State<OnlineScreen> {
     field.dispose();
     if (code != null && code.length == 6) await _lobby.joinByCode(code);
   }
-
-  String _failureText(AppText text, OnlineFailure failure) => switch (failure) {
-    OnlineFailure.notConfigured => text.onlineNotConfigured,
-    OnlineFailure.network => text.onlineNetworkError,
-    OnlineFailure.roomNotFound => text.onlineNoRoom,
-    OnlineFailure.roomFull => text.onlineRoomFull,
-  };
 }

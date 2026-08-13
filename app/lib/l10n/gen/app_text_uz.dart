@@ -423,4 +423,51 @@ class AppTextUz extends AppText {
   String onlineSecondsLeft(int seconds) {
     return '$seconds s';
   }
+
+  @override
+  String get menuProfile => 'Profil';
+
+  @override
+  String get profileTitle => 'Profil';
+
+  @override
+  String get profileName => 'Taxallus';
+
+  @override
+  String get profileNameHint => 'Taxallusingizni yozing';
+
+  @override
+  String get profileAvatar => 'Avatar';
+
+  @override
+  String get profileRating => 'Reyting';
+
+  @override
+  String get profileRatedGames => 'Reytingli matchlar';
+
+  @override
+  String get profileRatingNote => 'Reyting faqat onlayn matchlarda o\'zgaradi';
+
+  @override
+  String get leaderboardTitle => 'Reyting jadvali';
+
+  @override
+  String get leaderboardEmpty => 'Jadval hozircha bo\'sh';
+
+  @override
+  String get leaderboardYou => 'Siz';
+
+  @override
+  String get actionRematchOnline => 'Revansh';
+
+  @override
+  String get rematchWaiting => 'Raqibning javobi kutilmoqda';
+
+  @override
+  String get rematchOffered => 'Raqib revansh taklif qilyapti';
+
+  @override
+  String ratingResult(int rating, String delta) {
+    return 'Reyting: $rating ($delta)';
+  }
 }

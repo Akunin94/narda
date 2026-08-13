@@ -13,6 +13,7 @@ import 'package:narda/online/online_backend.dart';
 import 'package:narda/online/online_match.dart';
 import 'package:narda/online/online_opponent.dart';
 import 'package:narda/online/protocol.dart';
+import 'package:narda/profile/profile.dart';
 import 'package:narda/ui/online/online_screen.dart';
 import 'package:narda_core/narda_core.dart';
 
@@ -38,10 +39,13 @@ class TestRoom {
     final MemoryOnlineBackend guestBackend = MemoryOnlineBackend(store, uid: 'b');
     final RoomHandle host = await hostBackend.createRoom(
       target: target,
-      name: 'A',
+      card: const PlayerCard(name: 'A'),
     );
     final String code = host.snapshot.meta!.code;
-    final RoomHandle guest = (await guestBackend.joinByCode(code, name: 'B'))!;
+    final RoomHandle guest = (await guestBackend.joinByCode(
+      code,
+      card: const PlayerCard(name: 'B'),
+    ))!;
     return TestRoom._(store, host, guest, code);
   }
 
@@ -166,9 +170,11 @@ void main() {
       addTearDown(server.dispose);
       final LobbyController host = LobbyController(
         backend: MemoryOnlineBackend(server, uid: 'a'),
+        profile: ProfileController.inMemory(),
       );
       final LobbyController guest = LobbyController(
         backend: MemoryOnlineBackend(server, uid: 'b'),
+        profile: ProfileController.inMemory(),
       );
       addTearDown(host.dispose);
       addTearDown(guest.dispose);
@@ -196,9 +202,11 @@ void main() {
       addTearDown(server.dispose);
       final LobbyController first = LobbyController(
         backend: MemoryOnlineBackend(server, uid: 'a'),
+        profile: ProfileController.inMemory(),
       );
       final LobbyController second = LobbyController(
         backend: MemoryOnlineBackend(server, uid: 'b'),
+        profile: ProfileController.inMemory(),
       );
       addTearDown(first.dispose);
       addTearDown(second.dispose);
@@ -226,6 +234,7 @@ void main() {
       addTearDown(server.dispose);
       final LobbyController lobby = LobbyController(
         backend: MemoryOnlineBackend(server, uid: 'a'),
+        profile: ProfileController.inMemory(),
         botOfferDelay: const Duration(milliseconds: 20),
       );
       addTearDown(lobby.dispose);
@@ -245,6 +254,7 @@ void main() {
     test('нет настроек Firebase — лобби честно говорит об этом', () async {
       final LobbyController lobby = LobbyController(
         backend: _UnavailableBackend(),
+        profile: ProfileController.inMemory(),
       );
       addTearDown(lobby.dispose);
 
@@ -415,7 +425,10 @@ void main() {
         room.server,
         uid: 'b',
       );
-      final RoomHandle rejoined = (await again.joinByCode(room.code, name: 'B'))!;
+      final RoomHandle rejoined = (await again.joinByCode(
+        room.code,
+        card: const PlayerCard(name: 'B'),
+      ))!;
       final OnlineMatch restored = OnlineMatch(
         room: rejoined,
         localColor: Player.black,
@@ -539,21 +552,32 @@ class _UnavailableBackend implements OnlineBackend {
   @override
   Future<RoomHandle> createRoom({
     required MatchTarget target,
-    required String name,
+    required PlayerCard card,
   }) => signIn().then((_) => throw StateError('unreachable'));
 
   @override
-  Future<RoomHandle?> joinByCode(String code, {required String name}) =>
+  Future<RoomHandle?> joinByCode(String code, {required PlayerCard card}) =>
       signIn().then((_) => null);
 
   @override
   Future<RoomHandle?> quickMatch({
     required MatchTarget target,
-    required String name,
+    required PlayerCard card,
   }) => signIn().then((_) => null);
 
   @override
   Future<void> cancelQuickMatch() async {}
+
+  @override
+  Future<void> publishProfile({
+    required PlayerCard card,
+    required int games,
+    required int wins,
+  }) => signIn();
+
+  @override
+  Future<List<RatingEntry>> leaderboard({int limit = 50}) =>
+      signIn().then((_) => const <RatingEntry>[]);
 
   @override
   void dispose() {}

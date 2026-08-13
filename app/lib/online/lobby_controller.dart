@@ -4,9 +4,11 @@ import 'package:flutter/foundation.dart';
 import 'package:narda_core/narda_core.dart';
 
 import '../game/game_setup.dart';
+import '../profile/profile.dart';
 import 'online_backend.dart';
 import 'online_match.dart';
 import 'protocol.dart';
+import 'rating_service.dart';
 
 /// Что сейчас делает лобби.
 enum LobbyStage {
@@ -29,25 +31,36 @@ enum LobbyStage {
   failed,
 }
 
-/// Готовая сетевая партия: сессия комнаты и настройка доски под неё.
+/// Готовая сетевая партия: сессия комнаты, настройка доски под неё и
+/// пересчёт рейтинга по итогу матча (§P5).
 class OnlineSession {
-  const OnlineSession({required this.match, required this.setup});
+  const OnlineSession({
+    required this.match,
+    required this.setup,
+    required this.rating,
+  });
 
   final OnlineMatch match;
   final GameSetup setup;
+  final RatingService rating;
 }
 
 /// Вход в онлайн: приватная комната по коду и быстрый матч (§6).
 class LobbyController extends ChangeNotifier {
   LobbyController({
     required OnlineBackend backend,
+    required ProfileController profile,
     this.botOfferDelay = const Duration(seconds: 15),
-  }) : _backend = backend;
+  }) : _backend = backend,
+       _profile = profile,
+       _rating = RatingService(backend: backend, profile: profile);
 
   /// Через сколько честно предложить сыграть с ботом, пока идёт поиск (§6).
   final Duration botOfferDelay;
 
   final OnlineBackend _backend;
+  final ProfileController _profile;
+  final RatingService _rating;
 
   LobbyStage _stage = LobbyStage.idle;
   OnlineFailure? _failure;
@@ -82,10 +95,10 @@ class LobbyController extends ChangeNotifier {
   Future<void> createRoom(MatchTarget target) => _run(() async {
     _stage = LobbyStage.connecting;
     _notify();
-    final String uid = await _backend.signIn();
+    await _signIn();
     final RoomHandle room = await _backend.createRoom(
       target: target,
-      name: _nameFor(uid),
+      card: _card,
     );
     _code = room.snapshot.meta?.code;
     _stage = LobbyStage.waitingForOpponent;
@@ -98,8 +111,8 @@ class LobbyController extends ChangeNotifier {
   Future<void> joinByCode(String code) => _run(() async {
     _stage = LobbyStage.connecting;
     _notify();
-    final String uid = await _backend.signIn();
-    final RoomHandle? room = await _backend.joinByCode(code, name: _nameFor(uid));
+    await _signIn();
+    final RoomHandle? room = await _backend.joinByCode(code, card: _card);
     if (room == null) throw const OnlineUnavailable(OnlineFailure.roomNotFound);
     _code = code;
     await _openWhenFull(room);
@@ -115,10 +128,10 @@ class LobbyController extends ChangeNotifier {
       _botOffer = true;
       _notify();
     });
-    final String uid = await _backend.signIn();
+    await _signIn();
     final RoomHandle? room = await _backend.quickMatch(
       target: target,
-      name: _nameFor(uid),
+      card: _card,
     );
     _botOfferTimer?.cancel();
     if (room == null) {
@@ -177,6 +190,7 @@ class LobbyController extends ChangeNotifier {
 
     _session = OnlineSession(
       match: match,
+      rating: _rating,
       setup: GameSetup.online(
         localPlayer: color,
         target: snapshot.meta?.matchTarget ?? MatchTarget.single,
@@ -207,9 +221,19 @@ class LobbyController extends ChangeNotifier {
     _notify();
   }
 
-  /// Профилей в P4 ещё нет (они в P5) — имя собирается из хвоста uid.
-  String _nameFor(String uid) =>
-      'O\'yinchi ${uid.length <= 4 ? uid : uid.substring(uid.length - 4)}';
+  /// Как игрок представится сопернику: ник, аватар и рейтинг из профиля (§P5).
+  PlayerCard get _card => PlayerCard(
+    name: _profile.name,
+    avatar: _profile.avatar,
+    rating: _profile.rating,
+  );
+
+  /// Вход. Заодно обновляет строку в таблице лидеров — игрок появляется в ней
+  /// сразу, не дожидаясь первого матча.
+  Future<void> _signIn() async {
+    await _backend.signIn();
+    unawaited(_rating.publish());
+  }
 
   void _notify() {
     if (_disposed) return;

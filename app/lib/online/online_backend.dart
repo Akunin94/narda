@@ -16,21 +16,32 @@ abstract interface class OnlineBackend {
   /// Создаёт приватную комнату и входит в неё хозяином.
   Future<RoomHandle> createRoom({
     required MatchTarget target,
-    required String name,
+    required PlayerCard card,
   });
 
   /// Вход по 6-значному коду; `null` — комнаты нет или она уже занята.
-  Future<RoomHandle?> joinByCode(String code, {required String name});
+  Future<RoomHandle?> joinByCode(String code, {required PlayerCard card});
 
   /// Быстрый матч: спаривание транзакцией с первым ожидающим.
   /// `null` — поиск отменён через [cancelQuickMatch].
   Future<RoomHandle?> quickMatch({
     required MatchTarget target,
-    required String name,
+    required PlayerCard card,
   });
 
   /// Снимает игрока с очереди быстрого матча.
   Future<void> cancelQuickMatch();
+
+  /// Публикует профиль и рейтинг в общий список `users/{uid}` (§P5).
+  /// uid записи задаёт сам бэкенд — чужую строку переписать нельзя.
+  Future<void> publishProfile({
+    required PlayerCard card,
+    required int games,
+    required int wins,
+  });
+
+  /// Верхушка таблицы лидеров, от большего рейтинга к меньшему (§P5).
+  Future<List<RatingEntry>> leaderboard({int limit});
 
   void dispose();
 }

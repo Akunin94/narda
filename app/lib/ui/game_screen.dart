@@ -15,8 +15,11 @@ import '../game/turn_coordinator.dart';
 import '../l10n/gen/app_text.dart';
 import '../online/online_match.dart';
 import '../online/online_opponent.dart';
+import '../online/rating_service.dart';
+import '../profile/profile.dart';
 import '../theme/board_theme.dart';
 import '../theme/narda_theme.dart';
+import 'avatar.dart';
 import 'board/board_view.dart';
 import 'dice_view.dart';
 import 'online/phrase_bar.dart';
@@ -28,6 +31,7 @@ class GameScreen extends StatefulWidget {
     required this.setup,
     this.controller,
     this.online,
+    this.rating,
   });
 
   final GameSetup setup;
@@ -39,6 +43,9 @@ class GameScreen extends StatefulWidget {
   /// presence и фраз (§6). `null` — оффлайн.
   final OnlineMatch? online;
 
+  /// Пересчёт рейтинга Elo по итогу сетевого матча (§P5). `null` — оффлайн.
+  final RatingService? rating;
+
   @override
   State<GameScreen> createState() => _GameScreenState();
 }
@@ -47,6 +54,7 @@ class _GameScreenState extends State<GameScreen> {
   late final SettingsController _settings = SettingsScope.of(context);
   late final StatsStore _stats = StatsScope.of(context);
   late final AdsController _ads = AdsScope.of(context);
+  late final ProfileController _profile = ProfileScope.of(context);
 
   /// Контроллер собирается лениво: настройки и реклама берутся из дерева,
   /// а к ним нельзя обращаться раньше, чем завершится initState.
@@ -70,23 +78,35 @@ class _GameScreenState extends State<GameScreen> {
 
   bool _started = false;
 
+  /// Рейтинг за матч начисляется один раз — до реванша (§P5).
+  bool _ratingApplied = false;
+  bool _rematchStarting = false;
+  RatingChange? _ratingChange;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_started) return;
     _started = true;
+    widget.online?.addListener(_onOnlineChanged);
     _controller.start();
   }
 
   @override
   void dispose() {
+    widget.online?.removeListener(_onOnlineChanged);
     _controller.dispose();
     super.dispose();
   }
 
-  /// Итог партии: статистика (только против бота) и счётчик рекламы.
+  /// Итог партии: статистика (только против бота), рейтинг (только в онлайне)
+  /// и счётчик рекламы.
   void _recordGame(GameResult result) {
     _ads.noteGameFinished();
+    if (_isOnline) {
+      unawaited(_applyRating());
+      return;
+    }
     if (widget.setup.mode != GameMode.bot) return;
     _stats.recordGame(result, local: widget.setup.localPlayer);
     if (_controller.isMatchOver && widget.setup.target != MatchTarget.single) {
@@ -94,6 +114,37 @@ class _GameScreenState extends State<GameScreen> {
         won: _controller.score.winner == widget.setup.localPlayer,
       );
     }
+  }
+
+  /// Elo считается по итогу матча целиком, а не каждой партии серии (§P5).
+  Future<void> _applyRating() async {
+    final RatingService? rating = widget.rating;
+    final OnlineMatch? match = widget.online;
+    if (rating == null || match == null) return;
+    if (_ratingApplied || !_controller.isMatchOver) return;
+    _ratingApplied = true;
+    final RatingChange change = await rating.applyMatch(
+      opponentRating: match.opponentRating,
+      won: _controller.score.winner == widget.setup.localPlayer,
+    );
+    if (mounted) setState(() => _ratingChange = change);
+  }
+
+  /// Реванш начинается, только когда его подтвердили оба (§P5).
+  void _onOnlineChanged() {
+    final OnlineMatch? match = widget.online;
+    if (match == null || !mounted) return;
+    if (!match.rematchAgreed) {
+      _rematchStarting = false;
+      return;
+    }
+    if (_rematchStarting || !_controller.isMatchOver) return;
+    _rematchStarting = true;
+    setState(() {
+      _ratingApplied = false;
+      _ratingChange = null;
+    });
+    _controller.newMatch();
   }
 
   @override
@@ -350,6 +401,11 @@ class _GameScreenState extends State<GameScreen> {
             ),
           ),
           const SizedBox(width: 8),
+          // В онлайне рядом с именем стоит аватар из профиля (§P5).
+          if (_isOnline) ...<Widget>[
+            NardaAvatar(index: _avatarOf(player), size: 20),
+            const SizedBox(width: 6),
+          ],
           Text(
             _playerName(text, player),
             style: const TextStyle(
@@ -464,17 +520,19 @@ class _GameScreenState extends State<GameScreen> {
                     ),
                   ),
                 ],
-                const SizedBox(height: 20),
-                FilledButton(
-                  onPressed: _continue,
-                  child: Text(
-                    series && !matchOver
-                        ? text.actionNextGame
-                        : series
-                        ? text.actionNewMatch
-                        : text.actionRematch,
+                if (_ratingChange case final RatingChange change) ...<Widget>[
+                  const SizedBox(height: 10),
+                  Text(
+                    text.ratingResult(change.after, _signed(change.delta)),
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: NardaColors.textPrimary,
+                    ),
                   ),
-                ),
+                ],
+                const SizedBox(height: 20),
+                ..._resultActions(text, series: series, matchOver: matchOver),
                 const SizedBox(height: 8),
                 OutlinedButton(
                   onPressed: () => Navigator.of(context).maybePop(),
@@ -487,6 +545,54 @@ class _GameScreenState extends State<GameScreen> {
       ),
     );
   }
+
+  /// Кнопки под итогом. В онлайне доигранный матч продолжается только
+  /// реваншем по обоюдному согласию: соперник не должен обнаружить себя в
+  /// новой серии, о которой не просил (§P5).
+  List<Widget> _resultActions(
+    AppText text, {
+    required bool series,
+    required bool matchOver,
+  }) {
+    final OnlineMatch? match = widget.online;
+    if (match != null && matchOver) {
+      return <Widget>[
+        if (match.rematchRequestedByOpponent && !match.rematchRequestedByMe)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Text(
+              text.rematchOffered,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: NardaColors.gold),
+            ),
+          ),
+        FilledButton(
+          onPressed: match.rematchRequestedByMe
+              ? null
+              : () => unawaited(match.requestRematch()),
+          child: Text(
+            match.rematchRequestedByMe
+                ? text.rematchWaiting
+                : text.actionRematchOnline,
+          ),
+        ),
+      ];
+    }
+    return <Widget>[
+      FilledButton(
+        onPressed: _continue,
+        child: Text(
+          series && !matchOver
+              ? text.actionNextGame
+              : series
+              ? text.actionNewMatch
+              : text.actionRematch,
+        ),
+      ),
+    ];
+  }
+
+  String _signed(int delta) => delta >= 0 ? '+$delta' : '$delta';
 
   /// Переход к следующей партии. Interstitial показывается **здесь** — между
   /// партиями и никогда во время партии (§P3). В онлайне его нет вовсе:
@@ -549,11 +655,16 @@ class _GameScreenState extends State<GameScreen> {
     return text.statusYourTurn;
   }
 
+  int _avatarOf(Player player) => player == widget.setup.localPlayer
+      ? _profile.avatar
+      : (widget.online?.opponentAvatar ?? 0);
+
   String _playerName(AppText text, Player player) {
     final String side = player == Player.white
         ? text.sideWhite
         : text.sideBlack;
-    if (player == widget.setup.localPlayer) return side;
+    // В онлайне игрок подписан своим ником из профиля (§P5).
+    if (player == widget.setup.localPlayer) return _isOnline ? _profile.name : side;
     if (widget.setup.mode == GameMode.bot) {
       return 'Bot · ${_levelName(text, widget.setup.botLevel ?? BotLevel.orta)}';
     }

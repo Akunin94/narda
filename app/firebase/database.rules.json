@@ -19,6 +19,15 @@
       }
     },
 
+    "users": {
+      ".read": "auth !== null",
+      ".indexOn": ["rating"],
+      "$uid": {
+        ".write": "auth !== null && $uid === auth.uid",
+        ".validate": "newData.hasChildren(['name', 'rating']) && newData.child('name').isString() && newData.child('name').val().length <= 24 && newData.child('rating').isNumber() && newData.child('rating').val() >= 100 && newData.child('rating').val() <= 4000 && (!data.exists() || (newData.child('rating').val() - data.child('rating').val() <= 64 && data.child('rating').val() - newData.child('rating').val() <= 64))"
+      }
+    },
+
     "rooms": {
       "$roomId": {
         ".read": "auth !== null && (data.child('players').child(auth.uid).exists() || data.child('meta/status').val() === 'waiting')",
@@ -33,8 +42,15 @@
 
         "players": {
           "$uid": {
-            ".write": "auth !== null && $uid === auth.uid && !data.exists() && data.parent().parent().child('meta/status').val() === 'waiting'",
+            ".write": "auth !== null && $uid === auth.uid && (data.exists() ? newData.child('color').val() === data.child('color').val() : data.parent().parent().child('meta/status').val() === 'waiting')",
             ".validate": "newData.hasChildren(['name', 'color'])"
+          }
+        },
+
+        "rematch": {
+          "$uid": {
+            ".write": "auth !== null && $uid === auth.uid",
+            ".validate": "newData.isNumber()"
           }
         },
 

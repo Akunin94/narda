@@ -73,7 +73,7 @@ class FirebaseOnlineBackend implements OnlineBackend {
   @override
   Future<RoomHandle> createRoom({
     required MatchTarget target,
-    required String name,
+    required PlayerCard card,
   }) async {
     await signIn();
     final DatabaseReference rooms = _db.ref('rooms');
@@ -88,7 +88,11 @@ class FirebaseOnlineBackend implements OnlineBackend {
           hostUid: _me,
         ).toJson()..['createdAt'] = ServerValue.timestamp,
         'players': <String, Object?>{
-          _me: RoomPlayer(uid: _me, name: name, color: Player.white).toJson(),
+          _me: RoomPlayer.fromCard(
+            uid: _me,
+            color: Player.white,
+            card: card,
+          ).toJson(),
         },
         'presence': <String, Object?>{_me: true},
       });
@@ -100,7 +104,7 @@ class FirebaseOnlineBackend implements OnlineBackend {
   }
 
   @override
-  Future<RoomHandle?> joinByCode(String code, {required String name}) async {
+  Future<RoomHandle?> joinByCode(String code, {required PlayerCard card}) async {
     await signIn();
     try {
       final DataSnapshot pointer = await _db.ref('codes/$code').get();
@@ -118,10 +122,10 @@ class FirebaseOnlineBackend implements OnlineBackend {
           throw const OnlineUnavailable(OnlineFailure.roomFull);
         }
         await _db.ref('rooms/$roomId').update(<String, Object?>{
-          'players/$_me': RoomPlayer(
+          'players/$_me': RoomPlayer.fromCard(
             uid: _me,
-            name: name,
             color: Player.black,
+            card: card,
           ).toJson(),
           'meta/status': RoomStatus.playing.name,
         });
@@ -135,14 +139,14 @@ class FirebaseOnlineBackend implements OnlineBackend {
   @override
   Future<RoomHandle?> quickMatch({
     required MatchTarget target,
-    required String name,
+    required PlayerCard card,
   }) async {
     await signIn();
     final Completer<RoomHandle?> completer = Completer<RoomHandle?>();
     _queue = completer;
 
     try {
-      final RoomHandle? paired = await _claimWaiting(target: target, name: name);
+      final RoomHandle? paired = await _claimWaiting(target: target, card: card);
       if (paired != null) {
         _queue = null;
         return paired;
@@ -158,6 +162,13 @@ class FirebaseOnlineBackend implements OnlineBackend {
         final Object? roomId = event.snapshot.value;
         if (roomId is! String || completer.isCompleted) return;
         await _leaveQueue();
+        // Комнату собрал тот, кто подобрал: свои ник, аватар и рейтинг
+        // (§P5) вписываем в готовую запись сами — цвет в ней не трогаем.
+        await _db.ref('rooms/$roomId/players/$_me').update(<String, Object?>{
+          'name': card.name,
+          'avatar': card.avatar,
+          'rating': card.rating,
+        });
         await _db.ref('rooms/$roomId/presence/$_me').set(true);
         if (!completer.isCompleted) {
           completer.complete(_FirebaseRoom(_db, roomId: roomId, uid: _me));
@@ -173,7 +184,7 @@ class FirebaseOnlineBackend implements OnlineBackend {
   /// двое одновременно подобрать одного и того же не смогут (§6).
   Future<RoomHandle?> _claimWaiting({
     required MatchTarget target,
-    required String name,
+    required PlayerCard card,
   }) async {
     final DataSnapshot queue = await _db.ref('matchmaking').get();
     for (final MapEntry<String, Object?> entry
@@ -203,7 +214,7 @@ class FirebaseOnlineBackend implements OnlineBackend {
       await _createPairedRoom(
         roomId: roomId,
         target: target,
-        name: name,
+        card: card,
         guestUid: entry.key,
       );
       return _FirebaseRoom(_db, roomId: roomId, uid: _me);
@@ -214,7 +225,7 @@ class FirebaseOnlineBackend implements OnlineBackend {
   Future<void> _createPairedRoom({
     required String roomId,
     required MatchTarget target,
-    required String name,
+    required PlayerCard card,
     required String guestUid,
   }) async {
     final String code = generateRoomCode();
@@ -226,7 +237,12 @@ class FirebaseOnlineBackend implements OnlineBackend {
         hostUid: _me,
       ).toJson()..['createdAt'] = ServerValue.timestamp,
       'players': <String, Object?>{
-        _me: RoomPlayer(uid: _me, name: name, color: Player.white).toJson(),
+        _me: RoomPlayer.fromCard(
+          uid: _me,
+          color: Player.white,
+          card: card,
+        ).toJson(),
+        // Ник, аватар и рейтинг гостя впишет он сам, когда увидит комнату.
         guestUid: RoomPlayer(
           uid: guestUid,
           name: '',
@@ -235,6 +251,44 @@ class FirebaseOnlineBackend implements OnlineBackend {
       },
       'presence': <String, Object?>{_me: true},
     });
+  }
+
+  @override
+  Future<void> publishProfile({
+    required PlayerCard card,
+    required int games,
+    required int wins,
+  }) async {
+    await signIn();
+    try {
+      await _db.ref('users/$_me').set(
+        RatingEntry(
+          uid: _me,
+          name: card.name,
+          avatar: card.avatar,
+          rating: card.rating,
+          games: games,
+          wins: wins,
+        ).toJson()..['updatedAt'] = ServerValue.timestamp,
+      );
+    } on FirebaseException {
+      throw const OnlineUnavailable(OnlineFailure.network);
+    }
+  }
+
+  @override
+  Future<List<RatingEntry>> leaderboard({int limit = 50}) async {
+    await signIn();
+    try {
+      final DataSnapshot top = await _db
+          .ref('users')
+          .orderByChild('rating')
+          .limitToLast(limit)
+          .get();
+      return ratingTable(top.value, limit: limit);
+    } on FirebaseException {
+      throw const OnlineUnavailable(OnlineFailure.network);
+    }
   }
 
   @override

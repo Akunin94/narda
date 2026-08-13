@@ -7,6 +7,7 @@ import 'ads/ads_controller.dart';
 import 'app.dart';
 import 'game/settings.dart';
 import 'game/stats.dart';
+import 'profile/profile.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,8 +16,11 @@ Future<void> main() async {
   ]);
   final SettingsController settings = await SettingsController.load();
   final StatsStore stats = await StatsStore.load();
+  final ProfileController profile = await ProfileController.load();
   final AdsController ads = AdsController();
   // Согласие и загрузка объявлений идут фоном: меню не должно их ждать.
   unawaited(ads.initialize());
-  runApp(NardaApp(settings: settings, stats: stats, ads: ads));
+  runApp(
+    NardaApp(settings: settings, stats: stats, ads: ads, profile: profile),
+  );
 }
