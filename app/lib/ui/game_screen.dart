@@ -3,25 +3,24 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:narda_core/narda_core.dart';
 
+import '../ads/ads_controller.dart';
+import '../app.dart';
+import '../game/feedback.dart';
 import '../game/game_setup.dart';
 import '../game/match_controller.dart';
 import '../game/settings.dart';
+import '../game/stats.dart';
 import '../l10n/gen/app_text.dart';
+import '../theme/board_theme.dart';
 import '../theme/narda_theme.dart';
 import 'board/board_view.dart';
 import 'dice_view.dart';
 
-/// Экран партии: доска, кости, счёт и кнопки хода.
+/// Экран партии: доска, кости, счёт серии и кнопки хода.
 class GameScreen extends StatefulWidget {
-  const GameScreen({
-    super.key,
-    required this.setup,
-    required this.settings,
-    this.controller,
-  });
+  const GameScreen({super.key, required this.setup, this.controller});
 
   final GameSetup setup;
-  final SettingsController settings;
 
   /// Готовый контроллер — нужен тестам, чтобы подставить кости и соперника.
   final MatchController? controller;
@@ -31,13 +30,31 @@ class GameScreen extends StatefulWidget {
 }
 
 class _GameScreenState extends State<GameScreen> {
+  late final SettingsController _settings = SettingsScope.of(context);
+  late final StatsStore _stats = StatsScope.of(context);
+  late final AdsController _ads = AdsScope.of(context);
+
+  /// Контроллер собирается лениво: настройки и реклама берутся из дерева,
+  /// а к ним нельзя обращаться раньше, чем завершится initState.
   late final MatchController _controller =
       widget.controller ??
-      MatchController(setup: widget.setup, settings: widget.settings);
+      MatchController(
+        setup: widget.setup,
+        settings: _settings,
+        feedback: DeviceFeedback(_settings),
+        onGameFinished: _recordGame,
+      );
+
+  /// Идёт показ interstitial — доска на это время закрыта оверлеем.
+  bool _switchingGame = false;
+
+  bool _started = false;
 
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_started) return;
+    _started = true;
     _controller.start();
   }
 
@@ -47,19 +64,32 @@ class _GameScreenState extends State<GameScreen> {
     super.dispose();
   }
 
+  /// Итог партии: статистика (только против бота) и счётчик рекламы.
+  void _recordGame(GameResult result) {
+    _ads.noteGameFinished();
+    if (widget.setup.mode != GameMode.bot) return;
+    _stats.recordGame(result, local: widget.setup.localPlayer);
+    if (_controller.isMatchOver && widget.setup.target != MatchTarget.single) {
+      _stats.recordMatch(
+        won: _controller.score.winner == widget.setup.localPlayer,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final AppText text = AppText.of(context);
+    final BoardTheme theme = _settings.boardTheme;
     return Scaffold(
       body: SafeArea(
         child: AnimatedBuilder(
-          animation: Listenable.merge(<Listenable>[_controller, widget.settings]),
+          animation: Listenable.merge(<Listenable>[_controller, _settings]),
           builder: (BuildContext context, Widget? child) => Stack(
             children: <Widget>[
               Column(
                 children: <Widget>[
                   _buildTopBar(text),
-                  _buildPlayerStrip(text, _controller.perspective.opponent),
+                  _buildPlayerStrip(text, theme, _controller.perspective.opponent),
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
@@ -70,6 +100,7 @@ class _GameScreenState extends State<GameScreen> {
                         child: _boardBox(
                           child: BoardView(
                             state: _controller.state,
+                            theme: theme,
                             perspective: _controller.perspective,
                             selected: _controller.selected,
                             destinations: _controller.destinations,
@@ -88,11 +119,11 @@ class _GameScreenState extends State<GameScreen> {
                       ),
                     ),
                   ),
-                  _buildPlayerStrip(text, _controller.perspective),
+                  _buildPlayerStrip(text, theme, _controller.perspective),
                   _buildActionBar(text),
                 ],
               ),
-              if (_controller.phase == TurnPhase.finished)
+              if (_controller.phase == TurnPhase.finished && !_switchingGame)
                 _buildResultOverlay(text),
             ],
           ),
@@ -119,14 +150,29 @@ class _GameScreenState extends State<GameScreen> {
         color: NardaColors.textMuted,
       ),
       Expanded(
-        child: Text(
-          _statusText(text),
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.w600,
-            color: NardaColors.textPrimary,
-          ),
+        child: Column(
+          children: <Widget>[
+            Text(
+              _statusText(text),
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.w600,
+                color: NardaColors.textPrimary,
+              ),
+            ),
+            if (widget.setup.target != MatchTarget.single)
+              Text(
+                '${text.labelScore} '
+                '${_controller.score.pointsOf(widget.setup.localPlayer)}:'
+                '${_controller.score.pointsOf(widget.setup.opponentPlayer)}'
+                ' · ${text.matchToPoints(widget.setup.target.points)}',
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: NardaColors.textMuted,
+                ),
+              ),
+          ],
         ),
       ),
       IconButton(
@@ -140,7 +186,7 @@ class _GameScreenState extends State<GameScreen> {
     ],
   );
 
-  Widget _buildPlayerStrip(AppText text, Player player) {
+  Widget _buildPlayerStrip(AppText text, BoardTheme theme, Player player) {
     final GameState state = _controller.state;
     final bool active = state.turn == player;
     return Container(
@@ -161,8 +207,8 @@ class _GameScreenState extends State<GameScreen> {
             height: 16,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: NardaColors.checkerFace(player),
-              border: Border.all(color: NardaColors.checkerEdge(player)),
+              color: theme.checkerFace(player),
+              border: Border.all(color: theme.checkerEdge(player)),
             ),
           ),
           const SizedBox(width: 8),
@@ -174,7 +220,7 @@ class _GameScreenState extends State<GameScreen> {
             ),
           ),
           const SizedBox(width: 10),
-          if (widget.settings.showPips)
+          if (_settings.showPips)
             Text(
               '${state.pipCount(player)} ${text.labelPip}',
               style: const TextStyle(color: NardaColors.textMuted, fontSize: 13),
@@ -196,6 +242,7 @@ class _GameScreenState extends State<GameScreen> {
               roll: state.roll,
               remaining: state.remainingDice,
               rolling: _controller.phase == TurnPhase.rolling,
+              theme: theme,
             ),
         ],
       ),
@@ -231,6 +278,8 @@ class _GameScreenState extends State<GameScreen> {
 
   Widget _buildResultOverlay(AppText text) {
     final GameResult result = _controller.result!;
+    final bool series = widget.setup.target != MatchTarget.single;
+    final bool matchOver = _controller.isMatchOver;
     return Positioned.fill(
       child: ColoredBox(
         color: Colors.black.withValues(alpha: 0.65),
@@ -247,7 +296,10 @@ class _GameScreenState extends State<GameScreen> {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 Text(
-                  _resultTitle(text, result),
+                  series && matchOver
+                      ? _matchTitle(text)
+                      : _resultTitle(text, result),
+                  textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w700,
@@ -257,12 +309,33 @@ class _GameScreenState extends State<GameScreen> {
                 const SizedBox(height: 8),
                 Text(
                   _resultSubtitle(text, result),
+                  textAlign: TextAlign.center,
                   style: const TextStyle(color: NardaColors.textMuted),
                 ),
+                if (series) ...<Widget>[
+                  const SizedBox(height: 10),
+                  Text(
+                    '${text.labelScore} '
+                    '${_controller.score.pointsOf(widget.setup.localPlayer)}'
+                    ' : '
+                    '${_controller.score.pointsOf(widget.setup.opponentPlayer)}',
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: NardaColors.textPrimary,
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 20),
                 FilledButton(
-                  onPressed: _controller.rematch,
-                  child: Text(text.actionRematch),
+                  onPressed: _continue,
+                  child: Text(
+                    series && !matchOver
+                        ? text.actionNextGame
+                        : series
+                        ? text.actionNewMatch
+                        : text.actionRematch,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 OutlinedButton(
@@ -275,6 +348,22 @@ class _GameScreenState extends State<GameScreen> {
         ),
       ),
     );
+  }
+
+  /// Переход к следующей партии. Interstitial показывается **здесь** — между
+  /// партиями и никогда во время партии (§P3).
+  Future<void> _continue() async {
+    final bool startNewMatch =
+        widget.setup.target != MatchTarget.single && _controller.isMatchOver;
+    setState(() => _switchingGame = true);
+    await _ads.maybeShowInterstitial();
+    if (!mounted) return;
+    setState(() => _switchingGame = false);
+    if (startNewMatch) {
+      _controller.newMatch();
+    } else {
+      _controller.nextGame();
+    }
   }
 
   Future<void> _confirmResign(AppText text) async {
@@ -343,6 +432,16 @@ class _GameScreenState extends State<GameScreen> {
     return result.winner == Player.white
         ? text.resultWhiteWins
         : text.resultBlackWins;
+  }
+
+  String _matchTitle(AppText text) {
+    final Player? winner = _controller.score.winner;
+    if (widget.setup.mode == GameMode.bot) {
+      return winner == widget.setup.localPlayer
+          ? text.matchWonTitle
+          : text.matchLostTitle;
+    }
+    return winner == Player.white ? text.matchWhiteWins : text.matchBlackWins;
   }
 
   String _resultSubtitle(AppText text, GameResult result) {

@@ -48,5 +48,197 @@
   "resultByResign": "Сдача партии",
 
   "actionRematch": "Ещё партия",
-  "actionMenu": "Меню"
+  "actionMenu": "Меню",
+
+  "menuRules": "Правила",
+  "@menuRules": { "description": "Кнопка: обучение правилам" },
+
+  "menuStats": "Статистика",
+  "@menuStats": { "description": "Кнопка: статистика" },
+
+  "menuThemes": "Оформление доски",
+  "@menuThemes": { "description": "Кнопка: оформление доски" },
+
+  "matchTitle": "Формат матча",
+  "@matchTitle": { "description": "Заголовок выбора формата матча" },
+
+  "matchSingle": "Одна партия",
+  "@matchSingle": { "description": "Формат: одиночная партия" },
+
+  "settingLanguage": "Язык",
+  "@settingLanguage": { "description": "Настройка языка" },
+
+  "languageAuto": "Как на устройстве",
+  "@languageAuto": { "description": "Язык: как на устройстве" },
+
+  "languageUz": "Узбекский",
+  "@languageUz": { "description": "Язык: узбекский" },
+
+  "languageRu": "Русский",
+  "@languageRu": { "description": "Язык: русский" },
+
+  "settingSound": "Звук",
+  "@settingSound": { "description": "Настройка звука" },
+
+  "settingSoundHint": "Звуки костей, шашек и победы",
+  "@settingSoundHint": { "description": "Пояснение к звуку" },
+
+  "settingVibration": "Вибрация",
+  "@settingVibration": { "description": "Настройка вибрации" },
+
+  "settingVibrationHint": "Отклик на бросок и перемещение",
+  "@settingVibrationHint": { "description": "Пояснение к вибрации" },
+
+  "settingPrivacy": "Настройки рекламы",
+  "@settingPrivacy": { "description": "Кнопка окна согласия UMP" },
+
+  "actionResetStats": "Сбросить статистику",
+  "@actionResetStats": { "description": "Кнопка сброса статистики" },
+
+  "resetStatsQuestion": "Очистить статистику?",
+  "@resetStatsQuestion": { "description": "Вопрос перед сбросом статистики" },
+
+  "statsTitle": "Статистика",
+  "@statsTitle": { "description": "Заголовок экрана статистики" },
+
+  "statsGames": "Партии",
+  "@statsGames": { "description": "Статистика: сыграно партий" },
+
+  "statsWins": "Победы",
+  "@statsWins": { "description": "Статистика: побед" },
+
+  "statsWinRate": "Процент побед",
+  "@statsWinRate": { "description": "Статистика: винрейт" },
+
+  "statsMarsWins": "Марс — ваш",
+  "@statsMarsWins": { "description": "Статистика: марсы в пользу игрока" },
+
+  "statsMarsLosses": "Марс — соперника",
+  "@statsMarsLosses": { "description": "Статистика: марсы в пользу соперника" },
+
+  "statsMatches": "Матчи",
+  "@statsMatches": { "description": "Статистика: сыграно матчей" },
+
+  "statsMatchWins": "Выиграно матчей",
+  "@statsMatchWins": { "description": "Статистика: выиграно матчей" },
+
+  "statsEmpty": "Пока не сыграно ни одной партии",
+  "@statsEmpty": { "description": "Статистика пуста" },
+
+  "statsNote": "Учитываются только партии против бота",
+  "@statsNote": { "description": "Пояснение: считаются только партии с ботом" },
+
+  "themesTitle": "Оформление доски",
+  "@themesTitle": { "description": "Заголовок экрана тем" },
+
+  "themeKlassik": "Классика",
+  "@themeKlassik": { "description": "Тема: классика" },
+
+  "themeKokGumbaz": "Синий купол",
+  "@themeKokGumbaz": { "description": "Тема: синий купол" },
+
+  "themeZar": "Золото и орех",
+  "@themeZar": { "description": "Тема: тёмный орех с золотом" },
+
+  "themeSelected": "Выбрано",
+  "@themeSelected": { "description": "Тема выбрана" },
+
+  "themeUnlockWatch": "Открыть за ролик",
+  "@themeUnlockWatch": { "description": "Открыть тему за ролик" },
+
+  "themeAdsUnavailable": "Реклама пока не готова",
+  "@themeAdsUnavailable": { "description": "Реклама сейчас недоступна" },
+
+  "themeUnlockedHint": "Просмотр ролика открывает тему на 24 часа",
+  "@themeUnlockedHint": { "description": "Пояснение: ролик открывает тему на 24 часа" },
+
+  "rulesTitle": "Правила",
+  "@rulesTitle": { "description": "Заголовок экрана правил" },
+
+  "rulesGoalTitle": "Цель",
+  "@rulesGoalTitle": { "description": "Правила: цель игры" },
+
+  "rulesGoalBody": "Проведите все 15 шашек по кругу в свой дом — пункты 1–6 — и выбросьте их раньше соперника. Битья нет, бара нет: шашки не сбиваются никогда.",
+  "@rulesGoalBody": { "description": "Правила: цель" },
+
+  "rulesStartTitle": "Старт и направление",
+  "@rulesStartTitle": { "description": "Правила: старт" },
+
+  "rulesStartBody": "В начале все 15 шашек стоят на голове. Обе стороны идут по кольцу в одну сторону, но их головы разнесены на полкруга — поэтому шашки не встречаются лоб в лоб.",
+  "@rulesStartBody": { "description": "Правила: старт" },
+
+  "rulesMoveTitle": "Ход",
+  "@rulesMoveTitle": { "description": "Правила: ход" },
+
+  "rulesMoveBody": "Бросаются два кубика: два перемещения, можно и одной шашкой подряд. Дубль даёт четыре перемещения. Вставать на пункт, где стоит хотя бы одна чужая шашка, нельзя; своих на пункте — сколько угодно.",
+  "@rulesMoveBody": { "description": "Правила: ход" },
+
+  "rulesHeadTitle": "Правило головы",
+  "@rulesHeadTitle": { "description": "Правила: голова" },
+
+  "rulesHeadBody": "За один бросок с головы снимается только одна шашка. Исключение — самый первый бросок партии: при 6-6, 4-4 или 3-3 можно снять две.",
+  "@rulesHeadBody": { "description": "Правила: голова" },
+
+  "rulesFullTitle": "Полный ход",
+  "@rulesFullTitle": { "description": "Правила: обязательность полного хода" },
+
+  "rulesFullBody": "Ход обязан быть максимально длинным: нужно использовать оба числа, а при дубле — сколько получится из четырёх. Если играется только одно число — играется большее. Если ходов нет вовсе, ход пропускается.",
+  "@rulesFullBody": { "description": "Правила: полный ход" },
+
+  "rulesBlockTitle": "Правило блока",
+  "@rulesBlockTitle": { "description": "Правила: блок из шести" },
+
+  "rulesBlockBody": "Нельзя выстроить шесть подряд занятых пунктов, если перед этим забором не осталось ни одной шашки соперника. Если хотя бы одна его шашка уже прошла вперёд — блок разрешён.",
+  "@rulesBlockBody": { "description": "Правила: блок" },
+
+  "rulesBearOffTitle": "Выброс",
+  "@rulesBearOffTitle": { "description": "Правила: выброс" },
+
+  "rulesBearOffBody": "Когда все 15 шашек дома, начинается выброс: шашка с пункта k снимается точным числом k. Если выпавшее число больше самого дальнего занятого пункта — снимается шашка с него. Вместо выброса можно ходить внутри дома.",
+  "@rulesBearOffBody": { "description": "Правила: выброс" },
+
+  "rulesResultTitle": "Результат",
+  "@rulesResultTitle": { "description": "Правила: результат" },
+
+  "rulesResultBody": "Кто первым выбросил все 15 шашек — победил. Обычная победа — oyin, 1 очко; если соперник не выбросил ни одной — mars, 2 очка. Матч играется до 3, 5 или 7 очков.",
+  "@rulesResultBody": { "description": "Правила: результат" },
+
+  "labelScore": "Счёт",
+  "@labelScore": { "description": "Подпись счёта серии" },
+
+  "actionNextGame": "Следующая партия",
+  "@actionNextGame": { "description": "Кнопка: следующая партия серии" },
+
+  "actionNewMatch": "Новый матч",
+  "@actionNewMatch": { "description": "Кнопка: новая серия" },
+
+  "matchWonTitle": "Вы выиграли матч!",
+  "@matchWonTitle": { "description": "Итог серии: победа игрока" },
+
+  "matchLostTitle": "Вы проиграли матч",
+  "@matchLostTitle": { "description": "Итог серии: поражение игрока" },
+
+  "matchWhiteWins": "Матч выиграли белые",
+  "@matchWhiteWins": { "description": "Итог серии: выиграли белые" },
+
+  "matchBlackWins": "Матч выиграли чёрные",
+  "@matchBlackWins": { "description": "Итог серии: выиграли чёрные" },
+
+  "matchToPoints": "До {points} очков",
+  "@matchToPoints": {
+    "description": "Формат: серия до N очков",
+    "placeholders": { "points": { "type": "int" } }
+  },
+
+  "themeHoursLeft": "Осталось {hours} ч",
+  "@themeHoursLeft": {
+    "description": "Сколько часов осталось у открытой темы",
+    "placeholders": { "hours": { "type": "int" } }
+  },
+
+  "themeMinutesLeft": "Осталось {minutes} мин",
+  "@themeMinutesLeft": {
+    "description": "Сколько минут осталось у открытой темы",
+    "placeholders": { "minutes": { "type": "int" } }
+  }
 }

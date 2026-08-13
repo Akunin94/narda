@@ -22,8 +22,8 @@
 - Строки UI — только через ARB. Узбекская латиница — язык по умолчанию,
   русский — второй. Машинно-переведённые узбекские строки помечать в отчёте.
 
-Статус: P1 (ядро) и P2 (играбельный оффлайн) готовы. Дальше P3 — публикуемая
-версия. P4 (онлайн, Firebase) — только после явного «поехали»; до P4 в проекте
+Статус: P1 (ядро), P2 (играбельный оффлайн) и P3 (публикуемая версия) готовы.
+Дальше P4 (онлайн, Firebase) — только после явного «поехали»; до P4 в проекте
 не должно быть ни одной зависимости от Firebase.
 
 ## Структура
@@ -31,6 +31,8 @@
 ```
 packages/narda_core/   чистый Dart: состояние, правила, генератор ходов, бот
 app/                   Flutter: доска на CustomPaint, экраны, локализация
+app/tool/              генераторы ассетов: звуки (WAV) и графика (PNG)
+app/store/             материалы Google Play: иконка, графика, тексты, политика
 ```
 
 Три слоя (главное архитектурное требование, §2):
@@ -55,6 +57,10 @@ cd app
 flutter analyze && flutter test
 flutter gen-l10n                           # после правки ARB
 flutter run                                # Android, portrait
+
+# ассеты — только после правки генераторов, файлы закоммичены
+dart run tool/generate_sounds.dart         # assets/sounds/*.wav
+flutter test tool/generate_art.dart        # иконки mipmap-* и store/*.png
 ```
 
 ## Что стоит знать по коду
@@ -80,3 +86,20 @@ flutter run                                # Android, portrait
 - **minSdk.** Спека просит 23, фактически стоит минимум Flutter (24): tool сам
   переписывает литерал `minSdk = 23`, а `shared_preferences_android` требует 24.
   Не «чинить» это — вопрос открыт для владельца проекта.
+- **Темы доски.** Цвета доски, шашек и костей живут в `BoardTheme`
+  (`app/lib/theme/board_theme.dart`) и передаются в painters параметром;
+  `NardaColors` остались только для оболочки приложения. Платные темы держатся
+  на сроке в настройках: `unlockTheme` ставит метку на 24 часа, `boardTheme`
+  сам откатывается к классике, когда срок вышел.
+- **Реклама.** Правило показа interstitial вынесено в `InterstitialPolicy`
+  (`app/lib/ads/interstitial_policy.dart`), чтобы его можно было проверять без
+  AdMob. Показ живёт ровно в одном месте — `_continue` в `GameScreen`, между
+  партиями. Не вызывать `maybeShowInterstitial` откуда-либо ещё.
+  В тестах и превью берётся `AdsController.disabled()`.
+- **Ассеты не скачиваются.** Звуки синтезируются `tool/generate_sounds.dart`,
+  иконки и графика стора рисуются `tool/generate_art.dart` (запускается как
+  `flutter test`, потому что нужен `dart:ui`; текст рендерится шрифтом Roboto из
+  кэша Flutter). Так у файлов нет постороннего копирайта.
+- **Экраны берут зависимости из дерева.** `SettingsScope`, `StatsScope` и
+  `AdsScope` в `app/lib/app.dart`; `GameScreen` собирает контроллер лениво в
+  `didChangeDependencies` — обращаться к scope'ам в `initState` нельзя.

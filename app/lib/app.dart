@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'ads/ads_controller.dart';
 import 'game/settings.dart';
+import 'game/stats.dart';
 import 'l10n/gen/app_text.dart';
 import 'theme/narda_theme.dart';
 import 'ui/home_screen.dart';
@@ -18,6 +20,30 @@ class SettingsScope extends InheritedNotifier<SettingsController> {
       .notifier!;
 }
 
+/// Доступ к локальной статистике.
+class StatsScope extends InheritedNotifier<StatsStore> {
+  const StatsScope({
+    super.key,
+    required StatsStore store,
+    required super.child,
+  }) : super(notifier: store);
+
+  static StatsStore of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<StatsScope>()!.notifier!;
+}
+
+/// Доступ к рекламе. В тестах здесь лежит [AdsController.disabled].
+class AdsScope extends InheritedNotifier<AdsController> {
+  const AdsScope({
+    super.key,
+    required AdsController controller,
+    required super.child,
+  }) : super(notifier: controller);
+
+  static AdsController of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<AdsScope>()!.notifier!;
+}
+
 /// Язык по умолчанию — узбекский (§7): русский включается только если он
 /// стоит в языках устройства.
 const Locale nardaDefaultLocale = Locale('uz');
@@ -32,20 +58,37 @@ Locale resolveNardaLocale(List<Locale>? preferred, Iterable<Locale> supported) {
 }
 
 class NardaApp extends StatelessWidget {
-  const NardaApp({super.key, required this.settings});
+  NardaApp({super.key, required this.settings, StatsStore? stats, AdsController? ads})
+    : stats = stats ?? StatsStore.inMemory(),
+      ads = ads ?? AdsController.disabled();
 
   final SettingsController settings;
+  final StatsStore stats;
+  final AdsController ads;
 
   @override
   Widget build(BuildContext context) => SettingsScope(
     controller: settings,
-    child: MaterialApp(
-      onGenerateTitle: (BuildContext context) => AppText.of(context).appTitle,
-      theme: buildNardaTheme(),
-      localizationsDelegates: AppText.localizationsDelegates,
-      supportedLocales: AppText.supportedLocales,
-      localeListResolutionCallback: resolveNardaLocale,
-      home: const HomeScreen(),
+    child: StatsScope(
+      store: stats,
+      child: AdsScope(
+        controller: ads,
+        child: AnimatedBuilder(
+          animation: settings,
+          builder: (BuildContext context, Widget? child) => MaterialApp(
+            onGenerateTitle: (BuildContext context) => AppText.of(context).appTitle,
+            theme: buildNardaTheme(),
+            localizationsDelegates: AppText.localizationsDelegates,
+            supportedLocales: AppText.supportedLocales,
+            // Выбранный в настройках язык побеждает язык устройства (§P3).
+            locale: settings.localeCode == null
+                ? null
+                : Locale(settings.localeCode!),
+            localeListResolutionCallback: resolveNardaLocale,
+            home: const HomeScreen(),
+          ),
+        ),
+      ),
     ),
   );
 }

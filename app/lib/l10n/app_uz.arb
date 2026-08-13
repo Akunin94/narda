@@ -122,5 +122,197 @@
   "@actionRematch": { "description": "Сыграть ещё раз" },
 
   "actionMenu": "Menyu",
-  "@actionMenu": { "description": "Выйти в меню" }
+  "@actionMenu": { "description": "Выйти в меню" },
+
+  "menuRules": "Qoidalar",
+  "@menuRules": { "description": "Кнопка: обучение правилам" },
+
+  "menuStats": "Statistika",
+  "@menuStats": { "description": "Кнопка: статистика" },
+
+  "menuThemes": "Doska mavzusi",
+  "@menuThemes": { "description": "Кнопка: оформление доски" },
+
+  "matchTitle": "Partiya formati",
+  "@matchTitle": { "description": "Заголовок выбора формата матча" },
+
+  "matchSingle": "Bitta partiya",
+  "@matchSingle": { "description": "Формат: одиночная партия" },
+
+  "settingLanguage": "Til",
+  "@settingLanguage": { "description": "Настройка языка" },
+
+  "languageAuto": "Qurilma tili",
+  "@languageAuto": { "description": "Язык: как на устройстве" },
+
+  "languageUz": "O'zbekcha",
+  "@languageUz": { "description": "Язык: узбекский" },
+
+  "languageRu": "Ruscha",
+  "@languageRu": { "description": "Язык: русский" },
+
+  "settingSound": "Ovoz",
+  "@settingSound": { "description": "Настройка звука" },
+
+  "settingSoundHint": "Zar, tosh va g'alaba ovozlari",
+  "@settingSoundHint": { "description": "Пояснение к звуку" },
+
+  "settingVibration": "Tebranish",
+  "@settingVibration": { "description": "Настройка вибрации" },
+
+  "settingVibrationHint": "Yurish va zar tashlashda tebranish",
+  "@settingVibrationHint": { "description": "Пояснение к вибрации" },
+
+  "settingPrivacy": "Reklama sozlamalari",
+  "@settingPrivacy": { "description": "Кнопка окна согласия UMP" },
+
+  "actionResetStats": "Statistikani tozalash",
+  "@actionResetStats": { "description": "Кнопка сброса статистики" },
+
+  "resetStatsQuestion": "Statistika o'chirilsinmi?",
+  "@resetStatsQuestion": { "description": "Вопрос перед сбросом статистики" },
+
+  "statsTitle": "Statistika",
+  "@statsTitle": { "description": "Заголовок экрана статистики" },
+
+  "statsGames": "Partiyalar",
+  "@statsGames": { "description": "Статистика: сыграно партий" },
+
+  "statsWins": "G'alabalar",
+  "@statsWins": { "description": "Статистика: побед" },
+
+  "statsWinRate": "G'alaba foizi",
+  "@statsWinRate": { "description": "Статистика: винрейт" },
+
+  "statsMarsWins": "Mars — siz",
+  "@statsMarsWins": { "description": "Статистика: марсы в пользу игрока" },
+
+  "statsMarsLosses": "Mars — raqib",
+  "@statsMarsLosses": { "description": "Статистика: марсы в пользу соперника" },
+
+  "statsMatches": "Matchlar",
+  "@statsMatches": { "description": "Статистика: сыграно матчей" },
+
+  "statsMatchWins": "Yutilgan matchlar",
+  "@statsMatchWins": { "description": "Статистика: выиграно матчей" },
+
+  "statsEmpty": "Hali bitta ham partiya yo'q",
+  "@statsEmpty": { "description": "Статистика пуста" },
+
+  "statsNote": "Faqat bot bilan o'ynalgan partiyalar hisobga olinadi",
+  "@statsNote": { "description": "Пояснение: считаются только партии с ботом" },
+
+  "themesTitle": "Doska mavzusi",
+  "@themesTitle": { "description": "Заголовок экрана тем" },
+
+  "themeKlassik": "Klassik",
+  "@themeKlassik": { "description": "Тема: классика" },
+
+  "themeKokGumbaz": "Ko'k gumbaz",
+  "@themeKokGumbaz": { "description": "Тема: синий купол" },
+
+  "themeZar": "Zar",
+  "@themeZar": { "description": "Тема: тёмный орех с золотом" },
+
+  "themeSelected": "Tanlangan",
+  "@themeSelected": { "description": "Тема выбрана" },
+
+  "themeUnlockWatch": "Video ko'rib oching",
+  "@themeUnlockWatch": { "description": "Открыть тему за ролик" },
+
+  "themeAdsUnavailable": "Reklama hozircha tayyor emas",
+  "@themeAdsUnavailable": { "description": "Реклама сейчас недоступна" },
+
+  "themeUnlockedHint": "Video ko'rsangiz mavzu 24 soatga ochiladi",
+  "@themeUnlockedHint": { "description": "Пояснение: ролик открывает тему на 24 часа" },
+
+  "rulesTitle": "Qoidalar",
+  "@rulesTitle": { "description": "Заголовок экрана правил" },
+
+  "rulesGoalTitle": "Maqsad",
+  "@rulesGoalTitle": { "description": "Правила: цель игры" },
+
+  "rulesGoalBody": "Barcha 15 toshni aylana bo'ylab o'z uyingizga — 1-6 punktlarga — olib boring va raqibdan oldin chiqarib oling. Urish yo'q, bar yo'q: toshlar hech qachon urilmaydi.",
+  "@rulesGoalBody": { "description": "Правила: цель" },
+
+  "rulesStartTitle": "Boshlanish va yo'nalish",
+  "@rulesStartTitle": { "description": "Правила: старт" },
+
+  "rulesStartBody": "Boshida barcha 15 tosh boshda turadi. Ikkala tomon halqa bo'ylab bir yo'nalishda yuradi, lekin boshlari yarim aylana masofada — shuning uchun toshlar yuzma-yuz uchrashmaydi.",
+  "@rulesStartBody": { "description": "Правила: старт" },
+
+  "rulesMoveTitle": "Yurish",
+  "@rulesMoveTitle": { "description": "Правила: ход" },
+
+  "rulesMoveBody": "Ikki zar tashlanadi: ikki yurish, xohlasangiz bitta tosh bilan ketma-ket. Juft tushsa — to'rt yurish. Raqibning hech bo'lmaganda bitta toshi turgan punktga borib bo'lmaydi; o'z toshlaringiz bir punktda cheksiz tura oladi.",
+  "@rulesMoveBody": { "description": "Правила: ход" },
+
+  "rulesHeadTitle": "Bosh qoidasi",
+  "@rulesHeadTitle": { "description": "Правила: голова" },
+
+  "rulesHeadBody": "Bitta tashlashda boshdan faqat bitta tosh olinadi. Istisno — partiyadagi eng birinchi tashlash: 6-6, 4-4 yoki 3-3 tushsa, ikkita tosh olish mumkin.",
+  "@rulesHeadBody": { "description": "Правила: голова" },
+
+  "rulesFullTitle": "To'liq yurish",
+  "@rulesFullTitle": { "description": "Правила: обязательность полного хода" },
+
+  "rulesFullBody": "Yurish imkon qadar uzun bo'lishi shart: ikkala sonni ham ishlatish kerak, juftda esa to'rttadan qanchasi chiqsa. Faqat bitta son o'ynalsa — kattasi o'ynaladi. Umuman yurish bo'lmasa, navbat raqibga o'tadi.",
+  "@rulesFullBody": { "description": "Правила: полный ход" },
+
+  "rulesBlockTitle": "Blok qoidasi",
+  "@rulesBlockTitle": { "description": "Правила: блок из шести" },
+
+  "rulesBlockBody": "Ketma-ket oltita punktni egallash mumkin emas, agar to'siq oldida raqibning birorta ham toshi qolmasa. Uning kamida bitta toshi oldinda bo'lsa — blok mumkin.",
+  "@rulesBlockBody": { "description": "Правила: блок" },
+
+  "rulesBearOffTitle": "Chiqarish",
+  "@rulesBearOffTitle": { "description": "Правила: выброс" },
+
+  "rulesBearOffBody": "Barcha 15 tosh uyga yig'ilgach, chiqarish boshlanadi: k punktdagi tosh aynan k soni bilan chiqadi. Tushgan son eng uzoq band punktdan katta bo'lsa — o'sha punktdagi tosh chiqadi. Chiqarish o'rniga uy ichida yurish ham mumkin.",
+  "@rulesBearOffBody": { "description": "Правила: выброс" },
+
+  "rulesResultTitle": "Natija",
+  "@rulesResultTitle": { "description": "Правила: результат" },
+
+  "rulesResultBody": "Barcha 15 toshni birinchi bo'lib chiqargan yutadi. Oddiy g'alaba — oyin, 1 ochko; raqib bitta ham chiqara olmasa — mars, 2 ochko. Match 3, 5 yoki 7 ochkogacha o'ynaladi.",
+  "@rulesResultBody": { "description": "Правила: результат" },
+
+  "labelScore": "Hisob",
+  "@labelScore": { "description": "Подпись счёта серии" },
+
+  "actionNextGame": "Keyingi partiya",
+  "@actionNextGame": { "description": "Кнопка: следующая партия серии" },
+
+  "actionNewMatch": "Yangi match",
+  "@actionNewMatch": { "description": "Кнопка: новая серия" },
+
+  "matchWonTitle": "Matchda yutdingiz!",
+  "@matchWonTitle": { "description": "Итог серии: победа игрока" },
+
+  "matchLostTitle": "Matchda yutqazdingiz",
+  "@matchLostTitle": { "description": "Итог серии: поражение игрока" },
+
+  "matchWhiteWins": "Matchda oq toshlar yutdi",
+  "@matchWhiteWins": { "description": "Итог серии: выиграли белые" },
+
+  "matchBlackWins": "Matchda qora toshlar yutdi",
+  "@matchBlackWins": { "description": "Итог серии: выиграли чёрные" },
+
+  "matchToPoints": "{points} ochkogacha",
+  "@matchToPoints": {
+    "description": "Формат: серия до N очков",
+    "placeholders": { "points": { "type": "int" } }
+  },
+
+  "themeHoursLeft": "{hours} soat qoldi",
+  "@themeHoursLeft": {
+    "description": "Сколько часов осталось у открытой темы",
+    "placeholders": { "hours": { "type": "int" } }
+  },
+
+  "themeMinutesLeft": "{minutes} daqiqa qoldi",
+  "@themeMinutesLeft": {
+    "description": "Сколько минут осталось у открытой темы",
+    "placeholders": { "minutes": { "type": "int" } }
+  }
 }

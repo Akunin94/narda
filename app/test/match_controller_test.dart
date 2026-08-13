@@ -5,48 +5,8 @@ import 'package:narda/game/opponent.dart';
 import 'package:narda/game/settings.dart';
 import 'package:narda_core/narda_core.dart';
 
+import 'support/match_helpers.dart';
 import 'support/positions.dart';
-
-/// Бот без изолята — в тестах ход считается синхронно.
-class _StubBot implements Opponent {
-  _StubBot(this.player);
-
-  @override
-  final Player player;
-
-  final Bot _bot = HeuristicBot(level: BotLevel.orta, seed: 3);
-
-  @override
-  bool get movesOnThisDevice => false;
-
-  @override
-  Future<MoveSequence?> chooseSequence(GameState state) async =>
-      _bot.choose(state);
-
-  @override
-  void dispose() {}
-}
-
-/// Даёт отработать асинхронным шагам контроллера.
-Future<void> settle() => Future<void>.delayed(Duration.zero);
-
-/// Играет ход локального игрока тапами и подтверждает его.
-void playLocalTurn(MatchController controller) {
-  var guard = 0;
-  while (controller.canInteract && !controller.canConfirm && guard++ < 12) {
-    final List<int> sources = controller.movableSources.toList();
-    if (sources.isEmpty) break;
-    controller.tapPoint(sources.first);
-    if (controller.selected == null) continue;
-    final int? destination = controller.destinations.first;
-    if (destination == null) {
-      controller.tapBearOff();
-    } else {
-      controller.tapPoint(destination);
-    }
-  }
-  if (controller.canConfirm) controller.confirm();
-}
 
 void main() {
   test('hotseat: ход собирается тапами, доска переворачивается', () async {
@@ -114,7 +74,7 @@ void main() {
       setup: const GameSetup.vsBot(BotLevel.orta),
       settings: SettingsController.inMemory(),
       dice: scriptedDice(roll: const DiceRoll(6, 5)),
-      opponent: _StubBot(Player.black),
+      opponent: StubBot(Player.black),
       timing: const MatchTiming.instant(),
     );
     addTearDown(controller.dispose);
@@ -138,7 +98,7 @@ void main() {
         setup: const GameSetup.vsBot(BotLevel.oson),
         settings: SettingsController.inMemory(),
         dice: RandomDiceSource.seeded(game),
-        opponent: _StubBot(Player.black),
+        opponent: StubBot(Player.black),
         timing: const MatchTiming.instant(),
       );
       controller.start();
@@ -166,7 +126,7 @@ void main() {
       setup: const GameSetup.vsBot(BotLevel.oson),
       settings: SettingsController.inMemory(),
       dice: scriptedDice(),
-      opponent: _StubBot(Player.black),
+      opponent: StubBot(Player.black),
       timing: const MatchTiming.instant(),
     );
     addTearDown(controller.dispose);

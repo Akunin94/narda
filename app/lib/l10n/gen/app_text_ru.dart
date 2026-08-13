@@ -131,4 +131,201 @@ class AppTextRu extends AppText {
 
   @override
   String get actionMenu => 'Меню';
+
+  @override
+  String get menuRules => 'Правила';
+
+  @override
+  String get menuStats => 'Статистика';
+
+  @override
+  String get menuThemes => 'Оформление доски';
+
+  @override
+  String get matchTitle => 'Формат матча';
+
+  @override
+  String get matchSingle => 'Одна партия';
+
+  @override
+  String get settingLanguage => 'Язык';
+
+  @override
+  String get languageAuto => 'Как на устройстве';
+
+  @override
+  String get languageUz => 'Узбекский';
+
+  @override
+  String get languageRu => 'Русский';
+
+  @override
+  String get settingSound => 'Звук';
+
+  @override
+  String get settingSoundHint => 'Звуки костей, шашек и победы';
+
+  @override
+  String get settingVibration => 'Вибрация';
+
+  @override
+  String get settingVibrationHint => 'Отклик на бросок и перемещение';
+
+  @override
+  String get settingPrivacy => 'Настройки рекламы';
+
+  @override
+  String get actionResetStats => 'Сбросить статистику';
+
+  @override
+  String get resetStatsQuestion => 'Очистить статистику?';
+
+  @override
+  String get statsTitle => 'Статистика';
+
+  @override
+  String get statsGames => 'Партии';
+
+  @override
+  String get statsWins => 'Победы';
+
+  @override
+  String get statsWinRate => 'Процент побед';
+
+  @override
+  String get statsMarsWins => 'Марс — ваш';
+
+  @override
+  String get statsMarsLosses => 'Марс — соперника';
+
+  @override
+  String get statsMatches => 'Матчи';
+
+  @override
+  String get statsMatchWins => 'Выиграно матчей';
+
+  @override
+  String get statsEmpty => 'Пока не сыграно ни одной партии';
+
+  @override
+  String get statsNote => 'Учитываются только партии против бота';
+
+  @override
+  String get themesTitle => 'Оформление доски';
+
+  @override
+  String get themeKlassik => 'Классика';
+
+  @override
+  String get themeKokGumbaz => 'Синий купол';
+
+  @override
+  String get themeZar => 'Золото и орех';
+
+  @override
+  String get themeSelected => 'Выбрано';
+
+  @override
+  String get themeUnlockWatch => 'Открыть за ролик';
+
+  @override
+  String get themeAdsUnavailable => 'Реклама пока не готова';
+
+  @override
+  String get themeUnlockedHint => 'Просмотр ролика открывает тему на 24 часа';
+
+  @override
+  String get rulesTitle => 'Правила';
+
+  @override
+  String get rulesGoalTitle => 'Цель';
+
+  @override
+  String get rulesGoalBody =>
+      'Проведите все 15 шашек по кругу в свой дом — пункты 1–6 — и выбросьте их раньше соперника. Битья нет, бара нет: шашки не сбиваются никогда.';
+
+  @override
+  String get rulesStartTitle => 'Старт и направление';
+
+  @override
+  String get rulesStartBody =>
+      'В начале все 15 шашек стоят на голове. Обе стороны идут по кольцу в одну сторону, но их головы разнесены на полкруга — поэтому шашки не встречаются лоб в лоб.';
+
+  @override
+  String get rulesMoveTitle => 'Ход';
+
+  @override
+  String get rulesMoveBody =>
+      'Бросаются два кубика: два перемещения, можно и одной шашкой подряд. Дубль даёт четыре перемещения. Вставать на пункт, где стоит хотя бы одна чужая шашка, нельзя; своих на пункте — сколько угодно.';
+
+  @override
+  String get rulesHeadTitle => 'Правило головы';
+
+  @override
+  String get rulesHeadBody =>
+      'За один бросок с головы снимается только одна шашка. Исключение — самый первый бросок партии: при 6-6, 4-4 или 3-3 можно снять две.';
+
+  @override
+  String get rulesFullTitle => 'Полный ход';
+
+  @override
+  String get rulesFullBody =>
+      'Ход обязан быть максимально длинным: нужно использовать оба числа, а при дубле — сколько получится из четырёх. Если играется только одно число — играется большее. Если ходов нет вовсе, ход пропускается.';
+
+  @override
+  String get rulesBlockTitle => 'Правило блока';
+
+  @override
+  String get rulesBlockBody =>
+      'Нельзя выстроить шесть подряд занятых пунктов, если перед этим забором не осталось ни одной шашки соперника. Если хотя бы одна его шашка уже прошла вперёд — блок разрешён.';
+
+  @override
+  String get rulesBearOffTitle => 'Выброс';
+
+  @override
+  String get rulesBearOffBody =>
+      'Когда все 15 шашек дома, начинается выброс: шашка с пункта k снимается точным числом k. Если выпавшее число больше самого дальнего занятого пункта — снимается шашка с него. Вместо выброса можно ходить внутри дома.';
+
+  @override
+  String get rulesResultTitle => 'Результат';
+
+  @override
+  String get rulesResultBody =>
+      'Кто первым выбросил все 15 шашек — победил. Обычная победа — oyin, 1 очко; если соперник не выбросил ни одной — mars, 2 очка. Матч играется до 3, 5 или 7 очков.';
+
+  @override
+  String get labelScore => 'Счёт';
+
+  @override
+  String get actionNextGame => 'Следующая партия';
+
+  @override
+  String get actionNewMatch => 'Новый матч';
+
+  @override
+  String get matchWonTitle => 'Вы выиграли матч!';
+
+  @override
+  String get matchLostTitle => 'Вы проиграли матч';
+
+  @override
+  String get matchWhiteWins => 'Матч выиграли белые';
+
+  @override
+  String get matchBlackWins => 'Матч выиграли чёрные';
+
+  @override
+  String matchToPoints(int points) {
+    return 'До $points очков';
+  }
+
+  @override
+  String themeHoursLeft(int hours) {
+    return 'Осталось $hours ч';
+  }
+
+  @override
+  String themeMinutesLeft(int minutes) {
+    return 'Осталось $minutes мин';
+  }
 }

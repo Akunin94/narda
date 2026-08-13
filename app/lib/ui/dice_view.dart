@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:narda_core/narda_core.dart';
 
-import '../theme/narda_theme.dart';
+import '../theme/board_theme.dart';
 
 /// Кости хода: два числа обычного броска или четыре при дубле.
 /// Уже сыгранные числа гаснут, во время броска кости «крутятся».
@@ -11,12 +11,14 @@ class DiceView extends StatefulWidget {
     required this.roll,
     required this.remaining,
     required this.rolling,
+    required this.theme,
     this.dieSize = 30,
   });
 
   final DiceRoll roll;
   final List<int> remaining;
   final bool rolling;
+  final BoardTheme theme;
   final double dieSize;
 
   @override
@@ -78,6 +80,7 @@ class _DiceViewState extends State<DiceView>
                         ? _spinFace(i, _controller.value)
                         : faces[i],
                     dimmed: !spinning && !available[i],
+                    theme: widget.theme,
                   ),
                 ),
               ),
@@ -93,10 +96,15 @@ class _DiceViewState extends State<DiceView>
 }
 
 class _DiePainter extends CustomPainter {
-  const _DiePainter({required this.value, required this.dimmed});
+  const _DiePainter({
+    required this.value,
+    required this.dimmed,
+    required this.theme,
+  });
 
   final int value;
   final bool dimmed;
+  final BoardTheme theme;
 
   /// Точки граней в долях стороны кубика.
   static const Map<int, List<Offset>> _pips = <int, List<Offset>>{
@@ -132,17 +140,17 @@ class _DiePainter extends CustomPainter {
     final Rect rect = Offset.zero & size;
     canvas.drawRRect(
       RRect.fromRectAndRadius(rect.deflate(1), Radius.circular(size.width * 0.2)),
-      Paint()..color = NardaColors.checkerLight.withValues(alpha: opacity),
+      Paint()..color = theme.dieFace.withValues(alpha: opacity),
     );
     canvas.drawRRect(
       RRect.fromRectAndRadius(rect.deflate(1), Radius.circular(size.width * 0.2)),
       Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.5
-        ..color = NardaColors.checkerLightEdge.withValues(alpha: opacity),
+        ..color = theme.dieEdge.withValues(alpha: opacity),
     );
     final Paint pip = Paint()
-      ..color = NardaColors.checkerDarkEdge.withValues(alpha: opacity);
+      ..color = theme.diePip.withValues(alpha: opacity);
     for (final Offset point in _pips[value] ?? const <Offset>[]) {
       canvas.drawCircle(
         Offset(point.dx * size.width, point.dy * size.height),
@@ -154,5 +162,7 @@ class _DiePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_DiePainter oldDelegate) =>
-      oldDelegate.value != value || oldDelegate.dimmed != dimmed;
+      oldDelegate.value != value ||
+      oldDelegate.dimmed != dimmed ||
+      oldDelegate.theme.id != theme.id;
 }

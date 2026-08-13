@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:narda_core/narda_core.dart';
 
+import 'feedback.dart';
 import 'game_setup.dart';
 import 'opponent.dart';
 import 'settings.dart';
@@ -61,15 +62,22 @@ class MatchTiming {
 
 /// Ведение партии для экрана: очередь хода, сбор перемещений, анимации,
 /// отмена и подтверждение. Правила целиком остаются в ядре.
+///
+/// Здесь же живёт счёт серии до 3 / 5 / 7 очков (§3.4): партии сменяют друг
+/// друга через [nextGame], пока [isMatchOver] не станет истиной.
 class MatchController extends ChangeNotifier {
   MatchController({
     required this.setup,
     required this.settings,
     DiceSource? dice,
     Opponent? opponent,
+    MatchFeedback? feedback,
+    this.onGameFinished,
     this.timing = const MatchTiming(),
   }) : _game = Game(dice: dice ?? RandomDiceSource()),
-       _opponent = opponent ?? createOpponent(setup);
+       _opponent = opponent ?? createOpponent(setup),
+       _feedback = feedback ?? const SilentFeedback(),
+       _score = MatchScore(target: setup.target);
 
   static const MoveGenerator _generator = MoveGenerator();
 
@@ -77,8 +85,14 @@ class MatchController extends ChangeNotifier {
   final SettingsController settings;
   final MatchTiming timing;
 
+  /// Сообщает экрану о завершившейся партии: статистика и счётчик рекламы.
+  final void Function(GameResult result)? onGameFinished;
+
   final Game _game;
   final Opponent _opponent;
+  final MatchFeedback _feedback;
+
+  MatchScore _score;
 
   TurnPhase _phase = TurnPhase.rolling;
   TurnPlanner? _planner;
@@ -97,6 +111,12 @@ class MatchController extends ChangeNotifier {
   TurnPhase get phase => _phase;
 
   GameResult? get result => _result;
+
+  /// Счёт серии. Для одиночной партии цель — одно очко.
+  MatchScore get score => _score;
+
+  /// Серия доиграна: победитель набрал нужные очки.
+  bool get isMatchOver => _score.isOver;
 
   AnimatedMove? get animated => _animated;
 
@@ -142,8 +162,8 @@ class MatchController extends ChangeNotifier {
     unawaited(_runTurn());
   }
 
-  /// Новая партия теми же настройками.
-  void rematch() {
+  /// Следующая партия серии — счёт сохраняется.
+  void nextGame() {
     _generation++;
     _result = null;
     _planner = null;
@@ -151,6 +171,12 @@ class MatchController extends ChangeNotifier {
     _animated = null;
     _lastTurnMoves = const <Move>[];
     start();
+  }
+
+  /// Новая серия с нуля: счёт обнуляется.
+  void newMatch() {
+    _score = MatchScore(target: setup.target);
+    nextGame();
   }
 
   /// Тап по пункту: выбор шашки или перемещение выбранной шашки.
@@ -247,6 +273,7 @@ class MatchController extends ChangeNotifier {
     _disposed = true;
     _generation++;
     _opponent.dispose();
+    _feedback.dispose();
     super.dispose();
   }
 
@@ -256,6 +283,7 @@ class MatchController extends ChangeNotifier {
     _selected = null;
     _animated = null;
     _phase = TurnPhase.rolling;
+    _feedback.dice();
     _notify();
 
     if (!await _wait(timing.dice, generation)) return;
@@ -305,6 +333,7 @@ class MatchController extends ChangeNotifier {
 
   void _play(Move move) {
     _planner!.apply(move);
+    _feedback.checker();
     _animated = AnimatedMove(move: move, serial: ++_animationSerial);
     _notify();
   }
@@ -327,7 +356,10 @@ class MatchController extends ChangeNotifier {
 
   void _finish(GameResult result) {
     _result = result;
+    _score = _score.add(result);
     _phase = TurnPhase.finished;
+    _feedback.gameOver(won: result.winner == setup.localPlayer);
+    onGameFinished?.call(result);
     _notify();
   }
 

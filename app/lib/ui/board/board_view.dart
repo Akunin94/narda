@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:narda_core/narda_core.dart';
 
 import '../../game/match_controller.dart';
+import '../../theme/board_theme.dart';
 import 'board_geometry.dart';
 import 'board_painter.dart';
 
@@ -11,6 +12,7 @@ class BoardView extends StatefulWidget {
   const BoardView({
     super.key,
     required this.state,
+    required this.theme,
     required this.perspective,
     required this.selected,
     required this.destinations,
@@ -26,6 +28,7 @@ class BoardView extends StatefulWidget {
   });
 
   final GameState state;
+  final BoardTheme theme;
   final Player perspective;
   final int? selected;
   final List<int?> destinations;
@@ -119,7 +122,10 @@ class _BoardViewState extends State<BoardView>
           children: <Widget>[
             RepaintBoundary(
               child: CustomPaint(
-                painter: BoardBackgroundPainter(geometry: geometry),
+                painter: BoardBackgroundPainter(
+                  geometry: geometry,
+                  theme: widget.theme,
+                ),
               ),
             ),
             AnimatedBuilder(
@@ -127,6 +133,7 @@ class _BoardViewState extends State<BoardView>
               builder: (BuildContext context, Widget? child) => CustomPaint(
                 painter: BoardPiecesPainter(
                   geometry: geometry,
+                  theme: widget.theme,
                   state: widget.state,
                   selected: widget.selected,
                   destinations: widget.destinations,

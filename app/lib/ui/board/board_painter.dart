@@ -3,7 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:narda_core/narda_core.dart';
 
-import '../../theme/narda_theme.dart';
+import '../../theme/board_theme.dart';
 import 'board_geometry.dart';
 import 'ornament.dart';
 
@@ -11,9 +11,10 @@ import 'ornament.dart';
 /// Живёт под [RepaintBoundary] и перерисовывается только при смене размера
 /// или перспективы.
 class BoardBackgroundPainter extends CustomPainter {
-  const BoardBackgroundPainter({required this.geometry});
+  const BoardBackgroundPainter({required this.geometry, required this.theme});
 
   final BoardGeometry geometry;
+  final BoardTheme theme;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -21,22 +22,22 @@ class BoardBackgroundPainter extends CustomPainter {
     canvas.drawRRect(
       RRect.fromRectAndRadius(board, Radius.circular(geometry.frame * 0.7)),
       Paint()
-        ..shader = const LinearGradient(
+        ..shader = LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: <Color>[NardaColors.frameLight, NardaColors.frameDark],
+          colors: <Color>[theme.frameLight, theme.frameDark],
         ).createShader(board),
     );
-    paintFrameOrnament(canvas, size, geometry.frame);
+    paintFrameOrnament(canvas, size, geometry.frame, theme);
 
     final Rect inner = geometry.inner;
     canvas.drawRect(
       inner,
       Paint()
-        ..shader = const LinearGradient(
+        ..shader = LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: <Color>[NardaColors.feltLight, NardaColors.feltDark],
+          colors: <Color>[theme.feltLight, theme.feltDark],
         ).createShader(inner),
     );
     _paintGrain(canvas, inner);
@@ -45,13 +46,13 @@ class BoardBackgroundPainter extends CustomPainter {
       final Rect tray = geometry.trayRect(player);
       canvas.drawRRect(
         RRect.fromRectAndRadius(tray.deflate(1), const Radius.circular(4)),
-        Paint()..color = NardaColors.frameDark.withValues(alpha: 0.55),
+        Paint()..color = theme.frameDark.withValues(alpha: 0.55),
       );
     }
 
     canvas.drawRect(
       geometry.bar,
-      Paint()..color = NardaColors.frameDark.withValues(alpha: 0.85),
+      Paint()..color = theme.frameDark.withValues(alpha: 0.85),
     );
 
     for (int abs = 1; abs <= Coords.pointCount; abs++) {
@@ -63,7 +64,7 @@ class BoardBackgroundPainter extends CustomPainter {
       Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = 2
-        ..color = NardaColors.frameDark,
+        ..color = theme.frameDark,
     );
   }
 
@@ -84,7 +85,7 @@ class BoardBackgroundPainter extends CustomPainter {
         ..lineTo(rect.center.dx, rect.bottom);
     }
     path.close();
-    final Color color = light ? NardaColors.pointLight : NardaColors.pointDark;
+    final Color color = light ? theme.pointLight : theme.pointDark;
     canvas.drawPath(
       path,
       Paint()
@@ -99,7 +100,7 @@ class BoardBackgroundPainter extends CustomPainter {
       Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1
-        ..color = NardaColors.frameDark.withValues(alpha: 0.35),
+        ..color = theme.frameDark.withValues(alpha: 0.35),
     );
   }
 
@@ -129,13 +130,15 @@ class BoardBackgroundPainter extends CustomPainter {
   @override
   bool shouldRepaint(BoardBackgroundPainter oldDelegate) =>
       oldDelegate.geometry.size != geometry.size ||
-      oldDelegate.geometry.perspective != geometry.perspective;
+      oldDelegate.geometry.perspective != geometry.perspective ||
+      oldDelegate.theme.id != theme.id;
 }
 
 /// Подвижная часть доски: шашки, подсветки, летящая шашка.
 class BoardPiecesPainter extends CustomPainter {
   const BoardPiecesPainter({
     required this.geometry,
+    required this.theme,
     required this.state,
     required this.selected,
     required this.destinations,
@@ -148,6 +151,7 @@ class BoardPiecesPainter extends CustomPainter {
   });
 
   final BoardGeometry geometry;
+  final BoardTheme theme;
   final GameState state;
 
   /// Выбранный пункт отправления.
@@ -184,7 +188,7 @@ class BoardPiecesPainter extends CustomPainter {
     final Paint paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2
-      ..color = NardaColors.gold.withValues(alpha: 0.35);
+      ..color = theme.highlight.withValues(alpha: 0.35);
     for (final Move move in lastMoves) {
       canvas.drawPath(_pointPath(move.fromAbs), paint);
       final int? toAbs = move.toAbs;
@@ -195,11 +199,11 @@ class BoardPiecesPainter extends CustomPainter {
   void _paintDestinations(Canvas canvas) {
     if (destinations.isEmpty) return;
     final Player mover = state.turn;
-    final Paint glow = Paint()..color = NardaColors.gold.withValues(alpha: 0.28);
+    final Paint glow = Paint()..color = theme.highlight.withValues(alpha: 0.28);
     final Paint marker = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.5
-      ..color = NardaColors.gold;
+      ..color = theme.highlight;
     for (final int? abs in destinations) {
       if (abs == null) {
         final Rect tray = geometry.trayRect(mover);
@@ -238,6 +242,7 @@ class BoardPiecesPainter extends CustomPainter {
         final bool top = i == visible - 1;
         paintChecker(
           canvas,
+          theme: theme,
           center: geometry.checkerCenter(abs, i, count),
           radius: geometry.checkerRadius,
           player: player,
@@ -250,8 +255,8 @@ class BoardPiecesPainter extends CustomPainter {
 
   Color? _ringFor(int abs, bool isTop) {
     if (!isTop) return null;
-    if (abs == selected) return NardaColors.gold;
-    if (movable.contains(abs)) return NardaColors.gold.withValues(alpha: 0.45);
+    if (abs == selected) return theme.highlight;
+    if (movable.contains(abs)) return theme.highlight.withValues(alpha: 0.45);
     return null;
   }
 
@@ -265,14 +270,14 @@ class BoardPiecesPainter extends CustomPainter {
         final Rect rect = geometry.trayCheckerRect(player, i);
         canvas.drawRRect(
           RRect.fromRectAndRadius(rect, Radius.circular(rect.height / 2)),
-          Paint()..color = NardaColors.checkerFace(player),
+          Paint()..color = theme.checkerFace(player),
         );
         canvas.drawRRect(
           RRect.fromRectAndRadius(rect, Radius.circular(rect.height / 2)),
           Paint()
             ..style = PaintingStyle.stroke
             ..strokeWidth = 1
-            ..color = NardaColors.checkerEdge(player),
+            ..color = theme.checkerEdge(player),
         );
       }
     }
@@ -288,6 +293,7 @@ class BoardPiecesPainter extends CustomPainter {
           Offset(0, math.sin(math.pi * progress) * geometry.checkerRadius);
       paintChecker(
         canvas,
+        theme: theme,
         center: position,
         radius: geometry.checkerRadius * 1.05,
         player: move.player,
@@ -298,6 +304,7 @@ class BoardPiecesPainter extends CustomPainter {
     if (dragFrom != null && drag != null) {
       paintChecker(
         canvas,
+        theme: theme,
         center: drag,
         radius: geometry.checkerRadius * 1.15,
         player: state.turn,
@@ -349,6 +356,7 @@ class BoardPiecesPainter extends CustomPainter {
 /// Одна шашка: кремовая или тёмно-красная, с фаской и тенью (§7).
 void paintChecker(
   Canvas canvas, {
+  required BoardTheme theme,
   required Offset center,
   required double radius,
   required Player player,
@@ -356,8 +364,8 @@ void paintChecker(
   Color? ring,
   bool elevated = false,
 }) {
-  final Color face = NardaColors.checkerFace(player);
-  final Color edge = NardaColors.checkerEdge(player);
+  final Color face = theme.checkerFace(player);
+  final Color edge = theme.checkerEdge(player);
 
   canvas.drawCircle(
     center.translate(0, elevated ? radius * 0.35 : radius * 0.12),
@@ -409,7 +417,7 @@ void paintChecker(
       text: TextSpan(
         text: label,
         style: TextStyle(
-          color: NardaColors.checkerLabel(player),
+          color: theme.checkerLabel(player),
           fontSize: radius * 0.95,
           fontWeight: FontWeight.w700,
         ),

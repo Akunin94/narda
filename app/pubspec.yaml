@@ -3,10 +3,10 @@ description: >-
   «Uzun narda» — длинные нарды с узбекским интерфейсом: доска на CustomPaint,
   игра против бота и hotseat на одном устройстве.
 publish_to: none
-version: 0.2.0+1
+version: 0.3.0+3
 
 environment:
-  sdk: ^3.9.0
+  sdk: ^3.11.0
 
 dependencies:
   flutter:
@@ -15,6 +15,9 @@ dependencies:
     sdk: flutter
   intl: any
   shared_preferences: ^2.3.0
+  audioplayers: ^6.8.1
+  vibration: ^3.2.0
+  google_mobile_ads: ^9.0.0
   narda_core:
     path: ../packages/narda_core
 
@@ -26,3 +29,5 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   generate: true
+  assets:
+    - assets/sounds/

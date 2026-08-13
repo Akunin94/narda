@@ -342,6 +342,372 @@ abstract class AppText {
   /// In uz, this message translates to:
   /// **'Menyu'**
   String get actionMenu;
+
+  /// Кнопка: обучение правилам
+  ///
+  /// In uz, this message translates to:
+  /// **'Qoidalar'**
+  String get menuRules;
+
+  /// Кнопка: статистика
+  ///
+  /// In uz, this message translates to:
+  /// **'Statistika'**
+  String get menuStats;
+
+  /// Кнопка: оформление доски
+  ///
+  /// In uz, this message translates to:
+  /// **'Doska mavzusi'**
+  String get menuThemes;
+
+  /// Заголовок выбора формата матча
+  ///
+  /// In uz, this message translates to:
+  /// **'Partiya formati'**
+  String get matchTitle;
+
+  /// Формат: одиночная партия
+  ///
+  /// In uz, this message translates to:
+  /// **'Bitta partiya'**
+  String get matchSingle;
+
+  /// Настройка языка
+  ///
+  /// In uz, this message translates to:
+  /// **'Til'**
+  String get settingLanguage;
+
+  /// Язык: как на устройстве
+  ///
+  /// In uz, this message translates to:
+  /// **'Qurilma tili'**
+  String get languageAuto;
+
+  /// Язык: узбекский
+  ///
+  /// In uz, this message translates to:
+  /// **'O\'zbekcha'**
+  String get languageUz;
+
+  /// Язык: русский
+  ///
+  /// In uz, this message translates to:
+  /// **'Ruscha'**
+  String get languageRu;
+
+  /// Настройка звука
+  ///
+  /// In uz, this message translates to:
+  /// **'Ovoz'**
+  String get settingSound;
+
+  /// Пояснение к звуку
+  ///
+  /// In uz, this message translates to:
+  /// **'Zar, tosh va g\'alaba ovozlari'**
+  String get settingSoundHint;
+
+  /// Настройка вибрации
+  ///
+  /// In uz, this message translates to:
+  /// **'Tebranish'**
+  String get settingVibration;
+
+  /// Пояснение к вибрации
+  ///
+  /// In uz, this message translates to:
+  /// **'Yurish va zar tashlashda tebranish'**
+  String get settingVibrationHint;
+
+  /// Кнопка окна согласия UMP
+  ///
+  /// In uz, this message translates to:
+  /// **'Reklama sozlamalari'**
+  String get settingPrivacy;
+
+  /// Кнопка сброса статистики
+  ///
+  /// In uz, this message translates to:
+  /// **'Statistikani tozalash'**
+  String get actionResetStats;
+
+  /// Вопрос перед сбросом статистики
+  ///
+  /// In uz, this message translates to:
+  /// **'Statistika o\'chirilsinmi?'**
+  String get resetStatsQuestion;
+
+  /// Заголовок экрана статистики
+  ///
+  /// In uz, this message translates to:
+  /// **'Statistika'**
+  String get statsTitle;
+
+  /// Статистика: сыграно партий
+  ///
+  /// In uz, this message translates to:
+  /// **'Partiyalar'**
+  String get statsGames;
+
+  /// Статистика: побед
+  ///
+  /// In uz, this message translates to:
+  /// **'G\'alabalar'**
+  String get statsWins;
+
+  /// Статистика: винрейт
+  ///
+  /// In uz, this message translates to:
+  /// **'G\'alaba foizi'**
+  String get statsWinRate;
+
+  /// Статистика: марсы в пользу игрока
+  ///
+  /// In uz, this message translates to:
+  /// **'Mars — siz'**
+  String get statsMarsWins;
+
+  /// Статистика: марсы в пользу соперника
+  ///
+  /// In uz, this message translates to:
+  /// **'Mars — raqib'**
+  String get statsMarsLosses;
+
+  /// Статистика: сыграно матчей
+  ///
+  /// In uz, this message translates to:
+  /// **'Matchlar'**
+  String get statsMatches;
+
+  /// Статистика: выиграно матчей
+  ///
+  /// In uz, this message translates to:
+  /// **'Yutilgan matchlar'**
+  String get statsMatchWins;
+
+  /// Статистика пуста
+  ///
+  /// In uz, this message translates to:
+  /// **'Hali bitta ham partiya yo\'q'**
+  String get statsEmpty;
+
+  /// Пояснение: считаются только партии с ботом
+  ///
+  /// In uz, this message translates to:
+  /// **'Faqat bot bilan o\'ynalgan partiyalar hisobga olinadi'**
+  String get statsNote;
+
+  /// Заголовок экрана тем
+  ///
+  /// In uz, this message translates to:
+  /// **'Doska mavzusi'**
+  String get themesTitle;
+
+  /// Тема: классика
+  ///
+  /// In uz, this message translates to:
+  /// **'Klassik'**
+  String get themeKlassik;
+
+  /// Тема: синий купол
+  ///
+  /// In uz, this message translates to:
+  /// **'Ko\'k gumbaz'**
+  String get themeKokGumbaz;
+
+  /// Тема: тёмный орех с золотом
+  ///
+  /// In uz, this message translates to:
+  /// **'Zar'**
+  String get themeZar;
+
+  /// Тема выбрана
+  ///
+  /// In uz, this message translates to:
+  /// **'Tanlangan'**
+  String get themeSelected;
+
+  /// Открыть тему за ролик
+  ///
+  /// In uz, this message translates to:
+  /// **'Video ko\'rib oching'**
+  String get themeUnlockWatch;
+
+  /// Реклама сейчас недоступна
+  ///
+  /// In uz, this message translates to:
+  /// **'Reklama hozircha tayyor emas'**
+  String get themeAdsUnavailable;
+
+  /// Пояснение: ролик открывает тему на 24 часа
+  ///
+  /// In uz, this message translates to:
+  /// **'Video ko\'rsangiz mavzu 24 soatga ochiladi'**
+  String get themeUnlockedHint;
+
+  /// Заголовок экрана правил
+  ///
+  /// In uz, this message translates to:
+  /// **'Qoidalar'**
+  String get rulesTitle;
+
+  /// Правила: цель игры
+  ///
+  /// In uz, this message translates to:
+  /// **'Maqsad'**
+  String get rulesGoalTitle;
+
+  /// Правила: цель
+  ///
+  /// In uz, this message translates to:
+  /// **'Barcha 15 toshni aylana bo\'ylab o\'z uyingizga — 1-6 punktlarga — olib boring va raqibdan oldin chiqarib oling. Urish yo\'q, bar yo\'q: toshlar hech qachon urilmaydi.'**
+  String get rulesGoalBody;
+
+  /// Правила: старт
+  ///
+  /// In uz, this message translates to:
+  /// **'Boshlanish va yo\'nalish'**
+  String get rulesStartTitle;
+
+  /// Правила: старт
+  ///
+  /// In uz, this message translates to:
+  /// **'Boshida barcha 15 tosh boshda turadi. Ikkala tomon halqa bo\'ylab bir yo\'nalishda yuradi, lekin boshlari yarim aylana masofada — shuning uchun toshlar yuzma-yuz uchrashmaydi.'**
+  String get rulesStartBody;
+
+  /// Правила: ход
+  ///
+  /// In uz, this message translates to:
+  /// **'Yurish'**
+  String get rulesMoveTitle;
+
+  /// Правила: ход
+  ///
+  /// In uz, this message translates to:
+  /// **'Ikki zar tashlanadi: ikki yurish, xohlasangiz bitta tosh bilan ketma-ket. Juft tushsa — to\'rt yurish. Raqibning hech bo\'lmaganda bitta toshi turgan punktga borib bo\'lmaydi; o\'z toshlaringiz bir punktda cheksiz tura oladi.'**
+  String get rulesMoveBody;
+
+  /// Правила: голова
+  ///
+  /// In uz, this message translates to:
+  /// **'Bosh qoidasi'**
+  String get rulesHeadTitle;
+
+  /// Правила: голова
+  ///
+  /// In uz, this message translates to:
+  /// **'Bitta tashlashda boshdan faqat bitta tosh olinadi. Istisno — partiyadagi eng birinchi tashlash: 6-6, 4-4 yoki 3-3 tushsa, ikkita tosh olish mumkin.'**
+  String get rulesHeadBody;
+
+  /// Правила: обязательность полного хода
+  ///
+  /// In uz, this message translates to:
+  /// **'To\'liq yurish'**
+  String get rulesFullTitle;
+
+  /// Правила: полный ход
+  ///
+  /// In uz, this message translates to:
+  /// **'Yurish imkon qadar uzun bo\'lishi shart: ikkala sonni ham ishlatish kerak, juftda esa to\'rttadan qanchasi chiqsa. Faqat bitta son o\'ynalsa — kattasi o\'ynaladi. Umuman yurish bo\'lmasa, navbat raqibga o\'tadi.'**
+  String get rulesFullBody;
+
+  /// Правила: блок из шести
+  ///
+  /// In uz, this message translates to:
+  /// **'Blok qoidasi'**
+  String get rulesBlockTitle;
+
+  /// Правила: блок
+  ///
+  /// In uz, this message translates to:
+  /// **'Ketma-ket oltita punktni egallash mumkin emas, agar to\'siq oldida raqibning birorta ham toshi qolmasa. Uning kamida bitta toshi oldinda bo\'lsa — blok mumkin.'**
+  String get rulesBlockBody;
+
+  /// Правила: выброс
+  ///
+  /// In uz, this message translates to:
+  /// **'Chiqarish'**
+  String get rulesBearOffTitle;
+
+  /// Правила: выброс
+  ///
+  /// In uz, this message translates to:
+  /// **'Barcha 15 tosh uyga yig\'ilgach, chiqarish boshlanadi: k punktdagi tosh aynan k soni bilan chiqadi. Tushgan son eng uzoq band punktdan katta bo\'lsa — o\'sha punktdagi tosh chiqadi. Chiqarish o\'rniga uy ichida yurish ham mumkin.'**
+  String get rulesBearOffBody;
+
+  /// Правила: результат
+  ///
+  /// In uz, this message translates to:
+  /// **'Natija'**
+  String get rulesResultTitle;
+
+  /// Правила: результат
+  ///
+  /// In uz, this message translates to:
+  /// **'Barcha 15 toshni birinchi bo\'lib chiqargan yutadi. Oddiy g\'alaba — oyin, 1 ochko; raqib bitta ham chiqara olmasa — mars, 2 ochko. Match 3, 5 yoki 7 ochkogacha o\'ynaladi.'**
+  String get rulesResultBody;
+
+  /// Подпись счёта серии
+  ///
+  /// In uz, this message translates to:
+  /// **'Hisob'**
+  String get labelScore;
+
+  /// Кнопка: следующая партия серии
+  ///
+  /// In uz, this message translates to:
+  /// **'Keyingi partiya'**
+  String get actionNextGame;
+
+  /// Кнопка: новая серия
+  ///
+  /// In uz, this message translates to:
+  /// **'Yangi match'**
+  String get actionNewMatch;
+
+  /// Итог серии: победа игрока
+  ///
+  /// In uz, this message translates to:
+  /// **'Matchda yutdingiz!'**
+  String get matchWonTitle;
+
+  /// Итог серии: поражение игрока
+  ///
+  /// In uz, this message translates to:
+  /// **'Matchda yutqazdingiz'**
+  String get matchLostTitle;
+
+  /// Итог серии: выиграли белые
+  ///
+  /// In uz, this message translates to:
+  /// **'Matchda oq toshlar yutdi'**
+  String get matchWhiteWins;
+
+  /// Итог серии: выиграли чёрные
+  ///
+  /// In uz, this message translates to:
+  /// **'Matchda qora toshlar yutdi'**
+  String get matchBlackWins;
+
+  /// Формат: серия до N очков
+  ///
+  /// In uz, this message translates to:
+  /// **'{points} ochkogacha'**
+  String matchToPoints(int points);
+
+  /// Сколько часов осталось у открытой темы
+  ///
+  /// In uz, this message translates to:
+  /// **'{hours} soat qoldi'**
+  String themeHoursLeft(int hours);
+
+  /// Сколько минут осталось у открытой темы
+  ///
+  /// In uz, this message translates to:
+  /// **'{minutes} daqiqa qoldi'**
+  String themeMinutesLeft(int minutes);
 }
 
 class _AppTextDelegate extends LocalizationsDelegate<AppText> {
