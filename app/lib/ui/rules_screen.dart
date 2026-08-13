@@ -5,6 +5,7 @@ import '../l10n/gen/app_text.dart';
 import '../theme/board_theme.dart';
 import '../theme/narda_theme.dart';
 import 'chrome.dart';
+import 'paint.dart';
 
 /// Обучение «Qoidalar»: восемь разделов правил, у каждого — своя картинка
 /// (§P3). Картинки рисуются тем же способом, что и доска: CustomPaint.
@@ -237,10 +238,10 @@ class RuleFigurePainter extends CustomPainter {
     canvas.drawCircle(
       center,
       radius * 0.88,
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = radius * 0.22
-        ..color = white ? theme.checkerWhiteEdge : theme.checkerBlackEdge,
+      strokePaint(
+        white ? theme.checkerWhiteEdge : theme.checkerBlackEdge,
+        radius * 0.22,
+      ),
     );
   }
 
@@ -256,11 +257,11 @@ class RuleFigurePainter extends CustomPainter {
     final double y = size.height * 0.62;
     final Offset start = Offset(width * from, y);
     final Offset end = Offset(width * to, y);
-    final Paint paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = size.height * 0.035
-      ..strokeCap = StrokeCap.round
-      ..color = theme.highlight;
+    final Paint paint = strokePaint(
+      theme.highlight,
+      size.height * 0.035,
+      cap: StrokeCap.round,
+    );
     final Path path = Path()
       ..moveTo(start.dx, start.dy)
       ..quadraticBezierTo(
@@ -293,11 +294,11 @@ class RuleFigurePainter extends CustomPainter {
     final double width = size.width / _points;
     final Offset center = Offset(width * (column + 0.5), size.height * 0.34);
     final double arm = width * 0.22;
-    final Paint paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = size.height * 0.045
-      ..strokeCap = StrokeCap.round
-      ..color = const Color(0xFFE05B4B);
+    final Paint paint = strokePaint(
+      const Color(0xFFE05B4B),
+      size.height * 0.045,
+      cap: StrokeCap.round,
+    );
     canvas.drawLine(center.translate(-arm, -arm), center.translate(arm, arm), paint);
     canvas.drawLine(center.translate(arm, -arm), center.translate(-arm, arm), paint);
   }
@@ -318,10 +319,7 @@ class RuleFigurePainter extends CustomPainter {
     );
     canvas.drawRRect(
       RRect.fromRectAndRadius(rect, Radius.circular(size.height * 0.08)),
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = size.height * 0.035
-        ..color = const Color(0xFFE05B4B),
+      strokePaint(const Color(0xFFE05B4B), size.height * 0.035),
     );
     _label(canvas, '6', Offset(rect.center.dx, rect.top - size.height * 0.02), size.height * 0.16);
   }

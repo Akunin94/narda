@@ -3,15 +3,16 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../theme/board_theme.dart';
+import '../paint.dart';
 
 /// Узбекский геометрический орнамент по рамке доски: цепочка ромбов с
 /// внутренним ромбом и точками между ними. Рисуется программно, никаких
 /// заимствованных текстур (§7).
 void paintFrameOrnament(Canvas canvas, Size size, double frame, BoardTheme theme) {
-  final Paint line = Paint()
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = math.max(1, frame * 0.06)
-    ..color = theme.ornament.withValues(alpha: 0.55);
+  final Paint line = strokePaint(
+    theme.ornament.withValues(alpha: 0.55),
+    math.max(1, frame * 0.06),
+  );
   final Paint fill = Paint()..color = theme.ornamentFill.withValues(alpha: 0.45);
 
   final double inset = frame * 0.18;

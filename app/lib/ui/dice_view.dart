@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:narda_core/narda_core.dart';
 
 import '../theme/board_theme.dart';
+import 'paint.dart';
 
 /// Кости хода: два числа обычного броска или четыре при дубле.
 /// Уже сыгранные числа гаснут, во время броска кости «крутятся».
@@ -144,10 +145,7 @@ class _DiePainter extends CustomPainter {
     );
     canvas.drawRRect(
       RRect.fromRectAndRadius(rect.deflate(1), Radius.circular(size.width * 0.2)),
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.5
-        ..color = theme.dieEdge.withValues(alpha: opacity),
+      strokePaint(theme.dieEdge.withValues(alpha: opacity), 1.5),
     );
     final Paint pip = Paint()
       ..color = theme.diePip.withValues(alpha: opacity);

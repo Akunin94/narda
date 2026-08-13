@@ -9,6 +9,7 @@ import '../l10n/gen/app_text.dart';
 import '../theme/board_theme.dart';
 import '../theme/narda_theme.dart';
 import 'chrome.dart';
+import 'paint.dart';
 
 /// Оформление доски и костей. Классика доступна всегда, две другие темы
 /// открываются просмотром rewarded-ролика на 24 часа (§P3).
@@ -270,10 +271,10 @@ class _ThemePreviewPainter extends CustomPainter {
     canvas.drawCircle(
       center,
       radius * 0.9,
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = radius * 0.2
-        ..color = white ? theme.checkerWhiteEdge : theme.checkerBlackEdge,
+      strokePaint(
+        white ? theme.checkerWhiteEdge : theme.checkerBlackEdge,
+        radius * 0.2,
+      ),
     );
   }
 

@@ -5,6 +5,7 @@ import '../game/stats.dart';
 import '../l10n/gen/app_text.dart';
 import '../theme/narda_theme.dart';
 import 'chrome.dart';
+import 'paint.dart';
 
 /// Локальная статистика: партии, винрейт, марсы, серии (§P3).
 class StatsScreen extends StatelessWidget {
@@ -132,10 +133,7 @@ class _WinRatePainter extends CustomPainter {
       0,
       3.1415926 * 2,
       false,
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = stroke
-        ..color = NardaColors.surfaceHigh,
+      strokePaint(NardaColors.surfaceHigh, stroke),
     );
     if (ratio <= 0) return;
     canvas.drawArc(
@@ -143,11 +141,7 @@ class _WinRatePainter extends CustomPainter {
       -3.1415926 / 2,
       3.1415926 * 2 * ratio.clamp(0.0, 1.0),
       false,
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = stroke
-        ..strokeCap = StrokeCap.round
-        ..color = NardaColors.gold,
+      strokePaint(NardaColors.gold, stroke, cap: StrokeCap.round),
     );
   }
 

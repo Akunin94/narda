@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:narda_core/narda_core.dart';
 
 import '../../theme/board_theme.dart';
+import '../paint.dart';
 import 'board_geometry.dart';
 import 'ornament.dart';
 
@@ -59,13 +60,7 @@ class BoardBackgroundPainter extends CustomPainter {
       _paintPoint(canvas, abs);
     }
 
-    canvas.drawRect(
-      inner,
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 2
-        ..color = theme.frameDark,
-    );
+    canvas.drawRect(inner, strokePaint(theme.frameDark, 2));
   }
 
   void _paintPoint(Canvas canvas, int abs) {
@@ -97,10 +92,7 @@ class BoardBackgroundPainter extends CustomPainter {
     );
     canvas.drawPath(
       path,
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1
-        ..color = theme.frameDark.withValues(alpha: 0.35),
+      strokePaint(theme.frameDark.withValues(alpha: 0.35), 1),
     );
   }
 
@@ -185,10 +177,10 @@ class BoardPiecesPainter extends CustomPainter {
 
   void _paintLastMove(Canvas canvas) {
     if (lastMoves.isEmpty) return;
-    final Paint paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2
-      ..color = theme.highlight.withValues(alpha: 0.35);
+    final Paint paint = strokePaint(
+      theme.highlight.withValues(alpha: 0.35),
+      2,
+    );
     for (final Move move in lastMoves) {
       canvas.drawPath(_pointPath(move.fromAbs), paint);
       final int? toAbs = move.toAbs;
@@ -200,10 +192,7 @@ class BoardPiecesPainter extends CustomPainter {
     if (destinations.isEmpty) return;
     final Player mover = state.turn;
     final Paint glow = Paint()..color = theme.highlight.withValues(alpha: 0.28);
-    final Paint marker = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.5
-      ..color = theme.highlight;
+    final Paint marker = strokePaint(theme.highlight, 2.5);
     for (final int? abs in destinations) {
       if (abs == null) {
         final Rect tray = geometry.trayRect(mover);
@@ -274,10 +263,7 @@ class BoardPiecesPainter extends CustomPainter {
         );
         canvas.drawRRect(
           RRect.fromRectAndRadius(rect, Radius.circular(rect.height / 2)),
-          Paint()
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = 1
-            ..color = theme.checkerEdge(player),
+          strokePaint(theme.checkerEdge(player), 1),
         );
       }
     }
@@ -389,28 +375,15 @@ void paintChecker(
   canvas.drawCircle(
     center,
     radius * 0.92,
-    Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = radius * 0.16
-      ..color = edge.withValues(alpha: 0.75),
+    strokePaint(edge.withValues(alpha: 0.75), radius * 0.16),
   );
   canvas.drawCircle(
     center,
     radius * 0.5,
-    Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = radius * 0.08
-      ..color = edge.withValues(alpha: 0.35),
+    strokePaint(edge.withValues(alpha: 0.35), radius * 0.08),
   );
   if (ring != null) {
-    canvas.drawCircle(
-      center,
-      radius * 1.08,
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = radius * 0.16
-        ..color = ring,
-    );
+    canvas.drawCircle(center, radius * 1.08, strokePaint(ring, radius * 0.16));
   }
   if (label != null) {
     final TextPainter painter = TextPainter(

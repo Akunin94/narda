@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../profile/profile.dart';
+import 'paint.dart';
 
 /// Аватар из набора (§P5). Ни одного ассета: розетка из ромбов рисуется
 /// программно в той же национальной эстетике, что и орнамент доски (§7).
@@ -69,10 +70,7 @@ class _AvatarPainter extends CustomPainter {
     canvas.drawCircle(
       center,
       radius - radius * 0.06,
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = radius * 0.08
-        ..color = style.ink.withValues(alpha: 0.7),
+      strokePaint(style.ink.withValues(alpha: 0.7), radius * 0.08),
     );
 
     final Paint fill = Paint()..color = style.ink;
@@ -87,10 +85,7 @@ class _AvatarPainter extends CustomPainter {
       canvas.drawCircle(
         center,
         radius * 0.34,
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = radius * 0.06
-          ..color = style.ink.withValues(alpha: 0.6),
+        strokePaint(style.ink.withValues(alpha: 0.6), radius * 0.06),
       );
     }
     canvas.drawPath(_diamond(center, radius * 0.22), fill);
