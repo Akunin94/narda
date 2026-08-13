@@ -22,7 +22,8 @@ import '../theme/narda_theme.dart';
 import 'avatar.dart';
 import 'board/board_view.dart';
 import 'dice_view.dart';
-import 'online/phrase_bar.dart';
+import 'online/online_status_bar.dart';
+import 'overlay_card.dart';
 
 /// Экран партии: доска, кости, счёт серии и кнопки хода.
 class GameScreen extends StatefulWidget {
@@ -164,7 +165,11 @@ class _GameScreenState extends State<GameScreen> {
               Column(
                 children: <Widget>[
                   _buildTopBar(text),
-                  if (_isOnline) _buildOnlineBar(text),
+                  if (_isOnline)
+                    OnlineStatusBar(
+                      match: widget.online!,
+                      isOver: _controller.isOver,
+                    ),
                   _buildPlayerStrip(text, theme, _controller.perspective.opponent),
                   Expanded(
                     child: Padding(
@@ -200,9 +205,9 @@ class _GameScreenState extends State<GameScreen> {
                 ],
               ),
               if (_controller.phase == TurnPhase.finished && !_switchingGame)
-                _buildResultOverlay(text),
+                Positioned.fill(child: _buildResultOverlay(text)),
               if (_controller.phase == TurnPhase.aborted)
-                _buildAbortOverlay(text),
+                Positioned.fill(child: _buildAbortOverlay(text)),
             ],
           ),
         ),
@@ -210,117 +215,25 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 
-  /// Полоска онлайна: реплика соперника, связь, таймер хода и клейм (§6).
-  Widget _buildOnlineBar(AppText text) {
-    final OnlineMatch match = widget.online!;
-    final Duration? left = match.turnRemaining;
-    final String? phrase = match.opponentPhrase;
-    return Column(
-      children: <Widget>[
-        if (phrase != null) PhraseBubble(phrase: phrase),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14),
-          child: Row(
-            children: <Widget>[
-              Icon(
-                match.opponentOnline ? Icons.wifi : Icons.wifi_off,
-                size: 16,
-                color: match.opponentOnline
-                    ? NardaColors.textMuted
-                    : NardaColors.gold,
-              ),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Text(
-                  match.opponentOnline
-                      ? match.opponentName
-                      : text.onlineOpponentOffline,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: NardaColors.textMuted,
-                  ),
-                ),
-              ),
-              if (match.canClaimWin && !_controller.isOver)
-                TextButton(
-                  onPressed: () => unawaited(match.claimWin()),
-                  child: Text(
-                    text.onlineClaimWin,
-                    style: const TextStyle(fontSize: 12),
-                  ),
-                ),
-              if (left != null && !_controller.isOver)
-                Text(
-                  text.onlineSecondsLeft(left.inSeconds),
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: left.inSeconds <= 10
-                        ? NardaColors.gold
-                        : NardaColors.textMuted,
-                  ),
-                ),
-              IconButton(
-                onPressed: () => showPhraseSheet(
-                  context,
-                  onSend: (String phrase) => unawaited(match.sendPhrase(phrase)),
-                ),
-                icon: const Icon(Icons.chat_bubble_outline, size: 18),
-                color: NardaColors.textMuted,
-                tooltip: text.onlinePhrasesTitle,
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildAbortOverlay(AppText text) => Positioned.fill(
-    child: ColoredBox(
-      color: Colors.black.withValues(alpha: 0.65),
-      child: Center(
-        child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 32),
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: NardaColors.surface,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: NardaColors.goldDeep),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Text(
-                text.onlineAborted,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                  color: NardaColors.gold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                switch (_controller.abortReason) {
-                  MatchAbortReason.desync => text.onlineAbortedDesync,
-                  MatchAbortReason.connection || null =>
-                    text.onlineAbortedConnection,
-                },
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: NardaColors.textMuted),
-              ),
-              const SizedBox(height: 20),
-              FilledButton(
-                onPressed: () => Navigator.of(context).maybePop(),
-                child: Text(text.actionMenu),
-              ),
-            ],
-          ),
-        ),
+  Widget _buildAbortOverlay(AppText text) => ModalOverlay(
+    title: text.onlineAborted,
+    titleSize: 20,
+    children: <Widget>[
+      const SizedBox(height: 8),
+      Text(
+        switch (_controller.abortReason) {
+          MatchAbortReason.desync => text.onlineAbortedDesync,
+          MatchAbortReason.connection || null => text.onlineAbortedConnection,
+        },
+        textAlign: TextAlign.center,
+        style: const TextStyle(color: NardaColors.textMuted),
       ),
-    ),
+      const SizedBox(height: 20),
+      FilledButton(
+        onPressed: () => Navigator.of(context).maybePop(),
+        child: Text(text.actionMenu),
+      ),
+    ],
   );
 
   /// Доска занимает всю доступную высоту, но не вытягивается уже,
@@ -474,75 +387,50 @@ class _GameScreenState extends State<GameScreen> {
     final GameResult result = _controller.result!;
     final bool series = widget.setup.target != MatchTarget.single;
     final bool matchOver = _controller.isMatchOver;
-    return Positioned.fill(
-      child: ColoredBox(
-        color: Colors.black.withValues(alpha: 0.65),
-        child: Center(
-          child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 32),
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: NardaColors.surface,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: NardaColors.goldDeep),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Text(
-                  series && matchOver
-                      ? _matchTitle(text)
-                      : _resultTitle(text, result),
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w700,
-                    color: NardaColors.gold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  _resultSubtitle(text, result),
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: NardaColors.textMuted),
-                ),
-                if (series) ...<Widget>[
-                  const SizedBox(height: 10),
-                  Text(
-                    '${text.labelScore} '
-                    '${_controller.score.pointsOf(widget.setup.localPlayer)}'
-                    ' : '
-                    '${_controller.score.pointsOf(widget.setup.opponentPlayer)}',
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: NardaColors.textPrimary,
-                    ),
-                  ),
-                ],
-                if (_ratingChange case final RatingChange change) ...<Widget>[
-                  const SizedBox(height: 10),
-                  Text(
-                    text.ratingResult(change.after, _signed(change.delta)),
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: NardaColors.textPrimary,
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 20),
-                ..._resultActions(text, series: series, matchOver: matchOver),
-                const SizedBox(height: 8),
-                OutlinedButton(
-                  onPressed: () => Navigator.of(context).maybePop(),
-                  child: Text(text.actionMenu),
-                ),
-              ],
+    return ModalOverlay(
+      title: series && matchOver
+          ? _matchTitle(text)
+          : _resultTitle(text, result),
+      children: <Widget>[
+        const SizedBox(height: 8),
+        Text(
+          _resultSubtitle(text, result),
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: NardaColors.textMuted),
+        ),
+        if (series) ...<Widget>[
+          const SizedBox(height: 10),
+          Text(
+            '${text.labelScore} '
+            '${_controller.score.pointsOf(widget.setup.localPlayer)}'
+            ' : '
+            '${_controller.score.pointsOf(widget.setup.opponentPlayer)}',
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              color: NardaColors.textPrimary,
             ),
           ),
+        ],
+        if (_ratingChange case final RatingChange change) ...<Widget>[
+          const SizedBox(height: 10),
+          Text(
+            text.ratingResult(change.after, _signed(change.delta)),
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: NardaColors.textPrimary,
+            ),
+          ),
+        ],
+        const SizedBox(height: 20),
+        ..._resultActions(text, series: series, matchOver: matchOver),
+        const SizedBox(height: 8),
+        OutlinedButton(
+          onPressed: () => Navigator.of(context).maybePop(),
+          child: Text(text.actionMenu),
         ),
-      ),
+      ],
     );
   }
 
