@@ -240,5 +240,41 @@
   "@themeMinutesLeft": {
     "description": "Сколько минут осталось у открытой темы",
     "placeholders": { "minutes": { "type": "int" } }
+  },
+
+  "menuPlayOnline": "Играть онлайн",
+  "onlineTitle": "Онлайн",
+  "onlineQuickMatch": "Быстрая игра",
+  "onlineCreateRoom": "Создать комнату",
+  "onlineJoinRoom": "Войти по коду",
+  "onlineCodeHint": "6-значный код",
+  "onlineShareCode": "Продиктуйте код сопернику",
+  "onlineWaitingTitle": "Ждём соперника",
+  "onlineSearching": "Ищем соперника",
+  "onlineConnecting": "Подключаемся",
+  "onlineCancelSearch": "Остановить",
+  "onlineBotOffer": "Соперник не нашёлся. Сыграть с ботом, пока ищем?",
+  "onlineFairPlay": "В онлайне только живые игроки: бот никогда не выдаётся за человека.",
+  "onlineNotConfigured": "Онлайн ещё не настроен",
+  "onlineNetworkError": "Нет связи",
+  "onlineNoRoom": "Комната с таким кодом не найдена",
+  "onlineRoomFull": "В комнате уже двое",
+  "onlineOpponentLabel": "Соперник",
+  "onlineOpponentTurn": "Ход соперника",
+  "onlineOpponentOffline": "Соперник не в сети",
+  "onlineClaimWin": "Забрать победу",
+  "onlineAborted": "Партия аннулирована",
+  "onlineAbortedDesync": "Состояния партии разошлись",
+  "onlineAbortedConnection": "Связь потеряна",
+  "onlinePhrasesTitle": "Фразы",
+  "phraseSalom": "Салом!",
+  "phraseYaxshiYurish": "Хороший ход!",
+  "phraseOmad": "Удачи!",
+  "phraseRahmat": "Спасибо, хорошая игра",
+
+  "onlineSecondsLeft": "{seconds} с",
+  "@onlineSecondsLeft": {
+    "description": "Сколько секунд осталось на ход",
+    "placeholders": { "seconds": { "type": "int" } }
   }
 }

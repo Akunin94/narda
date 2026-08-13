@@ -7,6 +7,7 @@ import 'feedback.dart';
 import 'game_setup.dart';
 import 'opponent.dart';
 import 'settings.dart';
+import 'turn_coordinator.dart';
 import 'turn_planner.dart';
 
 /// Что происходит в партии прямо сейчас.
@@ -25,6 +26,9 @@ enum TurnPhase {
 
   /// Партия закончена.
   finished,
+
+  /// Партия аннулирована: общее состояние восстановить не удалось (§6).
+  aborted,
 }
 
 /// Перемещение, которое доска должна проиграть анимацией.
@@ -72,12 +76,16 @@ class MatchController extends ChangeNotifier {
     DiceSource? dice,
     Opponent? opponent,
     MatchFeedback? feedback,
+    TurnCoordinator? coordinator,
     this.onGameFinished,
     this.timing = const MatchTiming(),
   }) : _game = Game(dice: dice ?? RandomDiceSource()),
        _opponent = opponent ?? createOpponent(setup),
        _feedback = feedback ?? const SilentFeedback(),
-       _score = MatchScore(target: setup.target);
+       _coordinator = coordinator,
+       _score = MatchScore(target: setup.target) {
+    _signals = coordinator?.signals.listen(_handleSignal);
+  }
 
   static const MoveGenerator _generator = MoveGenerator();
 
@@ -92,11 +100,17 @@ class MatchController extends ChangeNotifier {
   final Opponent _opponent;
   final MatchFeedback _feedback;
 
+  /// Ведущий сетевой партии; `null` — оффлайн, кости берутся локально.
+  final TurnCoordinator? _coordinator;
+
+  StreamSubscription<MatchSignal>? _signals;
+
   MatchScore _score;
 
   TurnPhase _phase = TurnPhase.rolling;
   TurnPlanner? _planner;
   GameResult? _result;
+  MatchAbortReason? _abortReason;
   AnimatedMove? _animated;
   List<Move> _lastTurnMoves = const <Move>[];
   int? _selected;
@@ -111,6 +125,13 @@ class MatchController extends ChangeNotifier {
   TurnPhase get phase => _phase;
 
   GameResult? get result => _result;
+
+  /// Почему партия аннулирована; `null` — она шла или закончилась нормально.
+  MatchAbortReason? get abortReason => _abortReason;
+
+  /// Партия доиграна или аннулирована — доска больше не принимает ходы.
+  bool get isOver =>
+      _phase == TurnPhase.finished || _phase == TurnPhase.aborted;
 
   /// Счёт серии. Для одиночной партии цель — одно очко.
   MatchScore get score => _score;
@@ -157,15 +178,23 @@ class MatchController extends ChangeNotifier {
   int get movesRequired => _planner?.maxMoves ?? 0;
 
   /// Начинает партию: розыгрыш первого хода и первый бросок (§3.2.1).
+  /// В онлайне и то и другое согласуется с соперником.
   void start() {
-    _game.start();
-    unawaited(_runTurn());
+    final TurnCoordinator? coordinator = _coordinator;
+    if (coordinator == null) {
+      _game.start();
+      unawaited(_runTurn());
+      return;
+    }
+    unawaited(_startShared(coordinator, _generation));
   }
 
   /// Следующая партия серии — счёт сохраняется.
   void nextGame() {
     _generation++;
+    _phase = TurnPhase.rolling;
     _result = null;
+    _abortReason = null;
     _planner = null;
     _selected = null;
     _animated = null;
@@ -256,7 +285,7 @@ class MatchController extends ChangeNotifier {
 
   /// Сдача партии (§3.4): сдаётся тот, чей сейчас ход.
   void resign() {
-    if (_phase == TurnPhase.finished) return;
+    if (isOver) return;
     _generation++;
     final Player resigning = _opponent.movesOnThisDevice
         ? _game.state.turn
@@ -265,6 +294,7 @@ class MatchController extends ChangeNotifier {
     _selected = null;
     _animated = null;
     _game.resign(resigning);
+    unawaited(_coordinator?.publishResign());
     _finish(_game.result!);
   }
 
@@ -272,12 +302,37 @@ class MatchController extends ChangeNotifier {
   void dispose() {
     _disposed = true;
     _generation++;
+    unawaited(_signals?.cancel());
     _opponent.dispose();
     _feedback.dispose();
     super.dispose();
   }
 
+  /// Старт сетевой партии: позиция приходит от ведущего — свежая раздача
+  /// или восстановленная реплеем журнала после реконнекта (§6).
+  Future<void> _startShared(TurnCoordinator coordinator, int generation) async {
+    _phase = TurnPhase.rolling;
+    _notify();
+    final GameState state;
+    try {
+      state = await coordinator.opening();
+    } on Object {
+      _abort(MatchAbortReason.connection);
+      return;
+    }
+    if (_isStale(generation)) return;
+    _game.restore(state);
+    if (_game.isFinished) {
+      _finish(_game.result!);
+      return;
+    }
+    unawaited(_runTurn());
+  }
+
   Future<void> _runTurn() async {
+    // Партия могла закончиться внешним сигналом, пока предыдущий ход
+    // досчитывал свои await'ы — новый ход тогда начинать нельзя.
+    if (isOver) return;
     final int generation = _generation;
     _planner = null;
     _selected = null;
@@ -286,23 +341,31 @@ class MatchController extends ChangeNotifier {
     _feedback.dice();
     _notify();
 
-    if (!await _wait(timing.dice, generation)) return;
-
-    final List<MoveSequence> options = _generator.generate(_game.state);
-    if (options.isEmpty) {
-      _phase = TurnPhase.noMoves;
-      _notify();
-      if (!await _wait(timing.noMoves, generation)) return;
-      _lastTurnMoves = const <Move>[];
-      _game.pass();
-      unawaited(_runTurn());
+    final TurnCoordinator? coordinator = _coordinator;
+    if (coordinator != null && !await _syncRoll(coordinator, generation)) {
       return;
     }
 
-    final TurnPlanner planner = TurnPlanner(base: _game.state, options: options);
-    _planner = planner;
+    if (!await _wait(timing.dice, generation)) return;
 
-    if (isLocalTurn) {
+    final List<MoveSequence> options = _generator.generate(_game.state);
+    final bool local = isLocalTurn;
+
+    // «Yurish yo'q». В онлайне пас соперника всё равно приходит по сети:
+    // иначе разъедутся номера ходов в журнале комнаты.
+    if (options.isEmpty && (local || coordinator == null)) {
+      _phase = TurnPhase.noMoves;
+      _notify();
+      if (!await _wait(timing.noMoves, generation)) return;
+      await _passTurn(generation, forced: false);
+      return;
+    }
+
+    if (options.isNotEmpty) {
+      _planner = TurnPlanner(base: _game.state, options: options);
+    }
+
+    if (local) {
       _phase = TurnPhase.choosing;
       _notify();
       if (settings.autoMove && options.length == 1) {
@@ -312,13 +375,50 @@ class MatchController extends ChangeNotifier {
       return;
     }
 
-    _phase = TurnPhase.thinking;
+    _phase = options.isEmpty ? TurnPhase.noMoves : TurnPhase.thinking;
     _notify();
     final MoveSequence? sequence = await _opponent.chooseSequence(_game.state);
     if (_isStale(generation)) return;
-    if (sequence != null && !await _playSequence(sequence, generation)) return;
+    if (sequence == null || sequence.isEmpty) {
+      if (!await _wait(timing.noMoves, generation)) return;
+      // Пустой ход при живых вариантах — просроченный таймер соперника (§6).
+      await _passTurn(generation, forced: options.isNotEmpty);
+      return;
+    }
+    if (!await _playSequence(sequence, generation)) return;
     if (!await _wait(timing.beforeCommit, generation)) return;
     await _commit(generation);
+  }
+
+  /// Заменяет бросок текущего хода согласованным с соперником.
+  Future<bool> _syncRoll(TurnCoordinator coordinator, int generation) async {
+    final DiceRoll roll;
+    try {
+      roll = await coordinator.roll(_game.state);
+    } on Object {
+      _abort(MatchAbortReason.connection);
+      return false;
+    }
+    if (_isStale(generation)) return false;
+    _game.restore(
+      _game.state.copyWith(
+        roll: roll,
+        remainingDice: roll.toRemaining(),
+        headMovesUsed: 0,
+      ),
+    );
+    _notify();
+    return true;
+  }
+
+  /// Передаёт очередь без перемещений. [forced] — ход просрочен по таймеру.
+  Future<void> _passTurn(int generation, {required bool forced}) async {
+    final GameState before = _game.state;
+    _lastTurnMoves = const <Move>[];
+    _planner = null;
+    _game.pass(forced: forced);
+    if (!await _publishLocal(before, MoveSequence.empty, generation)) return;
+    unawaited(_runTurn());
   }
 
   Future<bool> _playSequence(MoveSequence sequence, int generation) async {
@@ -342,16 +442,82 @@ class MatchController extends ChangeNotifier {
     final TurnPlanner? planner = _planner;
     if (planner == null || !planner.isComplete) return;
     final MoveSequence sequence = planner.canonicalSequence!;
+    final GameState before = _game.state;
     _planner = null;
     _selected = null;
     _lastTurnMoves = sequence.moves;
     _game.play(sequence);
+    if (!await _publishLocal(before, sequence, generation)) return;
     if (_game.isFinished) {
       _finish(_game.result!);
       return;
     }
-    if (_isStale(generation)) return;
     unawaited(_runTurn());
+  }
+
+  /// Отправляет свой ход сопернику. Возвращает `false`, если партия за это
+  /// время успела смениться. Оффлайн не ждёт ничего.
+  Future<bool> _publishLocal(
+    GameState before,
+    MoveSequence sequence,
+    int generation,
+  ) async {
+    final TurnCoordinator? coordinator = _coordinator;
+    if (coordinator == null || before.turn != setup.localPlayer) {
+      return !_isStale(generation);
+    }
+    try {
+      await coordinator.publish(before, sequence);
+    } on Object {
+      _abort(MatchAbortReason.connection);
+      return false;
+    }
+    return !_isStale(generation);
+  }
+
+  /// Сигналы ведущего: пересборка позиции, внешний итог, аннулирование (§6).
+  void _handleSignal(MatchSignal signal) {
+    if (_disposed) return;
+    switch (signal) {
+      case ResyncSignal(state: final GameState state):
+        _resync(state);
+      case FinishSignal(result: final GameResult result):
+        if (isOver) return;
+        _generation++;
+        _planner = null;
+        _selected = null;
+        _animated = null;
+        _finish(result);
+      case AbortSignal(reason: final MatchAbortReason reason):
+        _abort(reason);
+    }
+  }
+
+  /// Позиция пересобрана реплеем журнала — ход начинается заново с неё.
+  void _resync(GameState state) {
+    if (isOver) return;
+    _generation++;
+    _planner = null;
+    _selected = null;
+    _animated = null;
+    _lastTurnMoves = const <Move>[];
+    _game.restore(state);
+    if (_game.isFinished) {
+      _finish(_game.result!);
+      return;
+    }
+    unawaited(_runTurn());
+  }
+
+  void _abort(MatchAbortReason reason) {
+    if (isOver) return;
+    _generation++;
+    _planner = null;
+    _selected = null;
+    _animated = null;
+    _abortReason = reason;
+    _phase = TurnPhase.aborted;
+    _notify();
   }
 
   void _finish(GameResult result) {

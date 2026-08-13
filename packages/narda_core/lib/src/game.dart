@@ -98,10 +98,13 @@ class Game {
     _advance(state.applySequence(sequence));
   }
 
-  /// Пропуск хода — только когда легальных перемещений нет («yurish yo'q»).
-  void pass() {
+  /// Пропуск хода — когда легальных перемещений нет («yurish yo'q»).
+  ///
+  /// [forced] снимает проверку: в онлайне просроченный по таймеру ход
+  /// пропускается принудительно, даже если перемещения были (§6).
+  void pass({bool forced = false}) {
     _ensureRunning();
-    if (legalSequences().isNotEmpty) {
+    if (!forced && legalSequences().isNotEmpty) {
       throw StateError('Cannot pass: legal moves are available');
     }
     _advance(state);

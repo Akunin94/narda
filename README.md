@@ -13,7 +13,7 @@ app/                   Flutter: доска на CustomPaint, экраны, ло�
 app/store/             материалы Google Play: иконка, графика, тексты, политика
 ```
 
-Приложение подключает ядро как path-зависимость. До фазы P4 в проекте нет Firebase.
+Приложение подключает ядро как path-зависимость.
 
 ## Статус
 
@@ -23,7 +23,8 @@ app/store/             материалы Google Play: иконка, графи�
 - **P3 — публикуемая оффлайн-версия**: готово (матчи до 3/5/7, статистика,
   звук и вибрация, обучение «Qoidalar», темы доски, реклама с UMP, иконка,
   графика и тексты стора).
-- P4 — онлайн на Firebase.
+- **P4 — онлайн на Firebase**: готово (быстрый матч, приватная комната по коду,
+  таймер хода, реконнект реплеем, готовые фразы).
 - P5 — рейтинг, профили, таблица лидеров.
 
 ## Как проверить ядро
@@ -67,6 +68,37 @@ cd app
 dart run tool/generate_sounds.dart      # assets/sounds/*.wav  (~140 КБ)
 flutter test tool/generate_art.dart     # иконки mipmap-* и store/*.png
 ```
+
+## Онлайн (P4)
+
+Ключи Firebase в репозиторий не кладутся: приложение берёт их из
+`--dart-define`, а не из `google-services.json`. Без ключей меню открывается,
+онлайн честно пишет «Onlayn hali sozlanmagan», всё остальное работает.
+
+```bash
+cd app
+flutter run \
+  --dart-define=FIREBASE_API_KEY=... \
+  --dart-define=FIREBASE_APP_ID=1:000000000000:android:0000000000000000 \
+  --dart-define=FIREBASE_SENDER_ID=000000000000 \
+  --dart-define=FIREBASE_PROJECT_ID=uzun-narda \
+  --dart-define=FIREBASE_DATABASE_URL=https://uzun-narda-default-rtdb.firebaseio.com
+```
+
+Что нужно завести в проекте Firebase: анонимную авторизацию и Realtime
+Database. Правила базы лежат в
+[app/firebase/database.rules.json](app/firebase/database.rules.json) —
+`firebase deploy --only database`.
+
+Схема комнаты — в шапке [app/lib/online/protocol.dart](app/lib/online/protocol.dart).
+Кости в v1 генерирует клиент активного игрока (честное ограничение MVP по спеке);
+точка замены на серверные — `DiceSource` в ядре. Правила базы не могут проверить
+легальность хода, поэтому её проверяют оба клиента через `narda_core`:
+нелегальный ход или расхождение слепка позиции приводят к пересборке реплеем
+журнала, а если и реплей нелегален — партия аннулируется.
+
+Онлайн проверяется без сети: `MemoryOnlineServer` поднимает комнаты в памяти
+процесса, и два клиента играют партию целиком в `flutter test`.
 
 ## Релизная сборка
 

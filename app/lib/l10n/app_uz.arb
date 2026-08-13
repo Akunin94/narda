@@ -314,5 +314,98 @@
   "@themeMinutesLeft": {
     "description": "Сколько минут осталось у открытой темы",
     "placeholders": { "minutes": { "type": "int" } }
+  },
+
+  "menuPlayOnline": "Onlayn o'ynash",
+  "@menuPlayOnline": { "description": "Кнопка: игра по сети" },
+
+  "onlineTitle": "Onlayn",
+  "@onlineTitle": { "description": "Заголовок экрана онлайна" },
+
+  "onlineQuickMatch": "Tez o'yin",
+  "@onlineQuickMatch": { "description": "Быстрый матч" },
+
+  "onlineCreateRoom": "Xona yaratish",
+  "@onlineCreateRoom": { "description": "Создать приватную комнату" },
+
+  "onlineJoinRoom": "Kod bilan kirish",
+  "@onlineJoinRoom": { "description": "Войти в комнату по коду" },
+
+  "onlineCodeHint": "6 xonali kod",
+  "@onlineCodeHint": { "description": "Подсказка поля кода комнаты" },
+
+  "onlineShareCode": "Kodni raqibingizga ayting",
+  "@onlineShareCode": { "description": "Продиктуйте код сопернику" },
+
+  "onlineWaitingTitle": "Raqib kutilmoqda",
+  "@onlineWaitingTitle": { "description": "Ждём второго игрока" },
+
+  "onlineSearching": "Raqib qidirilmoqda",
+  "@onlineSearching": { "description": "Идёт поиск соперника" },
+
+  "onlineConnecting": "Ulanmoqda",
+  "@onlineConnecting": { "description": "Идёт подключение" },
+
+  "onlineCancelSearch": "To'xtatish",
+  "@onlineCancelSearch": { "description": "Остановить поиск или ожидание" },
+
+  "onlineBotOffer": "Raqib topilmadi. Kutayotganda bot bilan o'ynaysizmi?",
+  "@onlineBotOffer": { "description": "Честное предложение сыграть с ботом, пока идёт поиск" },
+
+  "onlineFairPlay": "Onlaynda faqat tirik o'yinchilar bo'ladi: bot hech qachon odam sifatida ko'rsatilmaydi.",
+  "@onlineFairPlay": { "description": "Обещание не выдавать ботов за людей" },
+
+  "onlineNotConfigured": "Onlayn hali sozlanmagan",
+  "@onlineNotConfigured": { "description": "Нет конфигурации Firebase" },
+
+  "onlineNetworkError": "Aloqa yo'q",
+  "@onlineNetworkError": { "description": "Ошибка сети" },
+
+  "onlineNoRoom": "Bunday kodli xona topilmadi",
+  "@onlineNoRoom": { "description": "Комната по коду не найдена" },
+
+  "onlineRoomFull": "Xona to'la",
+  "@onlineRoomFull": { "description": "В комнате уже двое" },
+
+  "onlineOpponentLabel": "Raqib",
+  "@onlineOpponentLabel": { "description": "Соперник без имени" },
+
+  "onlineOpponentTurn": "Raqib yuradi",
+  "@onlineOpponentTurn": { "description": "Статус: ход соперника по сети" },
+
+  "onlineOpponentOffline": "Raqib aloqada emas",
+  "@onlineOpponentOffline": { "description": "Соперник потерял связь" },
+
+  "onlineClaimWin": "G'alabani olish",
+  "@onlineClaimWin": { "description": "Забрать победу у пропавшего соперника" },
+
+  "onlineAborted": "Partiya bekor qilindi",
+  "@onlineAborted": { "description": "Партия аннулирована" },
+
+  "onlineAbortedDesync": "O'yin holatlari mos kelmadi",
+  "@onlineAbortedDesync": { "description": "Причина: состояния разошлись" },
+
+  "onlineAbortedConnection": "Aloqa uzildi",
+  "@onlineAbortedConnection": { "description": "Причина: обрыв связи" },
+
+  "onlinePhrasesTitle": "Iboralar",
+  "@onlinePhrasesTitle": { "description": "Заголовок панели готовых фраз" },
+
+  "phraseSalom": "Salom!",
+  "@phraseSalom": { "description": "Готовая фраза: приветствие" },
+
+  "phraseYaxshiYurish": "Yaxshi yurish!",
+  "@phraseYaxshiYurish": { "description": "Готовая фраза: хороший ход" },
+
+  "phraseOmad": "Omad!",
+  "@phraseOmad": { "description": "Готовая фраза: удачи" },
+
+  "phraseRahmat": "Rahmat, yaxshi o'yin",
+  "@phraseRahmat": { "description": "Готовая фраза: спасибо за игру" },
+
+  "onlineSecondsLeft": "{seconds} s",
+  "@onlineSecondsLeft": {
+    "description": "Сколько секунд осталось на ход",
+    "placeholders": { "seconds": { "type": "int" } }
   }
 }

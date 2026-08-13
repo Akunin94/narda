@@ -58,13 +58,22 @@ Locale resolveNardaLocale(List<Locale>? preferred, Iterable<Locale> supported) {
 }
 
 class NardaApp extends StatelessWidget {
-  NardaApp({super.key, required this.settings, StatsStore? stats, AdsController? ads})
-    : stats = stats ?? StatsStore.inMemory(),
-      ads = ads ?? AdsController.disabled();
+  NardaApp({
+    super.key,
+    required this.settings,
+    StatsStore? stats,
+    AdsController? ads,
+    this.home,
+  }) : stats = stats ?? StatsStore.inMemory(),
+       ads = ads ?? AdsController.disabled();
 
   final SettingsController settings;
   final StatsStore stats;
   final AdsController ads;
+
+  /// Стартовый экран; `null` — главное меню. Подменяется в тестах, чтобы
+  /// открыть экран сразу, со своими зависимостями.
+  final Widget? home;
 
   @override
   Widget build(BuildContext context) => SettingsScope(
@@ -85,7 +94,7 @@ class NardaApp extends StatelessWidget {
                 ? null
                 : Locale(settings.localeCode!),
             localeListResolutionCallback: resolveNardaLocale,
-            home: const HomeScreen(),
+            home: home ?? const HomeScreen(),
           ),
         ),
       ),

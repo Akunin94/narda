@@ -7,6 +7,7 @@ import '../game/settings.dart';
 import '../l10n/gen/app_text.dart';
 import '../theme/narda_theme.dart';
 import 'game_screen.dart';
+import 'online/online_screen.dart';
 import 'rules_screen.dart';
 import 'settings_sheet.dart';
 import 'stats_screen.dart';
@@ -53,6 +54,15 @@ class HomeScreen extends StatelessWidget {
               FilledButton(
                 onPressed: () => _chooseLevel(context, text, settings),
                 child: Text(text.menuPlayBot),
+              ),
+              const SizedBox(height: 12),
+              OutlinedButton(
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (BuildContext context) => const OnlineScreen(),
+                  ),
+                ),
+                child: Text(text.menuPlayOnline),
               ),
               const SizedBox(height: 12),
               OutlinedButton(

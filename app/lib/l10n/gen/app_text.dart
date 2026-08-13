@@ -708,6 +708,186 @@ abstract class AppText {
   /// In uz, this message translates to:
   /// **'{minutes} daqiqa qoldi'**
   String themeMinutesLeft(int minutes);
+
+  /// Кнопка: игра по сети
+  ///
+  /// In uz, this message translates to:
+  /// **'Onlayn o\'ynash'**
+  String get menuPlayOnline;
+
+  /// Заголовок экрана онлайна
+  ///
+  /// In uz, this message translates to:
+  /// **'Onlayn'**
+  String get onlineTitle;
+
+  /// Быстрый матч
+  ///
+  /// In uz, this message translates to:
+  /// **'Tez o\'yin'**
+  String get onlineQuickMatch;
+
+  /// Создать приватную комнату
+  ///
+  /// In uz, this message translates to:
+  /// **'Xona yaratish'**
+  String get onlineCreateRoom;
+
+  /// Войти в комнату по коду
+  ///
+  /// In uz, this message translates to:
+  /// **'Kod bilan kirish'**
+  String get onlineJoinRoom;
+
+  /// Подсказка поля кода комнаты
+  ///
+  /// In uz, this message translates to:
+  /// **'6 xonali kod'**
+  String get onlineCodeHint;
+
+  /// Продиктуйте код сопернику
+  ///
+  /// In uz, this message translates to:
+  /// **'Kodni raqibingizga ayting'**
+  String get onlineShareCode;
+
+  /// Ждём второго игрока
+  ///
+  /// In uz, this message translates to:
+  /// **'Raqib kutilmoqda'**
+  String get onlineWaitingTitle;
+
+  /// Идёт поиск соперника
+  ///
+  /// In uz, this message translates to:
+  /// **'Raqib qidirilmoqda'**
+  String get onlineSearching;
+
+  /// Идёт подключение
+  ///
+  /// In uz, this message translates to:
+  /// **'Ulanmoqda'**
+  String get onlineConnecting;
+
+  /// Остановить поиск или ожидание
+  ///
+  /// In uz, this message translates to:
+  /// **'To\'xtatish'**
+  String get onlineCancelSearch;
+
+  /// Честное предложение сыграть с ботом, пока идёт поиск
+  ///
+  /// In uz, this message translates to:
+  /// **'Raqib topilmadi. Kutayotganda bot bilan o\'ynaysizmi?'**
+  String get onlineBotOffer;
+
+  /// Обещание не выдавать ботов за людей
+  ///
+  /// In uz, this message translates to:
+  /// **'Onlaynda faqat tirik o\'yinchilar bo\'ladi: bot hech qachon odam sifatida ko\'rsatilmaydi.'**
+  String get onlineFairPlay;
+
+  /// Нет конфигурации Firebase
+  ///
+  /// In uz, this message translates to:
+  /// **'Onlayn hali sozlanmagan'**
+  String get onlineNotConfigured;
+
+  /// Ошибка сети
+  ///
+  /// In uz, this message translates to:
+  /// **'Aloqa yo\'q'**
+  String get onlineNetworkError;
+
+  /// Комната по коду не найдена
+  ///
+  /// In uz, this message translates to:
+  /// **'Bunday kodli xona topilmadi'**
+  String get onlineNoRoom;
+
+  /// В комнате уже двое
+  ///
+  /// In uz, this message translates to:
+  /// **'Xona to\'la'**
+  String get onlineRoomFull;
+
+  /// Соперник без имени
+  ///
+  /// In uz, this message translates to:
+  /// **'Raqib'**
+  String get onlineOpponentLabel;
+
+  /// Статус: ход соперника по сети
+  ///
+  /// In uz, this message translates to:
+  /// **'Raqib yuradi'**
+  String get onlineOpponentTurn;
+
+  /// Соперник потерял связь
+  ///
+  /// In uz, this message translates to:
+  /// **'Raqib aloqada emas'**
+  String get onlineOpponentOffline;
+
+  /// Забрать победу у пропавшего соперника
+  ///
+  /// In uz, this message translates to:
+  /// **'G\'alabani olish'**
+  String get onlineClaimWin;
+
+  /// Партия аннулирована
+  ///
+  /// In uz, this message translates to:
+  /// **'Partiya bekor qilindi'**
+  String get onlineAborted;
+
+  /// Причина: состояния разошлись
+  ///
+  /// In uz, this message translates to:
+  /// **'O\'yin holatlari mos kelmadi'**
+  String get onlineAbortedDesync;
+
+  /// Причина: обрыв связи
+  ///
+  /// In uz, this message translates to:
+  /// **'Aloqa uzildi'**
+  String get onlineAbortedConnection;
+
+  /// Заголовок панели готовых фраз
+  ///
+  /// In uz, this message translates to:
+  /// **'Iboralar'**
+  String get onlinePhrasesTitle;
+
+  /// Готовая фраза: приветствие
+  ///
+  /// In uz, this message translates to:
+  /// **'Salom!'**
+  String get phraseSalom;
+
+  /// Готовая фраза: хороший ход
+  ///
+  /// In uz, this message translates to:
+  /// **'Yaxshi yurish!'**
+  String get phraseYaxshiYurish;
+
+  /// Готовая фраза: удачи
+  ///
+  /// In uz, this message translates to:
+  /// **'Omad!'**
+  String get phraseOmad;
+
+  /// Готовая фраза: спасибо за игру
+  ///
+  /// In uz, this message translates to:
+  /// **'Rahmat, yaxshi o\'yin'**
+  String get phraseRahmat;
+
+  /// Сколько секунд осталось на ход
+  ///
+  /// In uz, this message translates to:
+  /// **'{seconds} s'**
+  String onlineSecondsLeft(int seconds);
 }
 
 class _AppTextDelegate extends LocalizationsDelegate<AppText> {

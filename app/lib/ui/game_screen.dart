@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -10,20 +11,33 @@ import '../game/game_setup.dart';
 import '../game/match_controller.dart';
 import '../game/settings.dart';
 import '../game/stats.dart';
+import '../game/turn_coordinator.dart';
 import '../l10n/gen/app_text.dart';
+import '../online/online_match.dart';
+import '../online/online_opponent.dart';
 import '../theme/board_theme.dart';
 import '../theme/narda_theme.dart';
 import 'board/board_view.dart';
 import 'dice_view.dart';
+import 'online/phrase_bar.dart';
 
 /// Экран партии: доска, кости, счёт серии и кнопки хода.
 class GameScreen extends StatefulWidget {
-  const GameScreen({super.key, required this.setup, this.controller});
+  const GameScreen({
+    super.key,
+    required this.setup,
+    this.controller,
+    this.online,
+  });
 
   final GameSetup setup;
 
   /// Готовый контроллер — нужен тестам, чтобы подставить кости и соперника.
   final MatchController? controller;
+
+  /// Сессия комнаты в онлайне: она же ведущий партии и источник таймера,
+  /// presence и фраз (§6). `null` — оффлайн.
+  final OnlineMatch? online;
 
   @override
   State<GameScreen> createState() => _GameScreenState();
@@ -43,7 +57,13 @@ class _GameScreenState extends State<GameScreen> {
         settings: _settings,
         feedback: DeviceFeedback(_settings),
         onGameFinished: _recordGame,
+        opponent: widget.online == null
+            ? null
+            : OnlineOpponent(widget.online!),
+        coordinator: widget.online,
       );
+
+  bool get _isOnline => widget.setup.mode == GameMode.online;
 
   /// Идёт показ interstitial — доска на это время закрыта оверлеем.
   bool _switchingGame = false;
@@ -83,12 +103,17 @@ class _GameScreenState extends State<GameScreen> {
     return Scaffold(
       body: SafeArea(
         child: AnimatedBuilder(
-          animation: Listenable.merge(<Listenable>[_controller, _settings]),
+          animation: Listenable.merge(<Listenable?>[
+            _controller,
+            _settings,
+            widget.online,
+          ]),
           builder: (BuildContext context, Widget? child) => Stack(
             children: <Widget>[
               Column(
                 children: <Widget>[
                   _buildTopBar(text),
+                  if (_isOnline) _buildOnlineBar(text),
                   _buildPlayerStrip(text, theme, _controller.perspective.opponent),
                   Expanded(
                     child: Padding(
@@ -125,12 +150,127 @@ class _GameScreenState extends State<GameScreen> {
               ),
               if (_controller.phase == TurnPhase.finished && !_switchingGame)
                 _buildResultOverlay(text),
+              if (_controller.phase == TurnPhase.aborted)
+                _buildAbortOverlay(text),
             ],
           ),
         ),
       ),
     );
   }
+
+  /// Полоска онлайна: реплика соперника, связь, таймер хода и клейм (§6).
+  Widget _buildOnlineBar(AppText text) {
+    final OnlineMatch match = widget.online!;
+    final Duration? left = match.turnRemaining;
+    final String? phrase = match.opponentPhrase;
+    return Column(
+      children: <Widget>[
+        if (phrase != null) PhraseBubble(phrase: phrase),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          child: Row(
+            children: <Widget>[
+              Icon(
+                match.opponentOnline ? Icons.wifi : Icons.wifi_off,
+                size: 16,
+                color: match.opponentOnline
+                    ? NardaColors.textMuted
+                    : NardaColors.gold,
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  match.opponentOnline
+                      ? match.opponentName
+                      : text.onlineOpponentOffline,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: NardaColors.textMuted,
+                  ),
+                ),
+              ),
+              if (match.canClaimWin && !_controller.isOver)
+                TextButton(
+                  onPressed: () => unawaited(match.claimWin()),
+                  child: Text(
+                    text.onlineClaimWin,
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                ),
+              if (left != null && !_controller.isOver)
+                Text(
+                  text.onlineSecondsLeft(left.inSeconds),
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: left.inSeconds <= 10
+                        ? NardaColors.gold
+                        : NardaColors.textMuted,
+                  ),
+                ),
+              IconButton(
+                onPressed: () => showPhraseSheet(
+                  context,
+                  onSend: (String phrase) => unawaited(match.sendPhrase(phrase)),
+                ),
+                icon: const Icon(Icons.chat_bubble_outline, size: 18),
+                color: NardaColors.textMuted,
+                tooltip: text.onlinePhrasesTitle,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAbortOverlay(AppText text) => Positioned.fill(
+    child: ColoredBox(
+      color: Colors.black.withValues(alpha: 0.65),
+      child: Center(
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 32),
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: NardaColors.surface,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: NardaColors.goldDeep),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Text(
+                text.onlineAborted,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  color: NardaColors.gold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                switch (_controller.abortReason) {
+                  MatchAbortReason.desync => text.onlineAbortedDesync,
+                  MatchAbortReason.connection || null =>
+                    text.onlineAbortedConnection,
+                },
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: NardaColors.textMuted),
+              ),
+              const SizedBox(height: 20),
+              FilledButton(
+                onPressed: () => Navigator.of(context).maybePop(),
+                child: Text(text.actionMenu),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
 
   /// Доска занимает всю доступную высоту, но не вытягивается уже,
   /// чем 0.62 ширины к высоте.
@@ -176,9 +316,7 @@ class _GameScreenState extends State<GameScreen> {
         ),
       ),
       IconButton(
-        onPressed: _controller.phase == TurnPhase.finished
-            ? null
-            : () => _confirmResign(text),
+        onPressed: _controller.isOver ? null : () => _confirmResign(text),
         icon: const Icon(Icons.flag_outlined),
         tooltip: text.actionResign,
         color: NardaColors.textMuted,
@@ -237,7 +375,7 @@ class _GameScreenState extends State<GameScreen> {
                 ),
               ),
             ),
-          if (active && _controller.phase != TurnPhase.finished)
+          if (active && !_controller.isOver)
             DiceView(
               roll: state.roll,
               remaining: state.remainingDice,
@@ -351,12 +489,13 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   /// Переход к следующей партии. Interstitial показывается **здесь** — между
-  /// партиями и никогда во время партии (§P3).
+  /// партиями и никогда во время партии (§P3). В онлайне его нет вовсе:
+  /// соперник не должен ждать чужой ролик.
   Future<void> _continue() async {
     final bool startNewMatch =
         widget.setup.target != MatchTarget.single && _controller.isMatchOver;
     setState(() => _switchingGame = true);
-    await _ads.maybeShowInterstitial();
+    if (!_isOnline) await _ads.maybeShowInterstitial();
     if (!mounted) return;
     setState(() => _switchingGame = false);
     if (startNewMatch) {
@@ -389,9 +528,12 @@ class _GameScreenState extends State<GameScreen> {
 
   String _statusText(AppText text) => switch (_controller.phase) {
     TurnPhase.rolling => text.statusRolling,
-    TurnPhase.thinking => text.statusThinking,
+    TurnPhase.thinking => _isOnline
+        ? text.onlineOpponentTurn
+        : text.statusThinking,
     TurnPhase.noMoves => text.statusNoMoves,
     TurnPhase.finished => _resultTitle(text, _controller.result!),
+    TurnPhase.aborted => text.onlineAborted,
     TurnPhase.choosing =>
       _controller.canConfirm
           ? text.statusConfirmTurn
@@ -411,8 +553,15 @@ class _GameScreenState extends State<GameScreen> {
     final String side = player == Player.white
         ? text.sideWhite
         : text.sideBlack;
-    if (widget.setup.mode == GameMode.bot && player != widget.setup.localPlayer) {
+    if (player == widget.setup.localPlayer) return side;
+    if (widget.setup.mode == GameMode.bot) {
       return 'Bot · ${_levelName(text, widget.setup.botLevel ?? BotLevel.orta)}';
+    }
+    if (_isOnline) {
+      final String name = widget.online?.opponentName ??
+          widget.setup.opponentName ??
+          '';
+      return name.isEmpty ? text.onlineOpponentLabel : name;
     }
     return side;
   }
@@ -424,24 +573,24 @@ class _GameScreenState extends State<GameScreen> {
   };
 
   String _resultTitle(AppText text, GameResult result) {
-    if (widget.setup.mode == GameMode.bot) {
-      return result.winner == widget.setup.localPlayer
-          ? text.resultYouWin
-          : text.resultYouLose;
+    if (widget.setup.mode == GameMode.hotseat) {
+      return result.winner == Player.white
+          ? text.resultWhiteWins
+          : text.resultBlackWins;
     }
-    return result.winner == Player.white
-        ? text.resultWhiteWins
-        : text.resultBlackWins;
+    return result.winner == widget.setup.localPlayer
+        ? text.resultYouWin
+        : text.resultYouLose;
   }
 
   String _matchTitle(AppText text) {
     final Player? winner = _controller.score.winner;
-    if (widget.setup.mode == GameMode.bot) {
-      return winner == widget.setup.localPlayer
-          ? text.matchWonTitle
-          : text.matchLostTitle;
+    if (widget.setup.mode == GameMode.hotseat) {
+      return winner == Player.white ? text.matchWhiteWins : text.matchBlackWins;
     }
-    return winner == Player.white ? text.matchWhiteWins : text.matchBlackWins;
+    return winner == widget.setup.localPlayer
+        ? text.matchWonTitle
+        : text.matchLostTitle;
   }
 
   String _resultSubtitle(AppText text, GameResult result) {

@@ -1,9 +1,9 @@
 name: narda
 description: >-
   «Uzun narda» — длинные нарды с узбекским интерфейсом: доска на CustomPaint,
-  игра против бота и hotseat на одном устройстве.
+  игра против бота, hotseat на одном устройстве и онлайн.
 publish_to: none
-version: 0.3.0+3
+version: 0.4.0+4
 
 environment:
   sdk: ^3.11.0
@@ -20,6 +20,9 @@ dependencies:
   google_mobile_ads: ^9.0.0
   narda_core:
     path: ../packages/narda_core
+  firebase_core: ^4.13.0
+  firebase_auth: ^6.5.7
+  firebase_database: ^12.4.7
 
 dev_dependencies:
   flutter_test:

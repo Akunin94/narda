@@ -22,15 +22,17 @@
 - Строки UI — только через ARB. Узбекская латиница — язык по умолчанию,
   русский — второй. Машинно-переведённые узбекские строки помечать в отчёте.
 
-Статус: P1 (ядро), P2 (играбельный оффлайн) и P3 (публикуемая версия) готовы.
-Дальше P4 (онлайн, Firebase) — только после явного «поехали»; до P4 в проекте
-не должно быть ни одной зависимости от Firebase.
+Статус: P1 (ядро), P2 (играбельный оффлайн), P3 (публикуемая версия) и
+P4 (онлайн на Firebase) готовы. Дальше P5 (Elo, профили, лидерборд, реванш) —
+только после явного «поехали».
 
 ## Структура
 
 ```
 packages/narda_core/   чистый Dart: состояние, правила, генератор ходов, бот
 app/                   Flutter: доска на CustomPaint, экраны, локализация
+app/lib/online/        P4: протокол комнат, Firebase, сессия партии, лобби
+app/firebase/          правила Realtime Database
 app/tool/              генераторы ассетов: звуки (WAV) и графика (PNG)
 app/store/             материалы Google Play: иконка, графика, тексты, политика
 ```
@@ -40,7 +42,7 @@ app/store/             материалы Google Play: иконка, графи�
 1. `narda_core` — **ни одного импорта Flutter**. Правила и бот живут только здесь.
 2. UI — Flutter, доска на `CustomPaint`, никаких игровых движков.
 3. Слой соперника — `Opponent` (`app/lib/game/opponent.dart`) с реализациями
-   `HotseatOpponent`, `BotOpponent`, в P4 добавится `OnlineOpponent`.
+   `HotseatOpponent`, `BotOpponent`, `OnlineOpponent`.
    UI не знает, с кем играет: он спрашивает только `movesOnThisDevice`.
 
 ## Команды
@@ -57,6 +59,7 @@ cd app
 flutter analyze && flutter test
 flutter gen-l10n                           # после правки ARB
 flutter run                                # Android, portrait
+flutter run --dart-define=FIREBASE_API_KEY=... # онлайн, ключи см. README
 
 # ассеты — только после правки генераторов, файлы закоммичены
 dart run tool/generate_sounds.dart         # assets/sounds/*.wav
@@ -103,3 +106,26 @@ flutter test tool/generate_art.dart        # иконки mipmap-* и store/*.pn
 - **Экраны берут зависимости из дерева.** `SettingsScope`, `StatsScope` и
   `AdsScope` в `app/lib/app.dart`; `GameScreen` собирает контроллер лениво в
   `didChangeDependencies` — обращаться к scope'ам в `initState` нельзя.
+
+## Онлайн (P4)
+
+- **Источник истины — журнал ходов**, а не пересылаемое состояние. Позиция
+  восстанавливается `replayGame` (`narda_core/lib/src/replay.dart`); на этом
+  держатся и реконнект, и разбор расхождений. Пришедший ход прогоняется через
+  генератор ядра, позиция сверяется слепком `positionDigest`; не сошлось —
+  реплей с нуля, а если и он нелегален — партия аннулируется (§6).
+- **Второй шов рядом с `Opponent` — `TurnCoordinator`**
+  (`app/lib/game/turn_coordinator.dart`): согласование первого хода, броска и
+  публикация своего хода. Оффлайн он `null`, и `MatchController` ведёт себя
+  ровно как раньше — эту развилку нельзя ломать, на ней держатся тесты P2–P3.
+- **Кости бросает клиент активного игрока** и публикует их вместе с ходом
+  (§6, честное ограничение MVP). Точка замены на серверные — `DiceSource`.
+- **Транспорт абстрагирован**: `OnlineBackend` / `RoomHandle`
+  (`app/lib/online/online_backend.dart`). Реализации — `FirebaseOnlineBackend`
+  и `MemoryOnlineBackend` (комнаты в памяти процесса). Тесты онлайна играют
+  партию двумя клиентами без сети и без Firebase.
+- **Ключи Firebase — только через `--dart-define`**, `google-services.json` в
+  репозитории нет. Без ключей онлайн честно говорит «не настроен».
+- **Не выдавать бота за живого игрока** (§6). Если очередь пуста дольше 15 с,
+  лобби прямо предлагает сыграть с ботом, называя его ботом.
+- **Interstitial в онлайне не показывается**: соперник не должен ждать ролик.

@@ -329,4 +329,98 @@ class AppTextUz extends AppText {
   String themeMinutesLeft(int minutes) {
     return '$minutes daqiqa qoldi';
   }
+
+  @override
+  String get menuPlayOnline => 'Onlayn o\'ynash';
+
+  @override
+  String get onlineTitle => 'Onlayn';
+
+  @override
+  String get onlineQuickMatch => 'Tez o\'yin';
+
+  @override
+  String get onlineCreateRoom => 'Xona yaratish';
+
+  @override
+  String get onlineJoinRoom => 'Kod bilan kirish';
+
+  @override
+  String get onlineCodeHint => '6 xonali kod';
+
+  @override
+  String get onlineShareCode => 'Kodni raqibingizga ayting';
+
+  @override
+  String get onlineWaitingTitle => 'Raqib kutilmoqda';
+
+  @override
+  String get onlineSearching => 'Raqib qidirilmoqda';
+
+  @override
+  String get onlineConnecting => 'Ulanmoqda';
+
+  @override
+  String get onlineCancelSearch => 'To\'xtatish';
+
+  @override
+  String get onlineBotOffer =>
+      'Raqib topilmadi. Kutayotganda bot bilan o\'ynaysizmi?';
+
+  @override
+  String get onlineFairPlay =>
+      'Onlaynda faqat tirik o\'yinchilar bo\'ladi: bot hech qachon odam sifatida ko\'rsatilmaydi.';
+
+  @override
+  String get onlineNotConfigured => 'Onlayn hali sozlanmagan';
+
+  @override
+  String get onlineNetworkError => 'Aloqa yo\'q';
+
+  @override
+  String get onlineNoRoom => 'Bunday kodli xona topilmadi';
+
+  @override
+  String get onlineRoomFull => 'Xona to\'la';
+
+  @override
+  String get onlineOpponentLabel => 'Raqib';
+
+  @override
+  String get onlineOpponentTurn => 'Raqib yuradi';
+
+  @override
+  String get onlineOpponentOffline => 'Raqib aloqada emas';
+
+  @override
+  String get onlineClaimWin => 'G\'alabani olish';
+
+  @override
+  String get onlineAborted => 'Partiya bekor qilindi';
+
+  @override
+  String get onlineAbortedDesync => 'O\'yin holatlari mos kelmadi';
+
+  @override
+  String get onlineAbortedConnection => 'Aloqa uzildi';
+
+  @override
+  String get onlinePhrasesTitle => 'Iboralar';
+
+  @override
+  String get phraseSalom => 'Salom!';
+
+  @override
+  String get phraseYaxshiYurish => 'Yaxshi yurish!';
+
+  @override
+  String get phraseOmad => 'Omad!';
+
+  @override
+  String get phraseRahmat => 'Rahmat, yaxshi o\'yin';
+
+  @override
+  String onlineSecondsLeft(int seconds) {
+    return '$seconds s';
+  }
 }

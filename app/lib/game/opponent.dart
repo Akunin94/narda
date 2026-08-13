@@ -93,6 +93,13 @@ Opponent createOpponent(GameSetup setup) => switch (setup.mode) {
     level: setup.botLevel ?? BotLevel.orta,
   ),
   GameMode.hotseat => HotseatOpponent(setup.opponentPlayer),
+  // Сетевой соперник неотделим от комнаты, поэтому его собирает лобби
+  // (`app/lib/online/lobby_controller.dart`) и передаёт готовым.
+  GameMode.online => throw ArgumentError.value(
+    setup.mode,
+    'setup.mode',
+    'Online opponent must be supplied by the lobby',
+  ),
 };
 
 /// Задание боту: состояние передаётся в изолят строкой, ход возвращается
@@ -126,16 +133,5 @@ List<int> chooseBotMove(BotTask task) {
 
 /// Восстанавливает ход из плоского списка пар `fromAbs, die`.
 @visibleForTesting
-MoveSequence decodeFlatSequence(GameState base, List<int> flat) => MoveSequence(<Move>[
-  for (int i = 0; i < flat.length; i += 2)
-    buildMove(player: base.turn, fromAbs: flat[i], die: flat[i + 1]),
-]);
-
-/// Собирает перемещение: за пределы дома — выброс, иначе обычный ход.
-Move buildMove({
-  required Player player,
-  required int fromAbs,
-  required int die,
-}) => Coords.toOwn(player, fromAbs) - die >= 1
-    ? Move.point(player: player, fromAbs: fromAbs, die: die)
-    : Move.bearOff(player: player, fromAbs: fromAbs, die: die);
+MoveSequence decodeFlatSequence(GameState base, List<int> flat) =>
+    decodeMoves(base.turn, flat);

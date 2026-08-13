@@ -328,4 +328,98 @@ class AppTextRu extends AppText {
   String themeMinutesLeft(int minutes) {
     return 'Осталось $minutes мин';
   }
+
+  @override
+  String get menuPlayOnline => 'Играть онлайн';
+
+  @override
+  String get onlineTitle => 'Онлайн';
+
+  @override
+  String get onlineQuickMatch => 'Быстрая игра';
+
+  @override
+  String get onlineCreateRoom => 'Создать комнату';
+
+  @override
+  String get onlineJoinRoom => 'Войти по коду';
+
+  @override
+  String get onlineCodeHint => '6-значный код';
+
+  @override
+  String get onlineShareCode => 'Продиктуйте код сопернику';
+
+  @override
+  String get onlineWaitingTitle => 'Ждём соперника';
+
+  @override
+  String get onlineSearching => 'Ищем соперника';
+
+  @override
+  String get onlineConnecting => 'Подключаемся';
+
+  @override
+  String get onlineCancelSearch => 'Остановить';
+
+  @override
+  String get onlineBotOffer =>
+      'Соперник не нашёлся. Сыграть с ботом, пока ищем?';
+
+  @override
+  String get onlineFairPlay =>
+      'В онлайне только живые игроки: бот никогда не выдаётся за человека.';
+
+  @override
+  String get onlineNotConfigured => 'Онлайн ещё не настроен';
+
+  @override
+  String get onlineNetworkError => 'Нет связи';
+
+  @override
+  String get onlineNoRoom => 'Комната с таким кодом не найдена';
+
+  @override
+  String get onlineRoomFull => 'В комнате уже двое';
+
+  @override
+  String get onlineOpponentLabel => 'Соперник';
+
+  @override
+  String get onlineOpponentTurn => 'Ход соперника';
+
+  @override
+  String get onlineOpponentOffline => 'Соперник не в сети';
+
+  @override
+  String get onlineClaimWin => 'Забрать победу';
+
+  @override
+  String get onlineAborted => 'Партия аннулирована';
+
+  @override
+  String get onlineAbortedDesync => 'Состояния партии разошлись';
+
+  @override
+  String get onlineAbortedConnection => 'Связь потеряна';
+
+  @override
+  String get onlinePhrasesTitle => 'Фразы';
+
+  @override
+  String get phraseSalom => 'Салом!';
+
+  @override
+  String get phraseYaxshiYurish => 'Хороший ход!';
+
+  @override
+  String get phraseOmad => 'Удачи!';
+
+  @override
+  String get phraseRahmat => 'Спасибо, хорошая игра';
+
+  @override
+  String onlineSecondsLeft(int seconds) {
+    return '$seconds с';
+  }
 }

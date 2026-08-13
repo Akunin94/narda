@@ -16,6 +16,7 @@ export 'src/game_state.dart';
 export 'src/move.dart';
 export 'src/move_generator.dart';
 export 'src/player.dart';
+export 'src/replay.dart';
 export 'src/result.dart';
 export 'src/rules.dart';
 export 'src/util/ascii_board.dart';
