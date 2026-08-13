@@ -149,11 +149,8 @@ class RatingEntry {
 
 /// Разбирает узел `users` и раскладывает по убыванию рейтинга.
 List<RatingEntry> ratingTable(Object? json, {int limit = 50}) {
-  final List<RatingEntry> entries = <RatingEntry>[];
-  childrenOf(json).forEach((String uid, Object? value) {
-    final RatingEntry? entry = RatingEntry.fromJson(uid, value);
-    if (entry != null) entries.add(entry);
-  });
+  final List<RatingEntry> entries =
+      namedChildren(json, RatingEntry.fromJson).values.toList();
   entries.sort((RatingEntry a, RatingEntry b) {
     final int byRating = b.rating.compareTo(a.rating);
     return byRating != 0 ? byRating : a.name.compareTo(b.name);
@@ -409,88 +406,68 @@ class RoomSnapshot {
     return RoomSnapshot(
       roomId: roomId,
       meta: RoomMeta.fromJson(json['meta']),
-      players: _players(json['players']),
+      players: namedChildren(json['players'], RoomPlayer.fromJson),
       state: RoomState.fromJson(json['state']),
-      games: _games(json['games']),
+      games: indexedChildren(json['games'], _game),
       outcome: RoomOutcome.fromJson(json['outcome']),
-      presence: _presence(json['presence']),
-      chat: _chat(json['chat']),
-      rematch: _rematch(json['rematch']),
+      presence: namedChildren(
+        json['presence'],
+        (String _, Object? value) => value is bool ? value : null,
+      ),
+      chat: namedChildren(json['chat'], _phrase),
+      rematch: namedChildren(
+        json['rematch'],
+        (String _, Object? value) => asInt(value),
+      ),
     );
   }
 
-  static Map<String, int> _rematch(Object? json) {
-    final Map<String, int> result = <String, int>{};
-    childrenOf(json).forEach((String uid, Object? value) {
-      final int? index = asInt(value);
-      if (index != null) result[uid] = index;
-    });
-    return result;
-  }
+  static RoomGame _game(Object? json) => RoomGame(
+    opening: indexedChildren(childOf(json, 'opening'), _openingDice),
+    moves: indexedChildren(childOf(json, 'moves'), RoomMove.fromJson),
+  );
 
-  static Map<int, RoomGame> _games(Object? json) {
-    final Map<int, RoomGame> result = <int, RoomGame>{};
-    childrenOf(json).forEach((String index, Object? value) {
-      final int? key = asInt(index);
-      if (key == null) return;
-      result[key] = RoomGame(
-        opening: _opening(childOf(value, 'opening')),
-        moves: _moves(childOf(value, 'moves')),
-      );
-    });
-    return result;
-  }
-
-  static Map<String, RoomPlayer> _players(Object? json) {
-    final Map<String, RoomPlayer> result = <String, RoomPlayer>{};
-    childrenOf(json).forEach((String uid, Object? value) {
-      final RoomPlayer? player = RoomPlayer.fromJson(uid, value);
-      if (player != null) result[uid] = player;
-    });
-    return result;
-  }
-
-  static Map<int, Map<String, int>> _opening(Object? json) {
-    final Map<int, Map<String, int>> result = <int, Map<String, int>>{};
-    childrenOf(json).forEach((String attempt, Object? value) {
-      final int? index = asInt(attempt);
-      if (index == null) return;
-      final Map<String, int> dice = <String, int>{};
-      childrenOf(value).forEach((String uid, Object? die) {
+  /// Кубики одной попытки розыгрыша первого хода: uid -> грань (§3.2.1).
+  static Map<String, int> _openingDice(Object? json) =>
+      namedChildren(json, (String _, Object? die) {
         final int? face = asInt(die);
-        if (face != null && face >= 1 && face <= 6) dice[uid] = face;
+        return face != null && face >= 1 && face <= 6 ? face : null;
       });
-      result[index] = dice;
-    });
-    return result;
-  }
 
-  static Map<int, RoomMove> _moves(Object? json) {
-    final Map<int, RoomMove> result = <int, RoomMove>{};
-    childrenOf(json).forEach((String index, Object? value) {
-      final int? key = asInt(index);
-      final RoomMove? move = RoomMove.fromJson(value);
-      if (key != null && move != null) result[key] = move;
-    });
-    return result;
+  static String? _phrase(String _, Object? json) {
+    final Object? phrase = childOf(json, 'phrase');
+    return phrase is String ? phrase : null;
   }
+}
 
-  static Map<String, bool> _presence(Object? json) {
-    final Map<String, bool> result = <String, bool>{};
-    childrenOf(json).forEach((String uid, Object? value) {
-      if (value is bool) result[uid] = value;
-    });
-    return result;
-  }
+/// Разбор узла со строковыми ключами (uid). Что [parse] не разобрал —
+/// в результат не попадает: чужие данные не должны ронять клиент.
+Map<String, V> namedChildren<V extends Object>(
+  Object? node,
+  V? Function(String key, Object? value) parse,
+) {
+  final Map<String, V> result = <String, V>{};
+  childrenOf(node).forEach((String key, Object? value) {
+    final V? parsed = parse(key, value);
+    if (parsed != null) result[key] = parsed;
+  });
+  return result;
+}
 
-  static Map<String, String> _chat(Object? json) {
-    final Map<String, String> result = <String, String>{};
-    childrenOf(json).forEach((String uid, Object? value) {
-      final Object? phrase = childOf(value, 'phrase');
-      if (phrase is String) result[uid] = phrase;
-    });
-    return result;
-  }
+/// То же для узлов с числовыми ключами: партии серии, журнал ходов, попытки
+/// розыгрыша. Нечисловые ключи пропускаются.
+Map<int, V> indexedChildren<V extends Object>(
+  Object? node,
+  V? Function(Object? value) parse,
+) {
+  final Map<int, V> result = <int, V>{};
+  childrenOf(node).forEach((String key, Object? value) {
+    final int? index = asInt(key);
+    if (index == null) return;
+    final V? parsed = parse(value);
+    if (parsed != null) result[index] = parsed;
+  });
+  return result;
 }
 
 /// Realtime Database отдаёт узел со сплошными числовыми ключами списком,
