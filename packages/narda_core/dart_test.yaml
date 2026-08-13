@@ -1,0 +1,5 @@
+tags:
+  slow:
+    timeout: 10x
+  perf:
+    timeout: 2x
