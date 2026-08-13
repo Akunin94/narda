@@ -93,17 +93,23 @@ class OnlineMatch extends ChangeNotifier implements TurnCoordinator {
 
   String get localUid => room.uid;
 
-  String? get opponentUid => _snapshot?.opponentOf(localUid)?.uid;
+  /// Второй игрок комнаты; `null` — он ещё не подключился.
+  RoomPlayer? get _opponent => _snapshot?.opponentOf(localUid);
 
-  String get opponentName => _snapshot?.opponentOf(localUid)?.name ?? '';
+  String? get opponentUid => _opponent?.uid;
+
+  String get opponentName => _opponent?.name ?? '';
 
   /// Аватар соперника из набора (§P5).
-  int get opponentAvatar => _snapshot?.opponentOf(localUid)?.avatar ?? 0;
+  int get opponentAvatar => _opponent?.avatar ?? 0;
 
   /// Рейтинг соперника на момент входа в комнату: по нему обе стороны
   /// считают Elo после матча и получают один и тот же результат (§P5).
-  int get opponentRating =>
-      _snapshot?.opponentOf(localUid)?.rating ?? eloStartRating;
+  int get opponentRating => _opponent?.rating ?? eloStartRating;
+
+  /// uid соперника, а пока его нет — свой: комната не понимает записи
+  /// «ходит никто» и «победил никто».
+  String get _opponentOrSelf => opponentUid ?? localUid;
 
   /// Код приватной комнаты — его диктуют сопернику.
   String get roomCode => _snapshot?.meta?.code ?? '';
@@ -159,12 +165,8 @@ class OnlineMatch extends ChangeNotifier implements TurnCoordinator {
     _first = await _resolveFirstMover(_gameIndex);
 
     final ReplayResult replay = _replay(_snapshot!, _first!, _gameIndex);
-    if (!replay.isLegal) {
-      _emit(const AbortSignal(MatchAbortReason.desync));
-      return Completer<GameState>().future;
-    }
-    _moveIndex = _snapshot!.game(_gameIndex).orderedMoves().length;
-    _position = replay.state;
+    if (!replay.isLegal) return _abortDesync<GameState>();
+    _adoptReplay(_snapshot!, replay.state);
     return replay.state;
   }
 
@@ -235,7 +237,7 @@ class OnlineMatch extends ChangeNotifier implements TurnCoordinator {
       ).toJson(),
       'state': RoomState(
         points: next.encode(),
-        turnUid: after.isFinished ? localUid : (opponentUid ?? localUid),
+        turnUid: after.isFinished ? localUid : _opponentOrSelf,
         moveIndex: index + 1,
         gameIndex: game,
         deadline: 0,
@@ -245,17 +247,15 @@ class OnlineMatch extends ChangeNotifier implements TurnCoordinator {
     if (_localExpired >= 2) {
       // Два просроченных хода подряд — поражение (§6).
       await _writeOutcome(
-        winnerUid: opponentUid ?? localUid,
+        winnerUid: _opponentOrSelf,
         reason: OutcomeReason.timeout,
       );
     }
   }
 
   @override
-  Future<void> publishResign() => _writeOutcome(
-    winnerUid: opponentUid ?? localUid,
-    reason: OutcomeReason.resign,
-  );
+  Future<void> publishResign() =>
+      _writeOutcome(winnerUid: _opponentOrSelf, reason: OutcomeReason.resign);
 
   /// Ход соперника из журнала. `null` — он пропустил ход.
   ///
@@ -425,20 +425,27 @@ class OnlineMatch extends ChangeNotifier implements TurnCoordinator {
   Future<T> _recover<T>() {
     final RoomSnapshot? snapshot = _snapshot;
     final Player? first = _first;
-    if (snapshot == null || first == null) {
-      _emit(const AbortSignal(MatchAbortReason.desync));
-      return Completer<T>().future;
-    }
+    if (snapshot == null || first == null) return _abortDesync<T>();
     final ReplayResult replay = _replay(snapshot, first, _gameIndex);
-    if (!replay.isLegal) {
-      _emit(const AbortSignal(MatchAbortReason.desync));
-      return Completer<T>().future;
-    }
-    _moveIndex = snapshot.game(_gameIndex).orderedMoves().length;
-    _position = replay.state;
+    if (!replay.isLegal) return _abortDesync<T>();
+    _adoptReplay(snapshot, replay.state);
     _deadline = 0;
     _turnState = null;
     _emit(ResyncSignal(replay.state));
+    return Completer<T>().future;
+  }
+
+  /// Позиция, пересобранная реплеем: журнал прочитан целиком, поэтому и
+  /// номер очередного хода берётся из него.
+  void _adoptReplay(RoomSnapshot snapshot, GameState state) {
+    _moveIndex = snapshot.game(_gameIndex).orderedMoves().length;
+    _position = state;
+  }
+
+  /// Общее состояние восстановить не удалось — партия аннулируется (§6).
+  /// Как и [_recover], возвращает `Future`, который никогда не завершится.
+  Future<T> _abortDesync<T>() {
+    _emit(const AbortSignal(MatchAbortReason.desync));
     return Completer<T>().future;
   }
 
