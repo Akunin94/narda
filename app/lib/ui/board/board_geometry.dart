@@ -79,6 +79,31 @@ class BoardGeometry {
     pointHeight,
   );
 
+  /// Контур треугольника пункта: у нижнего ряда вершина смотрит вверх,
+  /// у верхнего — вниз.
+  Path pointPath(int abs) {
+    final Rect rect = pointRect(abs);
+    final Path path = Path();
+    if (isBottom(abs)) {
+      path
+        ..moveTo(rect.left, rect.bottom)
+        ..lineTo(rect.right, rect.bottom)
+        ..lineTo(rect.center.dx, rect.top);
+    } else {
+      path
+        ..moveTo(rect.left, rect.top)
+        ..lineTo(rect.right, rect.top)
+        ..lineTo(rect.center.dx, rect.bottom);
+    }
+    return path..close();
+  }
+
+  /// Скруглённый контур лотка — им лоток и рисуется, и подсвечивается.
+  RRect trayShape(Player player) => RRect.fromRectAndRadius(
+    trayRect(player).deflate(1),
+    const Radius.circular(4),
+  );
+
   /// Область попадания пальцем — вся половина столбца.
   Rect hitRect(int abs) => Rect.fromLTWH(
     columnLeft(columnOf(abs)),

@@ -44,9 +44,8 @@ class BoardBackgroundPainter extends CustomPainter {
     _paintGrain(canvas, inner);
 
     for (final Player player in Player.values) {
-      final Rect tray = geometry.trayRect(player);
       canvas.drawRRect(
-        RRect.fromRectAndRadius(tray.deflate(1), const Radius.circular(4)),
+        geometry.trayShape(player),
         Paint()..color = theme.frameDark.withValues(alpha: 0.55),
       );
     }
@@ -67,19 +66,7 @@ class BoardBackgroundPainter extends CustomPainter {
     final Rect rect = geometry.pointRect(abs);
     final bool bottom = geometry.isBottom(abs);
     final bool light = (geometry.columnOf(abs) + (bottom ? 0 : 1)).isEven;
-    final Path path = Path();
-    if (bottom) {
-      path
-        ..moveTo(rect.left, rect.bottom)
-        ..lineTo(rect.right, rect.bottom)
-        ..lineTo(rect.center.dx, rect.top);
-    } else {
-      path
-        ..moveTo(rect.left, rect.top)
-        ..lineTo(rect.right, rect.top)
-        ..lineTo(rect.center.dx, rect.bottom);
-    }
-    path.close();
+    final Path path = geometry.pointPath(abs);
     final Color color = light ? theme.pointLight : theme.pointDark;
     canvas.drawPath(
       path,
@@ -182,9 +169,9 @@ class BoardPiecesPainter extends CustomPainter {
       2,
     );
     for (final Move move in lastMoves) {
-      canvas.drawPath(_pointPath(move.fromAbs), paint);
+      canvas.drawPath(geometry.pointPath(move.fromAbs), paint);
       final int? toAbs = move.toAbs;
-      if (toAbs != null) canvas.drawPath(_pointPath(toAbs), paint);
+      if (toAbs != null) canvas.drawPath(geometry.pointPath(toAbs), paint);
     }
   }
 
@@ -195,18 +182,12 @@ class BoardPiecesPainter extends CustomPainter {
     final Paint marker = strokePaint(theme.highlight, 2.5);
     for (final int? abs in destinations) {
       if (abs == null) {
-        final Rect tray = geometry.trayRect(mover);
-        canvas.drawRRect(
-          RRect.fromRectAndRadius(tray.deflate(1), const Radius.circular(4)),
-          glow,
-        );
-        canvas.drawRRect(
-          RRect.fromRectAndRadius(tray.deflate(1), const Radius.circular(4)),
-          marker,
-        );
+        canvas
+          ..drawRRect(geometry.trayShape(mover), glow)
+          ..drawRRect(geometry.trayShape(mover), marker);
         continue;
       }
-      canvas.drawPath(_pointPath(abs), glow);
+      canvas.drawPath(geometry.pointPath(abs), glow);
       final int count = state.checkersAt(mover, abs);
       canvas.drawCircle(
         geometry.checkerCenter(abs, count, count + 1),
@@ -315,24 +296,6 @@ class BoardPiecesPainter extends CustomPainter {
     }
     final int count = state.checkersAt(move.player, toAbs);
     return geometry.checkerCenter(toAbs, count - 1, count);
-  }
-
-  Path _pointPath(int abs) {
-    final Rect rect = geometry.pointRect(abs);
-    final bool bottom = geometry.isBottom(abs);
-    final Path path = Path();
-    if (bottom) {
-      path
-        ..moveTo(rect.left, rect.bottom)
-        ..lineTo(rect.right, rect.bottom)
-        ..lineTo(rect.center.dx, rect.top);
-    } else {
-      path
-        ..moveTo(rect.left, rect.top)
-        ..lineTo(rect.right, rect.top)
-        ..lineTo(rect.center.dx, rect.bottom);
-    }
-    return path..close();
   }
 
   @override
