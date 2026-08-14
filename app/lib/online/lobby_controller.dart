@@ -93,24 +93,21 @@ class LobbyController extends ChangeNotifier {
 
   /// Создаёт приватную комнату и ждёт соперника по коду.
   Future<void> createRoom(MatchTarget target) => _run(() async {
-    _stage = LobbyStage.connecting;
-    _notify();
+    _enter(LobbyStage.connecting);
     await _signIn();
     final RoomHandle room = await _backend.createRoom(
       target: target,
       card: _card,
     );
     _code = room.snapshot.meta?.code;
-    _stage = LobbyStage.waitingForOpponent;
-    _notify();
+    _enter(LobbyStage.waitingForOpponent);
     await _openWhenFull(room);
   });
 
   /// Вход в чужую приватную комнату по 6-значному коду.
   /// Формат матча берётся из комнаты — его выбрал хозяин.
   Future<void> joinByCode(String code) => _run(() async {
-    _stage = LobbyStage.connecting;
-    _notify();
+    _enter(LobbyStage.connecting);
     await _signIn();
     final RoomHandle? room = await _backend.joinByCode(code, card: _card);
     if (room == null) throw const OnlineUnavailable(OnlineFailure.roomNotFound);
@@ -120,9 +117,8 @@ class LobbyController extends ChangeNotifier {
 
   /// Быстрый матч через очередь.
   Future<void> quickMatch(MatchTarget target) => _run(() async {
-    _stage = LobbyStage.searching;
     _botOffer = false;
-    _notify();
+    _enter(LobbyStage.searching);
     _botOfferTimer = Timer(botOfferDelay, () {
       if (_stage != LobbyStage.searching) return;
       _botOffer = true;
@@ -135,8 +131,7 @@ class LobbyController extends ChangeNotifier {
     );
     _botOfferTimer?.cancel();
     if (room == null) {
-      _stage = LobbyStage.idle;
-      _notify();
+      _enter(LobbyStage.idle);
       return;
     }
     await _openWhenFull(room);
@@ -146,13 +141,13 @@ class LobbyController extends ChangeNotifier {
   Future<void> cancel() async {
     _cancelled = true;
     _botOfferTimer?.cancel();
-    await _watch?.cancel();
-    _watch = null;
+    await _stopWatching();
     await _backend.cancelQuickMatch();
     await _room?.leave();
     _room = null;
     _code = null;
     _botOffer = false;
+    // Готовую сессию отмена не отбирает: партию уже открывает экран.
     if (_stage != LobbyStage.ready) _stage = LobbyStage.idle;
     _notify();
   }
@@ -175,8 +170,7 @@ class LobbyController extends ChangeNotifier {
         if (snapshot.isFull && !full.isCompleted) full.complete();
       });
       await full.future;
-      await _watch?.cancel();
-      _watch = null;
+      await _stopWatching();
     }
     if (_cancelled || _disposed) return;
 
@@ -198,8 +192,18 @@ class LobbyController extends ChangeNotifier {
       ),
     );
     _room = null;
-    _stage = LobbyStage.ready;
+    _enter(LobbyStage.ready);
+  }
+
+  /// Смена состояния лобби — единственное, о чём экран узнаёт от него.
+  void _enter(LobbyStage stage) {
+    _stage = stage;
     _notify();
+  }
+
+  Future<void> _stopWatching() async {
+    await _watch?.cancel();
+    _watch = null;
   }
 
   Future<void> _run(Future<void> Function() body) async {
@@ -217,8 +221,7 @@ class LobbyController extends ChangeNotifier {
   void _fail(OnlineFailure reason) {
     _botOfferTimer?.cancel();
     _failure = reason;
-    _stage = LobbyStage.failed;
-    _notify();
+    _enter(LobbyStage.failed);
   }
 
   /// Как игрок представится сопернику: ник, аватар и рейтинг из профиля (§P5).
