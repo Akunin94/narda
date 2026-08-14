@@ -139,32 +139,61 @@ class AdsController extends ChangeNotifier {
     _interstitial = null;
     _policy.noteShown(_now());
     final Completer<void> closed = Completer<void>();
-    ad.fullScreenContentCallback = FullScreenContentCallback<InterstitialAd>(
-      onAdDismissedFullScreenContent: (InterstitialAd ad) {
-        ad.dispose();
-        if (!closed.isCompleted) closed.complete();
-      },
-      onAdFailedToShowFullScreenContent: (InterstitialAd ad, AdError error) {
-        debugPrint('narda: interstitial не показан — ${error.message}');
-        ad.dispose();
-        if (!closed.isCompleted) closed.complete();
-      },
+    ad.fullScreenContentCallback = _dismissOn<InterstitialAd>(
+      closed,
+      'interstitial',
     );
-    try {
-      await ad.show();
-      await closed.future;
-    } on Object catch (error) {
-      debugPrint('narda: interstitial упал — $error');
-    }
+    await _show(ad.show, closed, 'interstitial');
     unawaited(_loadInterstitial());
   }
 
+  /// Обвязка полноэкранного объявления: и закрытие, и сбой показа одинаково
+  /// освобождают объявление и снимают ожидание.
+  FullScreenContentCallback<T> _dismissOn<T extends Ad>(
+    Completer<void> closed,
+    String label,
+  ) => FullScreenContentCallback<T>(
+    onAdDismissedFullScreenContent: (T ad) => _release(ad, closed),
+    onAdFailedToShowFullScreenContent: (T ad, AdError error) {
+      debugPrint('narda: $label не показан — ${error.message}');
+      _release(ad, closed);
+    },
+  );
+
+  void _release(Ad ad, Completer<void> closed) {
+    ad.dispose();
+    if (!closed.isCompleted) closed.complete();
+  }
+
+  /// Ждёт показа и закрытия. Упавший ролик игру не роняет: без рекламы всё
+  /// работает полностью.
+  Future<void> _show(
+    Future<void> Function() show,
+    Completer<void> closed,
+    String label,
+  ) async {
+    try {
+      await show();
+      await closed.future;
+    } on Object catch (error) {
+      debugPrint('narda: $label упал — $error');
+    }
+  }
+
+  /// Загружать нечего: реклама выключена, согласия нет, объявление уже
+  /// готово или уже грузится, либо для него не задан ad unit.
+  bool _skipLoad({
+    required bool ready,
+    required bool loading,
+    required String unitId,
+  }) => !enabled || !_canRequestAds || ready || loading || unitId.isEmpty;
+
   Future<void> _loadInterstitial() async {
-    if (!enabled ||
-        !_canRequestAds ||
-        _interstitial != null ||
-        _loadingInterstitial ||
-        AdIds.interstitial.isEmpty) {
+    if (_skipLoad(
+      ready: _interstitial != null,
+      loading: _loadingInterstitial,
+      unitId: AdIds.interstitial,
+    )) {
       return;
     }
     _loadingInterstitial = true;
@@ -191,11 +220,11 @@ class AdsController extends ChangeNotifier {
 
   /// Заранее готовит rewarded, чтобы кнопка в экране тем была активна.
   Future<void> loadRewarded() async {
-    if (!enabled ||
-        !_canRequestAds ||
-        _rewarded != null ||
-        _loadingRewarded ||
-        AdIds.rewarded.isEmpty) {
+    if (_skipLoad(
+      ready: _rewarded != null,
+      loading: _loadingRewarded,
+      unitId: AdIds.rewarded,
+    )) {
       return;
     }
     _loadingRewarded = true;
@@ -230,27 +259,16 @@ class AdsController extends ChangeNotifier {
     notifyListeners();
     bool earned = false;
     final Completer<void> closed = Completer<void>();
-    ad.fullScreenContentCallback = FullScreenContentCallback<RewardedAd>(
-      onAdDismissedFullScreenContent: (RewardedAd ad) {
-        ad.dispose();
-        if (!closed.isCompleted) closed.complete();
-      },
-      onAdFailedToShowFullScreenContent: (RewardedAd ad, AdError error) {
-        debugPrint('narda: rewarded не показан — ${error.message}');
-        ad.dispose();
-        if (!closed.isCompleted) closed.complete();
-      },
-    );
-    try {
-      await ad.show(
+    ad.fullScreenContentCallback = _dismissOn<RewardedAd>(closed, 'rewarded');
+    await _show(
+      () => ad.show(
         onUserEarnedReward: (AdWithoutView ad, RewardItem reward) {
           earned = true;
         },
-      );
-      await closed.future;
-    } on Object catch (error) {
-      debugPrint('narda: rewarded упал — $error');
-    }
+      ),
+      closed,
+      'rewarded',
+    );
     unawaited(loadRewarded());
     return earned;
   }
