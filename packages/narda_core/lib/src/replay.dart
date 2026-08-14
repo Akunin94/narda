@@ -5,6 +5,7 @@ import 'move.dart';
 import 'move_generator.dart';
 import 'player.dart';
 import 'result.dart';
+import 'util/list_equality.dart';
 
 /// Заглушка броска для позиции, чей бросок журналу ещё не известен.
 const DiceRoll _pendingRoll = DiceRoll(1, 1);
@@ -66,14 +67,8 @@ class LoggedTurn {
   bool get isPass => moves.isEmpty;
 
   @override
-  bool operator ==(Object other) {
-    if (other is! LoggedTurn || other.roll != roll) return false;
-    if (other.moves.length != moves.length) return false;
-    for (var i = 0; i < moves.length; i++) {
-      if (other.moves[i] != moves[i]) return false;
-    }
-    return true;
-  }
+  bool operator ==(Object other) =>
+      other is LoggedTurn && other.roll == roll && sameItems(other.moves, moves);
 
   @override
   int get hashCode => Object.hash(roll, Object.hashAll(moves));

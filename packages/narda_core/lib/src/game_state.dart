@@ -2,6 +2,7 @@ import 'coords.dart';
 import 'dice.dart';
 import 'move.dart';
 import 'player.dart';
+import 'util/list_equality.dart';
 
 /// Иммутабельное состояние партии. Любое изменение возвращает новый объект.
 class GameState {
@@ -282,17 +283,11 @@ class GameState {
         other.whiteBorneOff != whiteBorneOff ||
         other.blackBorneOff != blackBorneOff ||
         other.turnIndex != turnIndex ||
-        other.headMovesUsed != headMovesUsed ||
-        other.remainingDice.length != remainingDice.length) {
+        other.headMovesUsed != headMovesUsed) {
       return false;
     }
-    for (var i = 0; i < remainingDice.length; i++) {
-      if (other.remainingDice[i] != remainingDice[i]) return false;
-    }
-    for (var i = 0; i < points.length; i++) {
-      if (other.points[i] != points[i]) return false;
-    }
-    return true;
+    return sameItems(other.remainingDice, remainingDice) &&
+        sameItems(other.points, points);
   }
 
   @override

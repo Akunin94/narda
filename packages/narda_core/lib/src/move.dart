@@ -1,5 +1,6 @@
 import 'coords.dart';
 import 'player.dart';
+import 'util/list_equality.dart';
 
 /// Одно перемещение шашки на [die] пунктов вперёд по маршруту игрока.
 ///
@@ -70,15 +71,8 @@ class MoveSequence {
   int get headMoves => moves.where((Move m) => m.isFromHead).length;
 
   @override
-  bool operator ==(Object other) {
-    if (other is! MoveSequence || other.moves.length != moves.length) {
-      return false;
-    }
-    for (var i = 0; i < moves.length; i++) {
-      if (other.moves[i] != moves[i]) return false;
-    }
-    return true;
-  }
+  bool operator ==(Object other) =>
+      other is MoveSequence && sameItems(other.moves, moves);
 
   @override
   int get hashCode => Object.hashAll(moves);
