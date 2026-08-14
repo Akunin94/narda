@@ -63,13 +63,20 @@ class SettingsController extends ChangeNotifier {
       vibration: prefs.getBool(_keyVibration) ?? true,
       localeCode: prefs.getString(_keyLocale),
       boardThemeId: prefs.getString(_keyBoardTheme) ?? klassikTheme.id,
-      botLevel: BotLevel
-          .values[(prefs.getInt(_keyBotLevel) ?? BotLevel.orta.index).clamp(0, BotLevel.values.length - 1)],
-      matchTarget: MatchTarget
-          .values[(prefs.getInt(_keyMatchTarget) ?? 0).clamp(0, MatchTarget.values.length - 1)],
+      botLevel: _enumAt(
+        BotLevel.values,
+        prefs.getInt(_keyBotLevel),
+        BotLevel.orta.index,
+      ),
+      matchTarget: _enumAt(MatchTarget.values, prefs.getInt(_keyMatchTarget), 0),
       now: DateTime.now,
     );
   }
+
+  /// Значение перечисления по сохранённому индексу: чужой или испорченный
+  /// индекс прижимается к границам набора.
+  static T _enumAt<T>(List<T> values, int? stored, int fallback) =>
+      values[(stored ?? fallback).clamp(0, values.length - 1)];
 
   static const String _keyAutoMove = 'auto_move';
   static const String _keyShowPips = 'show_pips';
@@ -101,56 +108,63 @@ class SettingsController extends ChangeNotifier {
   /// Выполнять ход автоматически, когда легальный вариант ровно один.
   bool get autoMove => _autoMove;
 
-  set autoMove(bool value) => _setBool(_keyAutoMove, value, (bool v) => _autoMove = v, _autoMove);
+  set autoMove(bool value) => _set(value, _autoMove, () {
+    _autoMove = value;
+    _prefs?.setBool(_keyAutoMove, value);
+  });
 
   /// Показывать pip-счёт обоих игроков.
   bool get showPips => _showPips;
 
-  set showPips(bool value) => _setBool(_keyShowPips, value, (bool v) => _showPips = v, _showPips);
+  set showPips(bool value) => _set(value, _showPips, () {
+    _showPips = value;
+    _prefs?.setBool(_keyShowPips, value);
+  });
 
   /// Звуки костей, шашек и победы.
   bool get sound => _sound;
 
-  set sound(bool value) => _setBool(_keySound, value, (bool v) => _sound = v, _sound);
+  set sound(bool value) => _set(value, _sound, () {
+    _sound = value;
+    _prefs?.setBool(_keySound, value);
+  });
 
   /// Вибро-отклик на бросок, перемещение и конец партии.
   bool get vibration => _vibration;
 
-  set vibration(bool value) => _setBool(_keyVibration, value, (bool v) => _vibration = v, _vibration);
+  set vibration(bool value) => _set(value, _vibration, () {
+    _vibration = value;
+    _prefs?.setBool(_keyVibration, value);
+  });
 
   /// Язык интерфейса: `null` — как на устройстве (по умолчанию узбекский).
   String? get localeCode => _localeCode;
 
-  set localeCode(String? value) {
-    if (value == _localeCode) return;
+  set localeCode(String? value) => _set(value, _localeCode, () {
     _localeCode = value;
+    // «Как на устройстве» — это отсутствие записи, а не пустая строка.
     if (value == null) {
       _prefs?.remove(_keyLocale);
     } else {
       _prefs?.setString(_keyLocale, value);
     }
-    notifyListeners();
-  }
+  });
 
   /// Последний выбранный уровень бота — подставляется на старте.
   BotLevel get botLevel => _botLevel;
 
-  set botLevel(BotLevel value) {
-    if (value == _botLevel) return;
+  set botLevel(BotLevel value) => _set(value, _botLevel, () {
     _botLevel = value;
     _prefs?.setInt(_keyBotLevel, value.index);
-    notifyListeners();
-  }
+  });
 
   /// Последний выбранный формат матча.
   MatchTarget get matchTarget => _matchTarget;
 
-  set matchTarget(MatchTarget value) {
-    if (value == _matchTarget) return;
+  set matchTarget(MatchTarget value) => _set(value, _matchTarget, () {
     _matchTarget = value;
     _prefs?.setInt(_keyMatchTarget, value.index);
-    notifyListeners();
-  }
+  });
 
   /// Выбранная тема доски. Если срок платной темы истёк — классика.
   BoardTheme get boardTheme {
@@ -158,12 +172,10 @@ class SettingsController extends ChangeNotifier {
     return isUnlocked(theme) ? theme : klassikTheme;
   }
 
-  set boardTheme(BoardTheme value) {
-    if (value.id == _boardThemeId) return;
+  set boardTheme(BoardTheme value) => _set(value.id, _boardThemeId, () {
     _boardThemeId = value.id;
     _prefs?.setString(_keyBoardTheme, value.id);
-    notifyListeners();
-  }
+  });
 
   /// Доступна ли тема прямо сейчас.
   bool isUnlocked(BoardTheme theme) =>
@@ -188,10 +200,11 @@ class SettingsController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void _setBool(String key, bool value, void Function(bool) assign, bool current) {
+  /// Запись настройки: то же самое значение ничего не делает, иначе —
+  /// присвоить, сохранить (если диск есть) и разбудить экраны.
+  void _set<T>(T value, T current, void Function() apply) {
     if (value == current) return;
-    assign(value);
-    _prefs?.setBool(key, value);
+    apply();
     notifyListeners();
   }
 }
