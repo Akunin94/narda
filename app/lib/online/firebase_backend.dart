@@ -121,14 +121,7 @@ class FirebaseOnlineBackend implements OnlineBackend {
         if (snapshot.isFull) {
           throw const OnlineUnavailable(OnlineFailure.roomFull);
         }
-        await _db.ref('rooms/$roomId').update(<String, Object?>{
-          'players/$_me': RoomPlayer.fromCard(
-            uid: _me,
-            color: Player.black,
-            card: card,
-          ).toJson(),
-          'meta/status': RoomStatus.playing.name,
-        });
+        await _db.ref('rooms/$roomId').update(guestEntry(_me, card));
       }
       return _FirebaseRoom(_db, roomId: roomId, uid: _me);
     } on FirebaseException {
@@ -346,25 +339,14 @@ class _FirebaseRoom implements RoomHandle {
   @override
   Stream<RoomSnapshot> get snapshots => _stream;
 
+  /// Метки серверного времени подменяются прямо перед отправкой.
   @override
   Future<void> update(Map<String, Object?> values) => _db
       .ref('rooms/$roomId')
       .update(<String, Object?>{
         for (final MapEntry<String, Object?> entry in values.entries)
-          entry.key: _resolve(entry.value),
+          entry.key: resolveTimestamps(entry.value, () => ServerValue.timestamp),
       });
-
-  /// Метки серверного времени подменяются прямо перед отправкой.
-  Object? _resolve(Object? value) {
-    if (value is ServerTimestamp) return ServerValue.timestamp;
-    if (value is Map<String, Object?>) {
-      return <String, Object?>{
-        for (final MapEntry<String, Object?> entry in value.entries)
-          entry.key: _resolve(entry.value),
-      };
-    }
-    return value;
-  }
 
   @override
   Future<void> keepPresence() async {

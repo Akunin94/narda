@@ -67,20 +67,9 @@ class MemoryOnlineServer {
     final Map<String, Object?>? root = _rooms[roomId];
     if (root == null) return;
     values.forEach((String path, Object? value) {
-      _writePath(root, path.split('/'), _resolve(value));
+      _writePath(root, path.split('/'), resolveTimestamps(value, now));
     });
     _publish(roomId);
-  }
-
-  Object? _resolve(Object? value) {
-    if (value is ServerTimestamp) return now();
-    if (value is Map<String, Object?>) {
-      return <String, Object?>{
-        for (final MapEntry<String, Object?> entry in value.entries)
-          entry.key: _resolve(entry.value),
-      };
-    }
-    return value;
   }
 
   void _writePath(Map<String, Object?> node, List<String> path, Object? value) {
@@ -174,13 +163,8 @@ class MemoryOnlineBackend implements OnlineBackend {
     }
     if (snapshot.isFull) throw const OnlineUnavailable(OnlineFailure.roomFull);
     server.update(roomId, <String, Object?>{
-      'players/$uid': RoomPlayer.fromCard(
-        uid: uid,
-        color: Player.black,
-        card: card,
-      ).toJson(),
+      ...guestEntry(uid, card),
       'presence/$uid': true,
-      'meta/status': RoomStatus.playing.name,
     });
     return MemoryRoomHandle(server, roomId: roomId, uid: uid);
   }
@@ -214,13 +198,8 @@ class MemoryOnlineBackend implements OnlineBackend {
     _queueWait = null;
     server.queue.remove(uid);
     server.update(roomId, <String, Object?>{
-      'players/$uid': RoomPlayer.fromCard(
-        uid: uid,
-        color: Player.black,
-        card: card,
-      ).toJson(),
+      ...guestEntry(uid, card),
       'presence/$uid': true,
-      'meta/status': RoomStatus.playing.name,
     });
     completer.complete(MemoryRoomHandle(server, roomId: roomId, uid: uid));
   }

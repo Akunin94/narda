@@ -107,6 +107,32 @@ class RoomPlayer {
   }
 }
 
+/// Запись второго игрока в комнату: цвет у гостя всегда чёрный, а с его
+/// входом комната переходит в игру (§6).
+Map<String, Object?> guestEntry(String uid, PlayerCard card) =>
+    <String, Object?>{
+      'players/$uid': RoomPlayer.fromCard(
+        uid: uid,
+        color: Player.black,
+        card: card,
+      ).toJson(),
+      'meta/status': RoomStatus.playing.name,
+    };
+
+/// Подменяет метки [serverTimestamp] по всему дереву записи: что такое
+/// «сейчас», знает только бэкенд — у Firebase это `ServerValue.timestamp`,
+/// у сервера в памяти его собственные часы.
+Object? resolveTimestamps(Object? value, Object Function() stamp) {
+  if (value is ServerTimestamp) return stamp();
+  if (value is Map<String, Object?>) {
+    return <String, Object?>{
+      for (final MapEntry<String, Object?> entry in value.entries)
+        entry.key: resolveTimestamps(entry.value, stamp),
+    };
+  }
+  return value;
+}
+
 /// Строка таблицы лидеров — она же публичная запись профиля `users/{uid}`.
 class RatingEntry {
   const RatingEntry({
