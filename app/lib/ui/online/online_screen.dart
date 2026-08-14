@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:narda_core/narda_core.dart';
@@ -10,6 +12,7 @@ import '../../online/firebase_backend.dart';
 import '../../online/lobby_controller.dart';
 import '../../online/online_backend.dart';
 import '../../theme/narda_theme.dart';
+import '../chrome.dart';
 import '../game_screen.dart';
 import '../home_screen.dart';
 import 'leaderboard_screen.dart';
@@ -60,9 +63,10 @@ class _OnlineScreenState extends State<OnlineScreen> {
     final OnlineSession? session = _lobby.session;
     if (session == null || _opened) return;
     _opened = true;
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute<void>(
-        builder: (BuildContext context) => GameScreen(
+    unawaited(
+      replaceScreen(
+        context,
+        GameScreen(
           setup: session.setup,
           online: session.match,
           rating: session.rating,
@@ -127,12 +131,8 @@ class _OnlineScreenState extends State<OnlineScreen> {
       ),
       const SizedBox(height: 12),
       OutlinedButton.icon(
-        onPressed: () => Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (BuildContext context) =>
-                LeaderboardScreen(backend: widget.backend),
-          ),
-        ),
+        onPressed: () =>
+            openScreen(context, LeaderboardScreen(backend: widget.backend)),
         icon: const Icon(Icons.leaderboard_outlined),
         label: Text(text.leaderboardTitle),
       ),
@@ -229,14 +229,10 @@ class _OnlineScreenState extends State<OnlineScreen> {
   Future<void> _playBot(SettingsController settings) async {
     await _lobby.cancel();
     if (!mounted) return;
-    await Navigator.of(context).pushReplacement(
-      MaterialPageRoute<void>(
-        builder: (BuildContext context) => GameScreen(
-          setup: GameSetup.vsBot(
-            settings.botLevel,
-            target: settings.matchTarget,
-          ),
-        ),
+    await replaceScreen(
+      context,
+      GameScreen(
+        setup: GameSetup.vsBot(settings.botLevel, target: settings.matchTarget),
       ),
     );
   }

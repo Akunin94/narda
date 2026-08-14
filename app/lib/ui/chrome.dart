@@ -7,6 +7,19 @@ import '../theme/narda_theme.dart';
 /// Здесь нет ни игровой логики, ни состояния — только повторяющееся
 /// оформление, чтобы экраны не расходились между собой по цветам и отступам.
 
+/// Переход на [screen]. Экраны приложения строятся заранее: конструкторы у
+/// них дешёвые, зависимости берутся из дерева уже на месте.
+Future<void> openScreen(BuildContext context, Widget screen) => Navigator.of(
+  context,
+).push(MaterialPageRoute<void>(builder: (BuildContext context) => screen));
+
+/// То же, но с заменой текущего экрана: из лобби обратно в лобби не
+/// возвращаются.
+Future<void> replaceScreen(BuildContext context, Widget screen) =>
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute<void>(builder: (BuildContext context) => screen),
+    );
+
 /// Шапка раздела: заголовок на цвете поверхности.
 class NardaAppBar extends AppBar {
   NardaAppBar({super.key, required String title})

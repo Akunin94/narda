@@ -8,6 +8,7 @@ import '../l10n/gen/app_text.dart';
 import '../profile/profile.dart';
 import '../theme/narda_theme.dart';
 import 'avatar.dart';
+import 'chrome.dart';
 import 'game_screen.dart';
 import 'online/online_screen.dart';
 import 'profile_screen.dart';
@@ -64,11 +65,7 @@ class HomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               OutlinedButton(
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (BuildContext context) => const OnlineScreen(),
-                  ),
-                ),
+                onPressed: () => openScreen(context, const OnlineScreen()),
                 child: Text(text.menuPlayOnline),
               ),
               const SizedBox(height: 12),
@@ -87,29 +84,17 @@ class HomeScreen extends StatelessWidget {
                   _MenuLink(
                     icon: Icons.menu_book_outlined,
                     label: text.menuRules,
-                    onPressed: () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (BuildContext context) => const RulesScreen(),
-                      ),
-                    ),
+                    onPressed: () => openScreen(context, const RulesScreen()),
                   ),
                   _MenuLink(
                     icon: Icons.bar_chart,
                     label: text.menuStats,
-                    onPressed: () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (BuildContext context) => const StatsScreen(),
-                      ),
-                    ),
+                    onPressed: () => openScreen(context, const StatsScreen()),
                   ),
                   _MenuLink(
                     icon: Icons.palette_outlined,
                     label: text.menuThemes,
-                    onPressed: () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (BuildContext context) => const ThemesScreen(),
-                      ),
-                    ),
+                    onPressed: () => openScreen(context, const ThemesScreen()),
                   ),
                   _MenuLink(
                     icon: Icons.settings,
@@ -198,11 +183,7 @@ class HomeScreen extends StatelessWidget {
     BuildContext context,
     SettingsController settings,
     GameSetup setup,
-  ) => Navigator.of(context).push(
-    MaterialPageRoute<void>(
-      builder: (BuildContext context) => GameScreen(setup: setup),
-    ),
-  );
+  ) => openScreen(context, GameScreen(setup: setup));
 }
 
 /// Ник, аватар и рейтинг в углу главного экрана; тап открывает профиль (§P5).
@@ -215,11 +196,7 @@ class _ProfileButton extends StatelessWidget {
     return AnimatedBuilder(
       animation: profile,
       builder: (BuildContext context, Widget? child) => TextButton.icon(
-        onPressed: () => Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (BuildContext context) => const ProfileScreen(),
-          ),
-        ),
+        onPressed: () => openScreen(context, const ProfileScreen()),
         icon: NardaAvatar(index: profile.avatar, size: 30),
         label: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

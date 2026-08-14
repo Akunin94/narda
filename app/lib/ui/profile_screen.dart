@@ -103,12 +103,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             _RatingCard(profile: _profile),
             const SizedBox(height: 12),
             OutlinedButton.icon(
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (BuildContext context) =>
-                      LeaderboardScreen(backend: widget.backend),
-                ),
-              ),
+              onPressed: () =>
+                  openScreen(context, LeaderboardScreen(backend: widget.backend)),
               icon: const Icon(Icons.leaderboard_outlined),
               label: Text(text.leaderboardTitle),
             ),
