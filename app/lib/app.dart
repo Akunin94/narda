@@ -8,6 +8,15 @@ import 'profile/profile.dart';
 import 'theme/narda_theme.dart';
 import 'ui/home_screen.dart';
 
+/// Контроллер, положенный в дерево scope'ом [S].
+///
+/// Восклицательные знаки здесь честные: экраны живут под [NardaApp], а он
+/// ставит все четыре scope'а сразу — отсутствие любого из них означает
+/// собранное неправильно дерево, а не случай, который надо обрабатывать.
+T _scopeOf<S extends InheritedNotifier<T>, T extends Listenable>(
+  BuildContext context,
+) => context.dependOnInheritedWidgetOfExactType<S>()!.notifier!;
+
 /// Доступ к настройкам из любого места дерева.
 class SettingsScope extends InheritedNotifier<SettingsController> {
   const SettingsScope({
@@ -16,9 +25,8 @@ class SettingsScope extends InheritedNotifier<SettingsController> {
     required super.child,
   }) : super(notifier: controller);
 
-  static SettingsController of(BuildContext context) => context
-      .dependOnInheritedWidgetOfExactType<SettingsScope>()!
-      .notifier!;
+  static SettingsController of(BuildContext context) =>
+      _scopeOf<SettingsScope, SettingsController>(context);
 }
 
 /// Доступ к локальной статистике.
@@ -30,7 +38,7 @@ class StatsScope extends InheritedNotifier<StatsStore> {
   }) : super(notifier: store);
 
   static StatsStore of(BuildContext context) =>
-      context.dependOnInheritedWidgetOfExactType<StatsScope>()!.notifier!;
+      _scopeOf<StatsScope, StatsStore>(context);
 }
 
 /// Доступ к профилю: ник, аватар и рейтинг Elo (§P5).
@@ -42,7 +50,7 @@ class ProfileScope extends InheritedNotifier<ProfileController> {
   }) : super(notifier: controller);
 
   static ProfileController of(BuildContext context) =>
-      context.dependOnInheritedWidgetOfExactType<ProfileScope>()!.notifier!;
+      _scopeOf<ProfileScope, ProfileController>(context);
 }
 
 /// Доступ к рекламе. В тестах здесь лежит [AdsController.disabled].
@@ -54,7 +62,7 @@ class AdsScope extends InheritedNotifier<AdsController> {
   }) : super(notifier: controller);
 
   static AdsController of(BuildContext context) =>
-      context.dependOnInheritedWidgetOfExactType<AdsScope>()!.notifier!;
+      _scopeOf<AdsScope, AdsController>(context);
 }
 
 /// Язык по умолчанию — узбекский (§7): русский включается только если он
