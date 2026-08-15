@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../l10n/gen/app_text.dart';
 import '../../online/protocol.dart';
 import '../../theme/narda_theme.dart';
+import '../sheet.dart';
 
 /// Общение в онлайне: только готовые фразы и эмодзи, свободного чата нет —
 /// его не пришлось бы модерировать (§6).
@@ -11,27 +12,13 @@ Future<void> showPhraseSheet(
   required ValueChanged<String> onSend,
 }) async {
   final AppText text = AppText.of(context);
-  final String? phrase = await showModalBottomSheet<String>(
-    context: context,
-    backgroundColor: NardaColors.surface,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-    ),
+  final String? phrase = await showNardaSheet<String>(
+    context,
     builder: (BuildContext context) => SafeArea(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
-            child: Text(
-              text.onlinePhrasesTitle,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: NardaColors.textPrimary,
-              ),
-            ),
-          ),
+          NardaSheetTitle(text.onlinePhrasesTitle),
           for (final String id in quickPhraseIds)
             ListTile(
               title: Text(

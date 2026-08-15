@@ -6,6 +6,7 @@ import '../game/settings.dart';
 import '../game/stats.dart';
 import '../l10n/gen/app_text.dart';
 import '../theme/narda_theme.dart';
+import 'sheet.dart';
 
 /// Настройки: язык, звук, вибрация, автоход, pip-счёт, сброс статистики и
 /// повторный вызов окна согласия на рекламу (§P3).
@@ -13,13 +14,9 @@ Future<void> showSettingsSheet(BuildContext context) {
   final SettingsController settings = SettingsScope.of(context);
   final StatsStore stats = StatsScope.of(context);
   final AdsController ads = AdsScope.of(context);
-  return showModalBottomSheet<void>(
-    context: context,
-    backgroundColor: NardaColors.surface,
-    isScrollControlled: true,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-    ),
+  return showNardaSheet<void>(
+    context,
+    scrollable: true,
     builder: (BuildContext context) => _SettingsSheet(
       settings: settings,
       stats: stats,
@@ -69,16 +66,9 @@ class _SettingsSheetState extends State<_SettingsSheet> {
           child: ListView(
             shrinkWrap: true,
             children: <Widget>[
-              Padding(
+              NardaSheetTitle(
+                text.menuSettings,
                 padding: const EdgeInsets.all(16),
-                child: Text(
-                  text.menuSettings,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: NardaColors.textPrimary,
-                  ),
-                ),
               ),
               ListTile(
                 title: Text(

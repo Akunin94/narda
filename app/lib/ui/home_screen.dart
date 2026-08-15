@@ -14,6 +14,7 @@ import 'online/online_screen.dart';
 import 'profile_screen.dart';
 import 'rules_screen.dart';
 import 'settings_sheet.dart';
+import 'sheet.dart';
 import 'stats_screen.dart';
 import 'themes_screen.dart';
 
@@ -117,19 +118,15 @@ class HomeScreen extends StatelessWidget {
     AppText text,
     SettingsController settings,
   ) async {
-    final BotLevel? level = await showModalBottomSheet<BotLevel>(
-      context: context,
-      backgroundColor: NardaColors.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+    final BotLevel? level = await showNardaSheet<BotLevel>(
+      context,
       builder: (BuildContext context) => SafeArea(
         child: AnimatedBuilder(
           animation: settings,
           builder: (BuildContext context, Widget? child) => Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              _SheetTitle(text.matchTitle),
+              NardaSheetTitle(text.matchTitle),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: MatchTargetPicker(
@@ -138,7 +135,7 @@ class HomeScreen extends StatelessWidget {
                       settings.matchTarget = target,
                 ),
               ),
-              _SheetTitle(text.levelTitle),
+              NardaSheetTitle(text.levelTitle),
               for (final ({BotLevel level, String label}) entry
                   in <({BotLevel level, String label})>[
                     (level: BotLevel.oson, label: text.levelOson),
@@ -262,25 +259,6 @@ class MatchTargetPicker extends StatelessWidget {
           onChanged(selection.single),
     );
   }
-}
-
-class _SheetTitle extends StatelessWidget {
-  const _SheetTitle(this.label);
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
-    child: Text(
-      label,
-      style: const TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.w600,
-        color: NardaColors.textPrimary,
-      ),
-    ),
-  );
 }
 
 class _MenuLink extends StatelessWidget {
