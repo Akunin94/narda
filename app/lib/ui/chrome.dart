@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/gen/app_text.dart';
 import '../theme/narda_theme.dart';
 
 /// Мелкие детали оболочки, одинаковые у всех разделов меню (§7).
@@ -19,6 +20,30 @@ Future<void> replaceScreen(BuildContext context, Widget screen) =>
     Navigator.of(context).pushReplacement(
       MaterialPageRoute<void>(builder: (BuildContext context) => screen),
     );
+
+/// Вопрос «да/нет» перед необратимым: сдачей партии, сбросом статистики.
+/// `false` — игрок отказался или закрыл окно.
+Future<bool> confirmAction(BuildContext context, String question) async {
+  final AppText text = AppText.of(context);
+  final bool? confirmed = await showDialog<bool>(
+    context: context,
+    builder: (BuildContext context) => AlertDialog(
+      backgroundColor: NardaColors.surface,
+      content: Text(question),
+      actions: <Widget>[
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: Text(text.actionNo),
+        ),
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(true),
+          child: Text(text.actionYes),
+        ),
+      ],
+    ),
+  );
+  return confirmed ?? false;
+}
 
 /// Шапка раздела: заголовок на цвете поверхности.
 class NardaAppBar extends AppBar {

@@ -6,6 +6,7 @@ import '../game/settings.dart';
 import '../game/stats.dart';
 import '../l10n/gen/app_text.dart';
 import '../theme/narda_theme.dart';
+import 'chrome.dart';
 import 'sheet.dart';
 
 /// Настройки: язык, звук, вибрация, автоход, pip-счёт, сброс статистики и
@@ -184,23 +185,8 @@ class _SettingsSheetState extends State<_SettingsSheet> {
   );
 
   Future<void> _confirmReset(AppText text) async {
-    final bool? confirmed = await showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) => AlertDialog(
-        backgroundColor: NardaColors.surface,
-        content: Text(text.resetStatsQuestion),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(text.actionNo),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(text.actionYes),
-          ),
-        ],
-      ),
-    );
-    if (confirmed ?? false) widget.stats.reset();
+    if (await confirmAction(context, text.resetStatsQuestion)) {
+      widget.stats.reset();
+    }
   }
 }

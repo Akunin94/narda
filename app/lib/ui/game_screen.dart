@@ -21,6 +21,7 @@ import '../theme/board_theme.dart';
 import '../theme/narda_theme.dart';
 import 'avatar.dart';
 import 'board/board_view.dart';
+import 'chrome.dart';
 import 'dice_view.dart';
 import 'online/online_status_bar.dart';
 import 'overlay_card.dart';
@@ -500,24 +501,9 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   Future<void> _confirmResign(AppText text) async {
-    final bool? confirmed = await showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) => AlertDialog(
-        backgroundColor: NardaColors.surface,
-        content: Text(text.resignQuestion),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(text.actionNo),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(text.actionYes),
-          ),
-        ],
-      ),
-    );
-    if (confirmed ?? false) _controller.resign();
+    if (await confirmAction(context, text.resignQuestion)) {
+      _controller.resign();
+    }
   }
 
   String _statusText(AppText text) => switch (_controller.phase) {
