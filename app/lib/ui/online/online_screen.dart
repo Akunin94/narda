@@ -90,8 +90,10 @@ class _OnlineScreenState extends State<OnlineScreen> {
           child: switch (_lobby.stage) {
             LobbyStage.waitingForOpponent => _waitingForCode(text),
             LobbyStage.searching => _searching(text, settings),
-            LobbyStage.connecting => _busy(text.onlineConnecting),
-            LobbyStage.ready => _busy(text.onlineConnecting),
+            // Комната уже собрана: экран партии откроет _onLobbyChanged.
+            LobbyStage.connecting || LobbyStage.ready => _busy(
+              text.onlineConnecting,
+            ),
             LobbyStage.idle || LobbyStage.failed => _menu(text, settings),
           },
         ),
@@ -153,76 +155,78 @@ class _OnlineScreenState extends State<OnlineScreen> {
     ],
   );
 
-  Widget _waitingForCode(AppText text) => Column(
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: <Widget>[
-      Text(
-        text.onlineShareCode,
-        textAlign: TextAlign.center,
-        style: const TextStyle(color: NardaColors.textMuted),
+  /// Приватная комната создана: код диктуют сопернику и ждут его.
+  Widget _waitingForCode(AppText text) => _centered(<Widget>[
+    Text(
+      text.onlineShareCode,
+      textAlign: TextAlign.center,
+      style: const TextStyle(color: NardaColors.textMuted),
+    ),
+    const SizedBox(height: 16),
+    SelectableText(
+      _lobby.code ?? '',
+      style: const TextStyle(
+        fontSize: 44,
+        letterSpacing: 8,
+        fontWeight: FontWeight.w700,
+        color: NardaColors.gold,
       ),
-      const SizedBox(height: 16),
-      SelectableText(
-        _lobby.code ?? '',
-        style: const TextStyle(
-          fontSize: 44,
-          letterSpacing: 8,
-          fontWeight: FontWeight.w700,
-          color: NardaColors.gold,
-        ),
-      ),
-      const SizedBox(height: 24),
-      const CircularProgressIndicator(color: NardaColors.goldDeep),
-      const SizedBox(height: 16),
-      Text(
-        text.onlineWaitingTitle,
-        style: const TextStyle(color: NardaColors.textPrimary),
-      ),
-      const SizedBox(height: 32),
-      OutlinedButton(
-        onPressed: _lobby.cancel,
-        child: Text(text.onlineCancelSearch),
-      ),
-    ],
-  );
+    ),
+    const SizedBox(height: 24),
+    _spinner,
+    const SizedBox(height: 16),
+    Text(
+      text.onlineWaitingTitle,
+      style: const TextStyle(color: NardaColors.textPrimary),
+    ),
+    const SizedBox(height: 32),
+    _cancelButton(text),
+  ]);
 
-  Widget _searching(AppText text, SettingsController settings) => Column(
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: <Widget>[
-      const CircularProgressIndicator(color: NardaColors.goldDeep),
-      const SizedBox(height: 20),
-      Text(
-        text.onlineSearching,
-        style: const TextStyle(fontSize: 18, color: NardaColors.textPrimary),
-      ),
-      if (_lobby.botOfferVisible) ...<Widget>[
-        const SizedBox(height: 28),
+  Widget _searching(AppText text, SettingsController settings) =>
+      _centered(<Widget>[
+        _spinner,
+        const SizedBox(height: 20),
         Text(
-          text.onlineBotOffer,
-          textAlign: TextAlign.center,
-          style: const TextStyle(color: NardaColors.textMuted),
+          text.onlineSearching,
+          style: const TextStyle(fontSize: 18, color: NardaColors.textPrimary),
         ),
-        const SizedBox(height: 12),
-        FilledButton(
-          onPressed: () => _playBot(settings),
-          child: Text(text.menuPlayBot),
-        ),
-      ],
-      const SizedBox(height: 32),
-      OutlinedButton(
-        onPressed: _lobby.cancel,
-        child: Text(text.onlineCancelSearch),
-      ),
-    ],
+        if (_lobby.botOfferVisible) ...<Widget>[
+          const SizedBox(height: 28),
+          Text(
+            text.onlineBotOffer,
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: NardaColors.textMuted),
+          ),
+          const SizedBox(height: 12),
+          FilledButton(
+            onPressed: () => _playBot(settings),
+            child: Text(text.menuPlayBot),
+          ),
+        ],
+        const SizedBox(height: 32),
+        _cancelButton(text),
+      ]);
+
+  Widget _busy(String label) => _centered(<Widget>[
+    _spinner,
+    const SizedBox(height: 20),
+    Text(label, style: const TextStyle(color: NardaColors.textPrimary)),
+  ]);
+
+  /// Все состояния ожидания выглядят одинаково: столбик по центру экрана.
+  Widget _centered(List<Widget> children) => Column(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: children,
   );
 
-  Widget _busy(String label) => Column(
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: <Widget>[
-      const CircularProgressIndicator(color: NardaColors.goldDeep),
-      const SizedBox(height: 20),
-      Text(label, style: const TextStyle(color: NardaColors.textPrimary)),
-    ],
+  static const Widget _spinner = CircularProgressIndicator(
+    color: NardaColors.goldDeep,
+  );
+
+  Widget _cancelButton(AppText text) => OutlinedButton(
+    onPressed: _lobby.cancel,
+    child: Text(text.onlineCancelSearch),
   );
 
   /// Пока ищем — можно сыграть с ботом. Ботов за живых не выдаём (§6).
