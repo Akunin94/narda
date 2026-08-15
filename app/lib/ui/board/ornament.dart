@@ -88,8 +88,8 @@ void _paintChain(
     final Offset center = horizontal
         ? Offset(band.left + offset, band.center.dy)
         : Offset(band.center.dx, band.top + offset);
-    canvas.drawPath(_diamond(center, step * 0.32), line);
-    canvas.drawPath(_diamond(center, step * 0.14), fill);
+    canvas.drawPath(diamondPath(center, step * 0.32), line);
+    canvas.drawPath(diamondPath(center, step * 0.14), fill);
     final Offset gap = horizontal
         ? Offset(center.dx + step / 2, center.dy)
         : Offset(center.dx, center.dy + step / 2);
@@ -98,10 +98,3 @@ void _paintChain(
     }
   }
 }
-
-Path _diamond(Offset center, double radius) => Path()
-  ..moveTo(center.dx, center.dy - radius)
-  ..lineTo(center.dx + radius, center.dy)
-  ..lineTo(center.dx, center.dy + radius)
-  ..lineTo(center.dx - radius, center.dy)
-  ..close();

@@ -23,6 +23,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:narda/theme/board_theme.dart';
 import 'package:narda/theme/narda_theme.dart';
+import 'package:narda/ui/paint.dart';
 
 /// Плотности Android: mdpi 48 dp → xxxhdpi 192 dp.
 const Map<String, double> _densities = <String, double>{
@@ -183,10 +184,10 @@ void _paintIconForeground(Canvas canvas, Size size, BoardTheme theme) {
 /// Цепочка ромбов по краю — тот же мотив, что на рамке доски.
 void _ornamentBorder(Canvas canvas, Size size, BoardTheme theme) {
   final double band = size.width * 0.13;
-  final Paint line = Paint()
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = math.max(1, size.width * 0.012)
-    ..color = theme.ornament.withValues(alpha: 0.75);
+  final Paint line = strokePaint(
+    theme.ornament.withValues(alpha: 0.75),
+    math.max(1, size.width * 0.012),
+  );
   final Paint fill = Paint()
     ..color = theme.ornamentFill.withValues(alpha: 0.6);
 
@@ -208,8 +209,8 @@ void _ornamentBorder(Canvas canvas, Size size, BoardTheme theme) {
       Offset(band * 0.3, offset),
       Offset(size.width - band * 0.3, offset),
     ]) {
-      canvas.drawPath(_diamond(center, band * 0.22), line);
-      canvas.drawPath(_diamond(center, band * 0.1), fill);
+      canvas.drawPath(diamondPath(center, band * 0.22), line);
+      canvas.drawPath(diamondPath(center, band * 0.1), fill);
     }
   }
 }
@@ -233,13 +234,7 @@ void _star(Canvas canvas, Offset center, double radius, BoardTheme theme) {
     path,
     Paint()..color = theme.ornamentFill.withValues(alpha: 0.85),
   );
-  canvas.drawPath(
-    path,
-    Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = radius * 0.07
-      ..color = theme.ornament,
-  );
+  canvas.drawPath(path, strokePaint(theme.ornament, radius * 0.07));
 }
 
 /// Игральная кость с пятёркой — сразу читается как нарды.
@@ -268,10 +263,7 @@ void _die(Canvas canvas, Rect rect, BoardTheme theme) {
   );
   canvas.drawRRect(
     RRect.fromRectAndRadius(rect, Radius.circular(rect.width * 0.2)),
-    Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = rect.width * 0.06
-      ..color = theme.dieEdge,
+    strokePaint(theme.dieEdge, rect.width * 0.06),
   );
   const List<Offset> pips = <Offset>[
     Offset(0.28, 0.28),
@@ -290,13 +282,6 @@ void _die(Canvas canvas, Rect rect, BoardTheme theme) {
   canvas.restore();
 }
 
-Path _diamond(Offset center, double radius) => Path()
-  ..moveTo(center.dx, center.dy - radius)
-  ..lineTo(center.dx + radius, center.dy)
-  ..lineTo(center.dx, center.dy + radius)
-  ..lineTo(center.dx - radius, center.dy)
-  ..close();
-
 /// Feature graphic 1024×500: название слева, фрагмент доски справа.
 void _paintFeatureGraphic(Canvas canvas, Size size, BoardTheme theme) {
   final Rect rect = Offset.zero & size;
@@ -312,13 +297,13 @@ void _paintFeatureGraphic(Canvas canvas, Size size, BoardTheme theme) {
 
   // Полосы орнамента сверху и снизу.
   for (final double y in <double>[size.height * 0.055, size.height * 0.945]) {
-    final Paint line = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2
-      ..color = theme.ornament.withValues(alpha: 0.5);
+    final Paint line = strokePaint(
+      theme.ornament.withValues(alpha: 0.5),
+      2,
+    );
     canvas.drawLine(Offset(0, y), Offset(size.width, y), line);
     for (double x = size.width * 0.02; x < size.width; x += size.width * 0.035) {
-      canvas.drawPath(_diamond(Offset(x, y), size.height * 0.022), line);
+      canvas.drawPath(diamondPath(Offset(x, y), size.height * 0.022), line);
     }
   }
 

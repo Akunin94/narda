@@ -78,7 +78,7 @@ class _AvatarPainter extends CustomPainter {
       final double angle = 2 * math.pi * i / style.rays - math.pi / 2;
       final Offset petal = center +
           Offset(math.cos(angle), math.sin(angle)) * (radius * 0.55);
-      canvas.drawPath(_diamond(petal, radius * 0.2), fill);
+      canvas.drawPath(diamondPath(petal, radius * 0.2), fill);
     }
 
     if (style.ringed) {
@@ -88,15 +88,8 @@ class _AvatarPainter extends CustomPainter {
         strokePaint(style.ink.withValues(alpha: 0.6), radius * 0.06),
       );
     }
-    canvas.drawPath(_diamond(center, radius * 0.22), fill);
+    canvas.drawPath(diamondPath(center, radius * 0.22), fill);
   }
-
-  Path _diamond(Offset center, double radius) => Path()
-    ..moveTo(center.dx, center.dy - radius)
-    ..lineTo(center.dx + radius, center.dy)
-    ..lineTo(center.dx, center.dy + radius)
-    ..lineTo(center.dx - radius, center.dy)
-    ..close();
 
   @override
   bool shouldRepaint(_AvatarPainter oldDelegate) => oldDelegate.style != style;
