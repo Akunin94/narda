@@ -229,21 +229,16 @@ class RuleFigurePainter extends CustomPainter {
     }
   }
 
-  void _checker(Canvas canvas, Offset center, double radius, bool white) {
-    canvas.drawCircle(
-      center,
-      radius,
-      Paint()..color = white ? theme.checkerWhiteFace : theme.checkerBlackFace,
-    );
-    canvas.drawCircle(
-      center,
-      radius * 0.88,
-      strokePaint(
-        white ? theme.checkerWhiteEdge : theme.checkerBlackEdge,
-        radius * 0.22,
-      ),
-    );
-  }
+  void _checker(Canvas canvas, Offset center, double radius, bool white) =>
+      paintFlatChecker(
+        canvas,
+        center: center,
+        radius: radius,
+        face: white ? theme.checkerWhiteFace : theme.checkerBlackFace,
+        edge: white ? theme.checkerWhiteEdge : theme.checkerBlackEdge,
+        ringScale: 0.88,
+        ringWidth: 0.22,
+      );
 
   /// Стрелка маршрута с необязательной подписью числа кубика.
   void _arrow(
@@ -352,23 +347,17 @@ class RuleFigurePainter extends CustomPainter {
     }
   }
 
-  void _label(Canvas canvas, String value, Offset center, double fontSize) {
-    final TextPainter painter = TextPainter(
-      text: TextSpan(
-        text: value,
-        style: TextStyle(
+  void _label(Canvas canvas, String value, Offset center, double fontSize) =>
+      paintCenteredText(
+        canvas,
+        value,
+        center,
+        TextStyle(
           color: theme.highlight,
           fontSize: fontSize,
           fontWeight: FontWeight.w700,
         ),
-      ),
-      textDirection: TextDirection.ltr,
-    )..layout();
-    painter.paint(
-      canvas,
-      center - Offset(painter.width / 2, painter.height / 2),
-    );
-  }
+      );
 
   @override
   bool shouldRepaint(RuleFigurePainter oldDelegate) =>

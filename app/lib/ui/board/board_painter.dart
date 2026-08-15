@@ -349,17 +349,15 @@ void paintChecker(
     canvas.drawCircle(center, radius * 1.08, strokePaint(ring, radius * 0.16));
   }
   if (label != null) {
-    final TextPainter painter = TextPainter(
-      text: TextSpan(
-        text: label,
-        style: TextStyle(
-          color: theme.checkerLabel(player),
-          fontSize: radius * 0.95,
-          fontWeight: FontWeight.w700,
-        ),
+    paintCenteredText(
+      canvas,
+      label,
+      center,
+      TextStyle(
+        color: theme.checkerLabel(player),
+        fontSize: radius * 0.95,
+        fontWeight: FontWeight.w700,
       ),
-      textDirection: TextDirection.ltr,
-    )..layout();
-    painter.paint(canvas, center - Offset(painter.width / 2, painter.height / 2));
+    );
   }
 }

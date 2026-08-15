@@ -262,21 +262,14 @@ class _ThemePreviewPainter extends CustomPainter {
     canvas.drawCircle(die.center, radius * 0.22, Paint()..color = theme.diePip);
   }
 
-  void _checker(Canvas canvas, Offset center, double radius, bool white) {
-    canvas.drawCircle(
-      center,
-      radius,
-      Paint()..color = white ? theme.checkerWhiteFace : theme.checkerBlackFace,
-    );
-    canvas.drawCircle(
-      center,
-      radius * 0.9,
-      strokePaint(
-        white ? theme.checkerWhiteEdge : theme.checkerBlackEdge,
-        radius * 0.2,
-      ),
-    );
-  }
+  void _checker(Canvas canvas, Offset center, double radius, bool white) =>
+      paintFlatChecker(
+        canvas,
+        center: center,
+        radius: radius,
+        face: white ? theme.checkerWhiteFace : theme.checkerBlackFace,
+        edge: white ? theme.checkerWhiteEdge : theme.checkerBlackEdge,
+      );
 
   @override
   bool shouldRepaint(_ThemePreviewPainter oldDelegate) =>
