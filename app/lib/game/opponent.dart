@@ -125,10 +125,8 @@ List<int> chooseBotMove(BotTask task) {
     seed: task.seed,
   );
   final MoveSequence? sequence = bot.choose(state);
-  if (sequence == null) return const <int>[];
-  return <int>[
-    for (final Move move in sequence.moves) ...<int>[move.fromAbs, move.die],
-  ];
+  // Тот же формат, которым ходы едут в журнал комнаты, — кодирует ядро.
+  return sequence == null ? const <int>[] : encodeMoves(sequence);
 }
 
 /// Восстанавливает ход из плоского списка пар `fromAbs, die`.

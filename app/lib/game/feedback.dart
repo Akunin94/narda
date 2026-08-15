@@ -72,43 +72,54 @@ class DeviceFeedback implements MatchFeedback {
     _buzz(won ? 220 : 90);
   }
 
-  void _play(String asset) {
-    if (!settings.sound || _disposed) return;
-    unawaited(_playAsset(asset));
+  void _play(String asset) => _fire(
+    enabled: settings.sound,
+    // Звук — украшение: на устройстве без аудио партия должна идти дальше.
+    onFailure: 'не удалось проиграть $asset',
+    action: () => _playAsset(asset),
+  );
+
+  void _buzz(int milliseconds) => _fire(
+    enabled: settings.vibration,
+    onFailure: 'вибрация недоступна',
+    action: () => _vibrate(milliseconds),
+  );
+
+  /// Отклик не ждут и на нём не падают: выключённая настройка не доходит до
+  /// плагина вовсе, а отказ платформы остаётся строчкой в логе.
+  void _fire({
+    required bool enabled,
+    required String onFailure,
+    required Future<void> Function() action,
+  }) {
+    if (!enabled || _disposed) return;
+    unawaited(() async {
+      try {
+        await action();
+      } on Object catch (error) {
+        debugPrint('narda: $onFailure — $error');
+      }
+    }());
   }
 
   Future<void> _playAsset(String asset) async {
-    try {
-      final AudioPlayer player = _players.putIfAbsent(asset, () {
-        final AudioPlayer created = AudioPlayer(playerId: 'narda_$asset');
-        unawaited(created.setReleaseMode(ReleaseMode.stop));
-        unawaited(created.setPlayerMode(PlayerMode.lowLatency));
-        return created;
-      });
-      await player.stop();
-      await player.play(AssetSource('sounds/$asset'), volume: 0.85);
-    } on Object catch (error) {
-      // Звук — украшение: на устройстве без аудио партия должна идти дальше.
-      debugPrint('narda: не удалось проиграть $asset — $error');
-    }
-  }
-
-  void _buzz(int milliseconds) {
-    if (!settings.vibration || _disposed) return;
-    unawaited(_vibrate(milliseconds));
+    final AudioPlayer player = _players.putIfAbsent(asset, () {
+      final AudioPlayer created = AudioPlayer(playerId: 'narda_$asset');
+      unawaited(created.setReleaseMode(ReleaseMode.stop));
+      unawaited(created.setPlayerMode(PlayerMode.lowLatency));
+      return created;
+    });
+    await player.stop();
+    await player.play(AssetSource('sounds/$asset'), volume: 0.85);
   }
 
   Future<void> _vibrate(int milliseconds) async {
-    try {
-      if (!_vibrationChecked) {
-        _vibrationChecked = true;
-        _hasVibrator = await Vibration.hasVibrator();
-      }
-      if (!_hasVibrator || _disposed) return;
-      await Vibration.vibrate(duration: milliseconds, amplitude: 128);
-    } on Object catch (error) {
-      debugPrint('narda: вибрация недоступна — $error');
+    if (!_vibrationChecked) {
+      _vibrationChecked = true;
+      _hasVibrator = await Vibration.hasVibrator();
     }
+    if (!_hasVibrator || _disposed) return;
+    await Vibration.vibrate(duration: milliseconds, amplitude: 128);
   }
 
   @override
