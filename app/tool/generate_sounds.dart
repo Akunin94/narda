@@ -75,6 +75,25 @@ List<double> _lose() {
 List<double> _silence(double seconds) =>
     List<double>.filled((seconds * sampleRate).round(), 0);
 
+/// Подмешивает в буфер отрезок длиной [seconds], начиная с секунды [at]:
+/// [sample] считает один отсчёт по времени от начала отрезка. Хвост, не
+/// поместившийся в буфер, отбрасывается.
+void _mix(
+  List<double> buffer, {
+  required double at,
+  required double seconds,
+  required double Function(double t) sample,
+}) {
+  final int start = (at * sampleRate).round();
+  final int length = math.min(
+    buffer.length - start,
+    (sampleRate * seconds).round(),
+  );
+  for (int i = 0; i < length; i++) {
+    buffer[start + i] += sample(i / sampleRate);
+  }
+}
+
 /// Удар дерева о дерево: всплеск шума плюс затухающий резонанс корпуса.
 void _knock(
   List<double> buffer, {
@@ -84,19 +103,21 @@ void _knock(
   required double decay,
 }) {
   final math.Random random = math.Random(pitch.round());
-  final int start = (at * sampleRate).round();
-  final int length = math.min(buffer.length - start, (sampleRate * 0.16).round());
   double lowpass = 0;
-  for (int i = 0; i < length; i++) {
-    final double t = i / sampleRate;
-    final double envelope = math.exp(-decay * t);
-    final double noise = random.nextDouble() * 2 - 1;
-    lowpass += (noise - lowpass) * 0.55;
-    final double body =
-        math.sin(2 * math.pi * pitch * t) * 0.6 +
-        math.sin(2 * math.pi * pitch * 2.7 * t) * 0.25;
-    buffer[start + i] += gain * envelope * (lowpass * 0.75 + body * 0.55);
-  }
+  _mix(
+    buffer,
+    at: at,
+    seconds: 0.16,
+    sample: (double t) {
+      final double envelope = math.exp(-decay * t);
+      final double noise = random.nextDouble() * 2 - 1;
+      lowpass += (noise - lowpass) * 0.55;
+      final double body =
+          math.sin(2 * math.pi * pitch * t) * 0.6 +
+          math.sin(2 * math.pi * pitch * 2.7 * t) * 0.25;
+      return gain * envelope * (lowpass * 0.75 + body * 0.55);
+    },
+  );
 }
 
 /// Щипок: основной тон с обертонами и мягкой атакой.
@@ -106,20 +127,20 @@ void _pluck(
   required double frequency,
   required double gain,
   required double decay,
-}) {
-  final int start = (at * sampleRate).round();
-  final int length = math.min(buffer.length - start, (sampleRate * 0.9).round());
-  for (int i = 0; i < length; i++) {
-    final double t = i / sampleRate;
+}) => _mix(
+  buffer,
+  at: at,
+  seconds: 0.9,
+  sample: (double t) {
     final double attack = math.min(1, t / 0.008);
     final double envelope = attack * math.exp(-decay * t);
     final double wave =
         math.sin(2 * math.pi * frequency * t) +
         math.sin(2 * math.pi * frequency * 2 * t) * 0.30 +
         math.sin(2 * math.pi * frequency * 3 * t) * 0.12;
-    buffer[start + i] += gain * envelope * wave * 0.45;
-  }
-}
+    return gain * envelope * wave * 0.45;
+  },
+);
 
 /// Приводит пик к −1 дБ, чтобы ничего не клиппировало.
 List<double> _normalize(List<double> samples) {
