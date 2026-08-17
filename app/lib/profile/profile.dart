@@ -103,13 +103,15 @@ class ProfileController extends ChangeNotifier {
 
   set name(String value) {
     final String trimmed = value.trim();
+    // Пустое поле оставляет прежний ник: играть без имени нельзя.
     if (trimmed.isEmpty || trimmed == _profile.name) return;
     final String next = trimmed.length > nardaMaxNameLength
         ? trimmed.substring(0, nardaMaxNameLength)
         : trimmed;
-    _profile = _profile.copyWith(name: next);
-    _prefs?.setString(_keyName, next);
-    notifyListeners();
+    _update(
+      _profile.copyWith(name: next),
+      (SharedPreferences prefs) => prefs.setString(_keyName, next),
+    );
   }
 
   int get avatar => _profile.avatar;
@@ -117,9 +119,10 @@ class ProfileController extends ChangeNotifier {
   set avatar(int value) {
     final int next = value.clamp(0, nardaAvatarCount - 1);
     if (next == _profile.avatar) return;
-    _profile = _profile.copyWith(avatar: next);
-    _prefs?.setInt(_keyAvatar, next);
-    notifyListeners();
+    _update(
+      _profile.copyWith(avatar: next),
+      (SharedPreferences prefs) => prefs.setInt(_keyAvatar, next),
+    );
   }
 
   int get rating => _profile.rating;
@@ -140,16 +143,30 @@ class ProfileController extends ChangeNotifier {
       won: won,
       ratedGames: _profile.ratedGames,
     );
-    _profile = _profile.copyWith(
-      rating: after,
-      ratedGames: _profile.ratedGames + 1,
-      ratedWins: _profile.ratedWins + (won ? 1 : 0),
+    _update(
+      _profile.copyWith(
+        rating: after,
+        ratedGames: _profile.ratedGames + 1,
+        ratedWins: _profile.ratedWins + (won ? 1 : 0),
+      ),
+      (SharedPreferences prefs) => prefs
+        ..setInt(_keyRating, after)
+        ..setInt(_keyRatedGames, _profile.ratedGames)
+        ..setInt(_keyRatedWins, _profile.ratedWins),
     );
-    _prefs
-      ?..setInt(_keyRating, after)
-      ..setInt(_keyRatedGames, _profile.ratedGames)
-      ..setInt(_keyRatedWins, _profile.ratedWins);
-    notifyListeners();
     return RatingChange(before: before, after: after);
+  }
+
+  /// Записывает новый профиль: в памяти, на диск (если он есть) и в экраны.
+  /// [persist] вызывается уже после подмены [_profile] — счётчики в нём
+  /// читаются новые.
+  void _update(
+    PlayerProfile next,
+    void Function(SharedPreferences prefs) persist,
+  ) {
+    _profile = next;
+    final SharedPreferences? prefs = _prefs;
+    if (prefs != null) persist(prefs);
+    notifyListeners();
   }
 }
