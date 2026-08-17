@@ -13,6 +13,12 @@ void main(List<String> args) {
     return;
   }
 
+  // С `--quiet` (и всегда на серии партий) ход партии не печатается —
+  // остаётся только итоговая сводка.
+  void log(String message) {
+    if (!options.quiet) stdout.writeln(message);
+  }
+
   var whiteWins = 0;
   var marses = 0;
   var totalTurns = 0;
@@ -20,19 +26,16 @@ void main(List<String> args) {
 
   for (var game = 0; game < options.games; game++) {
     final seed = options.seed + game;
-    final dice = RandomDiceSource.seeded(seed);
-    final match = Game(dice: dice);
+    final match = Game(dice: RandomDiceSource.seeded(seed));
     final bots = <Player, Bot>{
       Player.white: _makeBot(options.whiteLevel, seed * 2 + 1),
       Player.black: _makeBot(options.blackLevel, seed * 2 + 2),
     };
 
     final opening = match.start();
-    if (!options.quiet) {
-      stdout.writeln('=== o\'yin ${game + 1}, seed $seed ===');
-      stdout.writeln('birinchi yurish: $opening');
-      stdout.writeln(AsciiBoard.render(match.state));
-    }
+    log('=== o\'yin ${game + 1}, seed $seed ===');
+    log('birinchi yurish: $opening');
+    log(AsciiBoard.render(match.state));
 
     var turns = 0;
     while (!match.isFinished && turns < options.maxTurns) {
@@ -44,19 +47,14 @@ void main(List<String> args) {
         longestMoveMs = stopwatch.elapsedMilliseconds;
       }
 
+      log('${state.turn.name} ${state.roll}: ${choice ?? "yurish yo'q"}');
       if (choice == null) {
-        if (!options.quiet) {
-          stdout.writeln("${state.turn.name} ${state.roll}: yurish yo'q");
-        }
         match.pass();
       } else {
-        if (!options.quiet) {
-          stdout.writeln('${state.turn.name} ${state.roll}: $choice');
-        }
         match.play(choice);
       }
       turns++;
-      if (!options.quiet) stdout.writeln(AsciiBoard.render(match.state));
+      log(AsciiBoard.render(match.state));
     }
 
     totalTurns += turns;
