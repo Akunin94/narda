@@ -75,6 +75,10 @@ class _GameScreenState extends State<GameScreen> {
 
   bool get _isOnline => widget.setup.mode == GameMode.online;
 
+  /// Оба игрока за этим устройством: подписи идут по цветам, а не «ты» и
+  /// «соперник».
+  bool get _isHotseat => widget.setup.mode == GameMode.hotseat;
+
   /// Идёт показ interstitial — доска на это время закрыта оверлеем.
   bool _switchingGame = false;
 
@@ -268,9 +272,7 @@ class _GameScreenState extends State<GameScreen> {
             ),
             if (widget.setup.target != MatchTarget.single)
               Text(
-                '${text.labelScore} '
-                '${_controller.score.pointsOf(widget.setup.localPlayer)}:'
-                '${_controller.score.pointsOf(widget.setup.opponentPlayer)}'
+                '${_scoreLine(text)}'
                 ' · ${text.matchToPoints(widget.setup.target.points)}',
                 style: const TextStyle(
                   fontSize: 12,
@@ -402,10 +404,7 @@ class _GameScreenState extends State<GameScreen> {
         if (series) ...<Widget>[
           const SizedBox(height: 10),
           Text(
-            '${text.labelScore} '
-            '${_controller.score.pointsOf(widget.setup.localPlayer)}'
-            ' : '
-            '${_controller.score.pointsOf(widget.setup.opponentPlayer)}',
+            _scoreLine(text, separator: ' : '),
             style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w700,
@@ -520,8 +519,15 @@ class _GameScreenState extends State<GameScreen> {
           : _turnText(text, _controller.state.turn),
   };
 
+  /// Счёт серии глазами локального игрока: его очки всегда слева.
+  String _scoreLine(AppText text, {String separator = ':'}) =>
+      '${text.labelScore} '
+      '${_controller.score.pointsOf(widget.setup.localPlayer)}'
+      '$separator'
+      '${_controller.score.pointsOf(widget.setup.opponentPlayer)}';
+
   String _turnText(AppText text, Player player) {
-    if (widget.setup.mode == GameMode.hotseat) {
+    if (_isHotseat) {
       return player == Player.white
           ? text.statusWhiteTurn
           : text.statusBlackTurn;
@@ -558,7 +564,7 @@ class _GameScreenState extends State<GameScreen> {
   };
 
   String _resultTitle(AppText text, GameResult result) {
-    if (widget.setup.mode == GameMode.hotseat) {
+    if (_isHotseat) {
       return result.winner == Player.white
           ? text.resultWhiteWins
           : text.resultBlackWins;
@@ -570,7 +576,7 @@ class _GameScreenState extends State<GameScreen> {
 
   String _matchTitle(AppText text) {
     final Player? winner = _controller.score.winner;
-    if (widget.setup.mode == GameMode.hotseat) {
+    if (_isHotseat) {
       return winner == Player.white ? text.matchWhiteWins : text.matchBlackWins;
     }
     return winner == widget.setup.localPlayer
