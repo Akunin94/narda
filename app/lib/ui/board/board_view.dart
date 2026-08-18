@@ -154,12 +154,28 @@ class _BoardViewState extends State<BoardView>
 
   void _handleTap(BoardGeometry geometry, Offset position) {
     if (!widget.interactive) return;
+    _hit(
+      geometry,
+      position,
+      onPoint: widget.onTapPoint,
+      onTray: widget.onTapTray,
+    );
+  }
+
+  /// Что под точкой [position]: пункт, лоток выброса ходящего или ничего.
+  /// Мимо доски — ни один обработчик не вызывается.
+  void _hit(
+    BoardGeometry geometry,
+    Offset position, {
+    required ValueChanged<int> onPoint,
+    required VoidCallback onTray,
+  }) {
     final int? abs = geometry.pointAt(position);
     if (abs != null) {
-      widget.onTapPoint(abs);
+      onPoint(abs);
       return;
     }
-    if (geometry.trayHit(position, widget.state.turn)) widget.onTapTray();
+    if (geometry.trayHit(position, widget.state.turn)) onTray();
   }
 
   void _handlePanStart(BoardGeometry geometry, Offset position) {
@@ -178,14 +194,12 @@ class _BoardViewState extends State<BoardView>
     final Offset? position = _dragPosition;
     _cancelDrag();
     if (from == null || position == null) return;
-    final int? target = geometry.pointAt(position);
-    if (target != null) {
-      widget.onDrop(from, target);
-      return;
-    }
-    if (geometry.trayHit(position, widget.state.turn)) {
-      widget.onDrop(from, null);
-    }
+    _hit(
+      geometry,
+      position,
+      onPoint: (int abs) => widget.onDrop(from, abs),
+      onTray: () => widget.onDrop(from, null),
+    );
   }
 
   void _cancelDrag() {
