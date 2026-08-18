@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:narda/ads/ads_controller.dart';
 import 'package:narda/ads/interstitial_policy.dart';
@@ -8,32 +7,15 @@ import 'package:narda/game/match_controller.dart';
 import 'package:narda/game/opponent.dart';
 import 'package:narda/game/settings.dart';
 import 'package:narda/game/stats.dart';
-import 'package:narda/l10n/gen/app_text.dart';
 import 'package:narda/theme/board_theme.dart';
 import 'package:narda/ui/rules_screen.dart';
 import 'package:narda/ui/stats_screen.dart';
 import 'package:narda/ui/themes_screen.dart';
 import 'package:narda_core/narda_core.dart';
 
+import 'support/harness.dart';
 import 'support/match_helpers.dart';
 import 'support/positions.dart';
-
-Widget wrap(Widget child, {SettingsController? settings, StatsStore? stats}) =>
-    SettingsScope(
-      controller: settings ?? SettingsController.inMemory(),
-      child: StatsScope(
-        store: stats ?? StatsStore.inMemory(),
-        child: AdsScope(
-          controller: AdsController.disabled(),
-          child: MaterialApp(
-            localizationsDelegates: AppText.localizationsDelegates,
-            supportedLocales: AppText.supportedLocales,
-            localeListResolutionCallback: resolveNardaLocale,
-            home: child,
-          ),
-        ),
-      ),
-    );
 
 void main() {
   group('серия до 3 очков', () {

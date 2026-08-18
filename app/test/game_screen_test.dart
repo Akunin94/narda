@@ -1,37 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:narda/ads/ads_controller.dart';
 import 'package:narda/app.dart';
 import 'package:narda/game/game_setup.dart';
 import 'package:narda/game/match_controller.dart';
 import 'package:narda/game/opponent.dart';
 import 'package:narda/game/settings.dart';
-import 'package:narda/game/stats.dart';
-import 'package:narda/l10n/gen/app_text.dart';
 import 'package:narda/ui/board/board_geometry.dart';
 import 'package:narda/ui/board/board_view.dart';
 import 'package:narda/ui/game_screen.dart';
 import 'package:narda_core/narda_core.dart';
 
+import 'support/harness.dart';
 import 'support/positions.dart';
-
-/// Экраны берут настройки, статистику и рекламу из дерева — в тестах это
-/// значения без диска и с выключенной рекламой.
-Widget wrap(Widget child, {SettingsController? settings}) => SettingsScope(
-  controller: settings ?? SettingsController.inMemory(),
-  child: StatsScope(
-    store: StatsStore.inMemory(),
-    child: AdsScope(
-      controller: AdsController.disabled(),
-      child: MaterialApp(
-        localizationsDelegates: AppText.localizationsDelegates,
-        supportedLocales: AppText.supportedLocales,
-        localeListResolutionCallback: resolveNardaLocale,
-        home: child,
-      ),
-    ),
-  ),
-);
 
 void main() {
   testWidgets('главный экран предлагает оба режима', (WidgetTester tester) async {
