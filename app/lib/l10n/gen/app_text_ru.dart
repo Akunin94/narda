@@ -175,6 +175,9 @@ class AppTextRu extends AppText {
   String get settingPrivacy => 'Настройки рекламы';
 
   @override
+  String get settingPrivacyPolicy => 'Политика конфиденциальности';
+
+  @override
   String get actionResetStats => 'Сбросить статистику';
 
   @override

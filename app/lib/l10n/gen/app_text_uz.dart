@@ -175,6 +175,9 @@ class AppTextUz extends AppText {
   String get settingPrivacy => 'Reklama sozlamalari';
 
   @override
+  String get settingPrivacyPolicy => 'Maxfiylik siyosati';
+
+  @override
   String get actionResetStats => 'Statistikani tozalash';
 
   @override

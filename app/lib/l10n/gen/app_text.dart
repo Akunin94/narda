@@ -427,6 +427,12 @@ abstract class AppText {
   /// **'Reklama sozlamalari'**
   String get settingPrivacy;
 
+  /// Ссылка на политику конфиденциальности
+  ///
+  /// In uz, this message translates to:
+  /// **'Maxfiylik siyosati'**
+  String get settingPrivacyPolicy;
+
   /// Кнопка сброса статистики
   ///
   /// In uz, this message translates to:

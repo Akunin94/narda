@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../ads/ads_controller.dart';
 import '../app.dart';
@@ -25,6 +26,10 @@ Future<void> showSettingsSheet(BuildContext context) {
     ),
   );
 }
+
+// Тот же адрес, что указан в Play Console (Google требует ссылку и в приложении).
+final Uri _privacyPolicyUrl =
+    Uri.parse('https://akunin94.github.io/portfolio/narda/privacy.html');
 
 class _SettingsSheet extends StatefulWidget {
   const _SettingsSheet({
@@ -148,6 +153,20 @@ class _SettingsSheetState extends State<_SettingsSheet> {
                   ),
                   onTap: widget.ads.showPrivacyOptions,
                 ),
+              ListTile(
+                leading: const Icon(
+                  Icons.policy_outlined,
+                  color: NardaColors.textMuted,
+                ),
+                title: Text(
+                  text.settingPrivacyPolicy,
+                  style: const TextStyle(color: NardaColors.textPrimary),
+                ),
+                onTap: () => launchUrl(
+                  _privacyPolicyUrl,
+                  mode: LaunchMode.externalApplication,
+                ),
+              ),
               ListTile(
                 leading: const Icon(
                   Icons.delete_outline,

@@ -92,6 +92,9 @@
   "settingPrivacy": "Настройки рекламы",
   "@settingPrivacy": { "description": "Кнопка окна согласия UMP" },
 
+  "settingPrivacyPolicy": "Политика конфиденциальности",
+  "@settingPrivacyPolicy": { "description": "Ссылка на политику конфиденциальности" },
+
   "actionResetStats": "Сбросить статистику",
   "@actionResetStats": { "description": "Кнопка сброса статистики" },
 

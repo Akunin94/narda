@@ -166,6 +166,9 @@
   "settingPrivacy": "Reklama sozlamalari",
   "@settingPrivacy": { "description": "Кнопка окна согласия UMP" },
 
+  "settingPrivacyPolicy": "Maxfiylik siyosati",
+  "@settingPrivacyPolicy": { "description": "Ссылка на политику конфиденциальности" },
+
   "actionResetStats": "Statistikani tozalash",
   "@actionResetStats": { "description": "Кнопка сброса статистики" },
 
