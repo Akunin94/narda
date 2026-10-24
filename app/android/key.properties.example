@@ -1,0 +1,5 @@
+# Скопируй в key.properties (он в .gitignore). Пути — относительно android/.
+storeFile=/Users/akunin/keys/narda-release.jks
+storePassword=
+keyAlias=narda
+keyPassword=

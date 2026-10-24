@@ -88,7 +88,8 @@ flutter run \
 Что нужно завести в проекте Firebase: анонимную авторизацию и Realtime
 Database. Правила базы лежат в
 [app/firebase/database.rules.json](app/firebase/database.rules.json) —
-`firebase deploy --only database`.
+из папки `app`:
+`firebase deploy --only database --project <id проекта>` (берёт `firebase.json`).
 
 Схема комнаты — в шапке [app/lib/online/protocol.dart](app/lib/online/protocol.dart).
 Кости в v1 генерирует клиент активного игрока (честное ограничение MVP по спеке);
@@ -122,19 +123,22 @@ Function остаётся в backlog, точка замены — `RatingService
 
 ## Релизная сборка
 
-Тестовые ad unit ID подставляются в debug автоматически; в релиз реальные
-приходят снаружи (§P3). App id AdMob попадает в манифест через gradle:
+Тестовые ad unit ID подставляются в debug автоматически. В релиз ключи Firebase
+и AdMob приходят из `app/release.json` (в git не попадает, шаблон —
+`release.example.json`). App id AdMob нужен в манифесте, поэтому идёт через gradle:
 
 ```bash
 cd app
+cp release.example.json release.json            # один раз, заполнить
+cp android/key.properties.example android/key.properties  # один раз, заполнить
 flutter build appbundle --release \
-  -Padmob_app_id=ca-app-pub-XXXX~YYYY \
-  --dart-define=ADMOB_INTERSTITIAL=ca-app-pub-XXXX/AAAA \
-  --dart-define=ADMOB_REWARDED=ca-app-pub-XXXX/BBBB
+  --dart-define-from-file=release.json \
+  -Padmob_app_id=ca-app-pub-XXXX~YYYY
 ```
 
-Без `--dart-define` реклама в релизе просто выключается. Ключ подписи берётся
-из `app/android/key.properties` (в git не попадает), иначе — debug-ключ.
+Без ключей AdMob реклама в релизе выключается, без ключей Firebase онлайн пишет
+«не настроен» — сборка всё равно пройдёт, поэтому проверяй оба на телефоне.
+Без `android/key.properties` релиз подписывается debug-ключом, и Play его не примет.
 
 Размеры последней сборки: AAB 53,4 МБ, APK по ABI 17,2 / 19,9 / 21,3 МБ,
 универсальный APK 44 МБ.

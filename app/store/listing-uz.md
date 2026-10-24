@@ -12,10 +12,10 @@ Uzun narda — o'zbek nardasi
 ## Qisqa tavsif (80 belgigacha)
 
 ```
-O'zbekcha uzun narda: kuchli bot, bitta qurilmada o'yin, oflayn va reklamasiz o'yin
+O'zbekcha uzun narda: onlayn o'yin, kuchli bot, bitta qurilmada ikki kishi
 ```
 
-(78 belgi)
+(74 belgi)
 
 ## To'liq tavsif (4000 belgigacha)
 
@@ -33,6 +33,8 @@ Bu qisqa narda emas. Bu aynan uzun narda:
 • oltita ketma-ket punktdan iborat "to'siq" qoidasi to'liq amal qiladi.
 
 NIMALAR BOR
+• Onlayn o'yin: tezkor qidiruv yoki do'st bilan 6 xonali kod orqali xona.
+  Reyting (Elo), reytinglar jadvali, revansh va tayyor iboralar.
 • Uch darajali bot: Oson, O'rta, Kuchli. Bot butun qonuniy yurishlar ro'yxatini
   ko'rib chiqadi va kelajakdagi zarlarga qaramaydi — halol o'ynaydi.
 • Bitta qurilmada ikki kishi: doska navbat bilan aylanadi.
@@ -42,20 +44,18 @@ NIMALAR BOR
   uchun ham tushunarli.
 • Chiroyli doska: iliq yog'och, milliy naqsh, katta va aniq toshlar.
 • Ovoz va tebranish, avto-yurish, pip hisobi — hammasi sozlamalarda.
-• Oflayn ishlaydi: internet faqat reklama uchun kerak.
+• Bot bilan va bitta qurilmada internetsiz o'ynash mumkin.
 • Interfeys tili: o'zbekcha va ruscha.
 
 O'yin butunlay bepul. Reklama faqat partiyalar orasida ko'rsatiladi va o'yin
 davomida hech qachon chiqmaydi. Video ko'rib, doska mavzularini 24 soatga
 ochish mumkin.
-
-Onlayn o'yin keyingi yangilanishlarda rejalashtirilgan.
 ```
 
 ## Kalit so'zlar (ASO)
 
 narda, uzun narda, nardy, длинные нарды, tosh o'yini, o'zbek nardasi,
-zar, backgammon uzbek, narda o'yini
+zar, backgammon uzbek, narda o'yini, onlayn narda
 
 ## Grafika
 
