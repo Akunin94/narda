@@ -3,7 +3,7 @@ description: >-
   «Uzun narda» — длинные нарды с узбекским интерфейсом: доска на CustomPaint,
   игра против бота, hotseat на одном устройстве и онлайн.
 publish_to: none
-version: 1.0.0+5
+version: 1.0.0+6
 
 environment:
   sdk: ^3.11.0
