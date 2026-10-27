@@ -4,8 +4,9 @@ import 'package:narda_core/narda_core.dart';
 // shortcut: временный журнал партии в logcat для разбора бота; убрать после отладки.
 const bool kGameLog = bool.fromEnvironment('NARDA_GAME_LOG');
 
-/// Пишет ход в logcat: доска до хода, кости, ход и топ-5 вариантов по оценке бота.
-void logTurn(GameState before, MoveSequence played, {required String who}) {
+/// Одна строка на ход: `T<ход> <w|b><s|r> <кости> > <сыгранный> | <топ-3 с оценкой> | n=<вариантов> | <позиция до хода>`.
+/// s — ходил игрок на устройстве, r — соперник; позиция — `GameState.encode()`.
+void logTurn(GameState before, MoveSequence played, {required bool local}) {
   if (!kGameLog) return;
   final List<MoveSequence> options = const MoveGenerator().generate(before);
   const Evaluator evaluator = Evaluator();
@@ -13,25 +14,19 @@ void logTurn(GameState before, MoveSequence played, {required String who}) {
     for (final MoveSequence option in options)
       (option, evaluator.evaluate(before.applySequence(option), before.turn)),
   ]..sort((a, b) => b.$2.compareTo(a.$2));
-  final StringBuffer out = StringBuffer()
-    ..writeln('=== ${before.turn.name} ($who) zarlar ${before.roll}: $played')
-    ..writeln('state ${before.encode()}')
-    ..write(AsciiBoard.render(before));
-  for (final (MoveSequence option, double score) in ranked.take(5)) {
-    final String mark = option == played ? '*' : ' ';
-    out.writeln('$mark ${score.toStringAsFixed(1)}  $option');
-  }
-  out.writeln('variantlar: ${options.length}');
-  _emit(out.toString());
+  final String top = ranked
+      .take(3)
+      .map(((MoveSequence, double) r) =>
+          '${r.$1 == played ? '*' : ''}${r.$1} ${r.$2.round()}')
+      .join('; ');
+  debugPrint(
+    'NARDA T${before.turnIndex} ${before.turn.code}${local ? 's' : 'r'} '
+    '${before.roll} > $played | $top | n=${options.length} | ${before.encode()}',
+  );
 }
 
 void logResult(GameResult result) {
-  if (kGameLog) _emit('=== natija: ${result.winner.name} g\'alaba, mars=${result.isMars}');
-}
-
-// Префикс на каждой строке — чтобы вытащить журнал через grep.
-void _emit(String text) {
-  for (final String line in text.split('\n')) {
-    if (line.isNotEmpty) debugPrint('NARDA $line');
+  if (kGameLog) {
+    debugPrint('NARDA END ${result.winner.code} mars=${result.isMars}');
   }
 }

@@ -414,7 +414,7 @@ class MatchController extends ChangeNotifier {
     final GameState before = _game.state;
     _lastTurnMoves = const <Move>[];
     _planner = null;
-    logTurn(before, MoveSequence.empty, who: _who(before));
+    logTurn(before, MoveSequence.empty, local: before.turn == setup.localPlayer);
     _game.pass(forced: forced);
     if (!await _publishLocal(before, MoveSequence.empty, generation)) return;
     unawaited(_runTurn());
@@ -445,7 +445,7 @@ class MatchController extends ChangeNotifier {
     _planner = null;
     _selected = null;
     _lastTurnMoves = sequence.moves;
-    logTurn(before, sequence, who: _who(before));
+    logTurn(before, sequence, local: before.turn == setup.localPlayer);
     _game.play(sequence);
     if (!await _publishLocal(before, sequence, generation)) return;
     if (_finishIfOver()) return;
@@ -523,9 +523,6 @@ class MatchController extends ChangeNotifier {
     _finish(_game.result!);
     return true;
   }
-
-  String _who(GameState before) =>
-      before.turn == setup.localPlayer ? 'siz' : 'raqib';
 
   void _finish(GameResult result) {
     logResult(result);
