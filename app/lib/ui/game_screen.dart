@@ -212,21 +212,30 @@ class _GameScreenState extends State<GameScreen> {
       ),
       SizedBox(
         width: 300,
-        child: FillOrScroll(
-          child: Column(
-            children: <Widget>[
-              _buildTopBar(text),
-              if (_isOnline)
-                OnlineStatusBar(
-                  match: widget.online!,
-                  isOver: _controller.isOver,
-                ),
-              _buildPlayerStrip(text, theme, _controller.perspective.opponent),
-              const Spacer(),
-              _buildPlayerStrip(text, theme, _controller.perspective),
-              _buildActionBar(text),
-            ],
-          ),
+        child: AdaptiveColumn(
+          tallHeight: 360,
+          children: (Widget Function(int flex) gap) => <Widget>[
+            _buildTopBar(text),
+            if (_isOnline)
+              OnlineStatusBar(
+                match: widget.online!,
+                isOver: _controller.isOver,
+              ),
+            _buildPlayerStrip(
+              text,
+              theme,
+              _controller.perspective.opponent,
+              compact: true,
+            ),
+            gap(1),
+            _buildPlayerStrip(
+              text,
+              theme,
+              _controller.perspective,
+              compact: true,
+            ),
+            _buildActionBar(text),
+          ],
         ),
       ),
     ],
@@ -326,10 +335,25 @@ class _GameScreenState extends State<GameScreen> {
     ],
   );
 
-  Widget _buildPlayerStrip(AppText text, BoardTheme theme, Player player) {
+  /// [compact] — узкая панель альбома: кубики уходят на вторую строку,
+  /// иначе дубль из четырёх кубиков не влезает в ширину.
+  Widget _buildPlayerStrip(
+    AppText text,
+    BoardTheme theme,
+    Player player, {
+    bool compact = false,
+  }) {
     final GameState state = _controller.state;
     final bool active = state.turn == player;
-    return Container(
+    final Widget? dice = active && !_controller.isOver
+        ? DiceView(
+            roll: state.roll,
+            remaining: state.remainingDice,
+            rolling: _controller.phase == TurnPhase.rolling,
+            theme: theme,
+          )
+        : null;
+    final Widget strip = Container(
       margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
@@ -385,15 +409,17 @@ class _GameScreenState extends State<GameScreen> {
                 ),
               ),
             ),
-          if (active && !_controller.isOver)
-            DiceView(
-              roll: state.roll,
-              remaining: state.remainingDice,
-              rolling: _controller.phase == TurnPhase.rolling,
-              theme: theme,
-            ),
+          if (dice != null && !compact) dice,
         ],
       ),
+    );
+    if (dice == null || !compact) return strip;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: <Widget>[
+        strip,
+        Padding(padding: const EdgeInsets.only(right: 14), child: dice),
+      ],
     );
   }
 

@@ -30,87 +30,86 @@ class HomeScreen extends StatelessWidget {
     final SettingsController settings = SettingsScope.of(context);
     return Scaffold(
       body: SafeArea(
-        child: FillOrScroll(
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 480),
-              child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 28),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              const Align(
-                alignment: Alignment.centerRight,
-                child: _ProfileButton(),
-              ),
-              const Spacer(flex: 2),
-              Text(
-                text.appTitle,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 40,
-                  fontWeight: FontWeight.w700,
-                  color: NardaColors.gold,
-                  letterSpacing: 1.5,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                text.menuSubtitle,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 16,
-                  color: NardaColors.textMuted,
-                ),
-              ),
-              const Spacer(),
-              FilledButton(
-                onPressed: () => _chooseLevel(context, text, settings),
-                child: Text(text.menuPlayBot),
-              ),
-              const SizedBox(height: 12),
-              OutlinedButton(
-                onPressed: () => openScreen(context, const OnlineScreen()),
-                child: Text(text.menuPlayOnline),
-              ),
-              const SizedBox(height: 12),
-              OutlinedButton(
-                onPressed: () => _startGame(
-                  context,
-                  settings,
-                  GameSetup.hotseat(target: settings.matchTarget),
-                ),
-                child: Text(text.menuPlayHotseat),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  _MenuLink(
-                    icon: Icons.menu_book_outlined,
-                    label: text.menuRules,
-                    onPressed: () => openScreen(context, const RulesScreen()),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 480),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 28),
+              child: AdaptiveColumn(
+                tallHeight: 560,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: (Widget Function(int flex) gap) => <Widget>[
+                  const Align(
+                    alignment: Alignment.centerRight,
+                    child: _ProfileButton(),
                   ),
-                  _MenuLink(
-                    icon: Icons.bar_chart,
-                    label: text.menuStats,
-                    onPressed: () => openScreen(context, const StatsScreen()),
+                  gap(2),
+                  Text(
+                    text.appTitle,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 40,
+                      fontWeight: FontWeight.w700,
+                      color: NardaColors.gold,
+                      letterSpacing: 1.5,
+                    ),
                   ),
-                  _MenuLink(
-                    icon: Icons.palette_outlined,
-                    label: text.menuThemes,
-                    onPressed: () => openScreen(context, const ThemesScreen()),
+                  const SizedBox(height: 8),
+                  Text(
+                    text.menuSubtitle,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: NardaColors.textMuted,
+                    ),
                   ),
-                  _MenuLink(
-                    icon: Icons.settings,
-                    label: text.menuSettings,
-                    onPressed: () => showSettingsSheet(context),
+                  gap(1),
+                  FilledButton(
+                    onPressed: () => _chooseLevel(context, text, settings),
+                    child: Text(text.menuPlayBot),
                   ),
+                  const SizedBox(height: 12),
+                  OutlinedButton(
+                    onPressed: () => openScreen(context, const OnlineScreen()),
+                    child: Text(text.menuPlayOnline),
+                  ),
+                  const SizedBox(height: 12),
+                  OutlinedButton(
+                    onPressed: () => _startGame(
+                      context,
+                      settings,
+                      GameSetup.hotseat(target: settings.matchTarget),
+                    ),
+                    child: Text(text.menuPlayHotseat),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      _MenuLink(
+                        icon: Icons.menu_book_outlined,
+                        label: text.menuRules,
+                        onPressed: () => openScreen(context, const RulesScreen()),
+                      ),
+                      _MenuLink(
+                        icon: Icons.bar_chart,
+                        label: text.menuStats,
+                        onPressed: () => openScreen(context, const StatsScreen()),
+                      ),
+                      _MenuLink(
+                        icon: Icons.palette_outlined,
+                        label: text.menuThemes,
+                        onPressed: () => openScreen(context, const ThemesScreen()),
+                      ),
+                      _MenuLink(
+                        icon: Icons.settings,
+                        label: text.menuSettings,
+                        onPressed: () => showSettingsSheet(context),
+                      ),
+                    ],
+                  ),
+                  gap(2),
                 ],
-              ),
-              const Spacer(flex: 2),
-            ],
-          ),
               ),
             ),
           ),

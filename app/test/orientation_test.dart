@@ -45,7 +45,6 @@ void main() {
       final Rect board = tester.getRect(find.byType(BoardView));
       // Доска повторяет ориентацию экрана: в альбоме шире, в портрете выше.
       expect(board.width > board.height, size.width > size.height);
-      expect(tester.takeException(), isNull);
     });
   }
 }

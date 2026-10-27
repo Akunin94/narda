@@ -45,22 +45,35 @@ Future<bool> confirmAction(BuildContext context, String question) async {
   return confirmed ?? false;
 }
 
-/// Колонка на всю высоту, которая прокручивается, когда не влезает
-/// (альбомная ориентация); `Spacer` внутри продолжают работать.
-class FillOrScroll extends StatelessWidget {
-  const FillOrScroll({super.key, required this.child});
+/// Колонка экрана: если высоты хватает ([tallHeight]), свободное место
+/// раздают `Spacer`'ы, иначе (альбом) — прокрутка с отступами 12×flex.
+class AdaptiveColumn extends StatelessWidget {
+  const AdaptiveColumn({
+    super.key,
+    required this.tallHeight,
+    required this.children,
+    this.crossAxisAlignment = CrossAxisAlignment.center,
+  });
 
-  final Widget child;
+  final double tallHeight;
+  final CrossAxisAlignment crossAxisAlignment;
+
+  /// Строит детей; `gap(flex)` — промежуток нужной «весомости».
+  final List<Widget> Function(Widget Function(int flex) gap) children;
 
   @override
   Widget build(BuildContext context) => LayoutBuilder(
-    builder: (BuildContext context, BoxConstraints constraints) =>
-        SingleChildScrollView(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(minHeight: constraints.maxHeight),
-            child: IntrinsicHeight(child: child),
-          ),
+    builder: (BuildContext context, BoxConstraints constraints) {
+      final bool tall = constraints.maxHeight >= tallHeight;
+      final Widget column = Column(
+        crossAxisAlignment: crossAxisAlignment,
+        children: children(
+          (int flex) =>
+              tall ? Spacer(flex: flex) : SizedBox(height: 12.0 * flex),
         ),
+      );
+      return tall ? column : SingleChildScrollView(child: column);
+    },
   );
 }
 
