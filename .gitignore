@@ -16,3 +16,6 @@ coverage/
 
 # OS
 .DS_Store
+
+# Журнал партии из tool/dev_install.sh
+narda-game.log
