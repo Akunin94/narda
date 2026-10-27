@@ -59,7 +59,7 @@ dart run bin/selfplay.dart --seed=42       # партия бот-против-б
 cd app
 flutter analyze && flutter test
 flutter gen-l10n                           # после правки ARB
-flutter run                                # Android, portrait
+flutter run                                # Android
 flutter run --dart-define=FIREBASE_API_KEY=... # онлайн, ключи см. README
 
 # ассеты — только после правки генераторов, файлы закоммичены
@@ -83,6 +83,8 @@ flutter test tool/generate_art.dart        # иконки mipmap-* и store/*.pn
 - **Локализация.** `AppText.supportedLocales` отсортирован по алфавиту (ru, uz),
   поэтому язык по умолчанию задаётся через `resolveNardaLocale` в `app/lib/app.dart`.
   Без него на любом «чужом» языке устройства включался бы русский.
+- **Ориентация: портрет и альбом** (просьба владельца, отступление от §2).
+  В альбоме `GameScreen` ставит доску слева, панель игроков справа.
 - **Форматирование.** Репозиторий намеренно не прогнан через `dart format`
   (стиль расставлен вручную). Не запускай форматтер по всему проекту.
 - Кости в ядре берутся из `DiceSource` — это точка замены для серверных костей

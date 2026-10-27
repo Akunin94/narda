@@ -45,6 +45,25 @@ Future<bool> confirmAction(BuildContext context, String question) async {
   return confirmed ?? false;
 }
 
+/// Колонка на всю высоту, которая прокручивается, когда не влезает
+/// (альбомная ориентация); `Spacer` внутри продолжают работать.
+class FillOrScroll extends StatelessWidget {
+  const FillOrScroll({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (BuildContext context, BoxConstraints constraints) =>
+        SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: IntrinsicHeight(child: child),
+          ),
+        ),
+  );
+}
+
 /// Шапка раздела: заголовок на цвете поверхности.
 class NardaAppBar extends AppBar {
   NardaAppBar({super.key, required String title})

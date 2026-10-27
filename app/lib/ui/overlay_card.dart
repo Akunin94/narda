@@ -28,7 +28,8 @@ class ModalOverlay extends StatelessWidget {
   Widget build(BuildContext context) => ColoredBox(
     color: Colors.black.withValues(alpha: 0.65),
     child: Center(
-      child: NardaCard(
+      child: SingleChildScrollView(
+        child: NardaCard(
         margin: const EdgeInsets.symmetric(horizontal: 32),
         padding: const EdgeInsets.all(24),
         radius: 20,
@@ -47,6 +48,7 @@ class ModalOverlay extends StatelessWidget {
             ...children,
           ],
         ),
+      ),
       ),
     ),
   );

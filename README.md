@@ -52,7 +52,7 @@ cd app
 flutter pub get
 flutter analyze                    # без замечаний
 flutter test                       # ход, геометрия доски, экраны, 20 партий подряд
-flutter run                        # Android, portrait
+flutter run                        # Android, портрет и альбом
 ```
 
 Язык интерфейса — узбекский по умолчанию; русский включается, если он стоит в

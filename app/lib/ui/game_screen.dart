@@ -167,48 +167,10 @@ class _GameScreenState extends State<GameScreen> {
           ]),
           builder: (BuildContext context, Widget? child) => Stack(
             children: <Widget>[
-              Column(
-                children: <Widget>[
-                  _buildTopBar(text),
-                  if (_isOnline)
-                    OnlineStatusBar(
-                      match: widget.online!,
-                      isOver: _controller.isOver,
-                    ),
-                  _buildPlayerStrip(text, theme, _controller.perspective.opponent),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      child: Center(
-                        child: _boardBox(
-                          child: BoardView(
-                            state: _controller.state,
-                            theme: theme,
-                            perspective: _controller.perspective,
-                            selected: _controller.selected,
-                            destinations: _controller.destinations,
-                            movable: _controller.movableSources.toSet(),
-                            lastMoves: _controller.lastTurnMoves,
-                            animated: _controller.animated,
-                            interactive: _controller.canInteract,
-                            moveDuration: _controller.timing.move,
-                            onTapPoint: _controller.tapPoint,
-                            onTapTray: _controller.tapBearOff,
-                            onDragStart: _controller.beginDrag,
-                            onDrop: (int fromAbs, int? toAbs) =>
-                                _controller.drop(fromAbs: fromAbs, toAbs: toAbs),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  _buildPlayerStrip(text, theme, _controller.perspective),
-                  _buildActionBar(text),
-                ],
-              ),
+              if (MediaQuery.orientationOf(context) == Orientation.landscape)
+                _buildLandscape(text, theme)
+              else
+                _buildPortrait(text, theme),
               if (_controller.phase == TurnPhase.finished && !_switchingGame)
                 Positioned.fill(child: _buildResultOverlay(text)),
               if (_controller.phase == TurnPhase.aborted)
@@ -219,6 +181,74 @@ class _GameScreenState extends State<GameScreen> {
       ),
     );
   }
+
+  Widget _buildPortrait(AppText text, BoardTheme theme) => Column(
+    children: <Widget>[
+      _buildTopBar(text),
+      if (_isOnline)
+        OnlineStatusBar(match: widget.online!, isOver: _controller.isOver),
+      _buildPlayerStrip(text, theme, _controller.perspective.opponent),
+      Expanded(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          child: Center(child: _boardBox(child: _buildBoard(theme))),
+        ),
+      ),
+      _buildPlayerStrip(text, theme, _controller.perspective),
+      _buildActionBar(text),
+    ],
+  );
+
+  /// Альбом: доска слева во всю высоту, справа — панель с игроками и кнопками.
+  Widget _buildLandscape(AppText text, BoardTheme theme) => Row(
+    children: <Widget>[
+      Expanded(
+        child: Padding(
+          padding: const EdgeInsets.all(4),
+          child: Center(
+            child: _boardBox(landscape: true, child: _buildBoard(theme)),
+          ),
+        ),
+      ),
+      SizedBox(
+        width: 300,
+        child: FillOrScroll(
+          child: Column(
+            children: <Widget>[
+              _buildTopBar(text),
+              if (_isOnline)
+                OnlineStatusBar(
+                  match: widget.online!,
+                  isOver: _controller.isOver,
+                ),
+              _buildPlayerStrip(text, theme, _controller.perspective.opponent),
+              const Spacer(),
+              _buildPlayerStrip(text, theme, _controller.perspective),
+              _buildActionBar(text),
+            ],
+          ),
+        ),
+      ),
+    ],
+  );
+
+  Widget _buildBoard(BoardTheme theme) => BoardView(
+    state: _controller.state,
+    theme: theme,
+    perspective: _controller.perspective,
+    selected: _controller.selected,
+    destinations: _controller.destinations,
+    movable: _controller.movableSources.toSet(),
+    lastMoves: _controller.lastTurnMoves,
+    animated: _controller.animated,
+    interactive: _controller.canInteract,
+    moveDuration: _controller.timing.move,
+    onTapPoint: _controller.tapPoint,
+    onTapTray: _controller.tapBearOff,
+    onDragStart: _controller.beginDrag,
+    onDrop: (int fromAbs, int? toAbs) =>
+        _controller.drop(fromAbs: fromAbs, toAbs: toAbs),
+  );
 
   Widget _buildAbortOverlay(AppText text) => ModalOverlay(
     title: text.onlineAborted,
@@ -241,15 +271,20 @@ class _GameScreenState extends State<GameScreen> {
     ],
   );
 
-  /// Доска занимает всю доступную высоту, но не вытягивается уже,
-  /// чем 0.62 ширины к высоте.
-  Widget _boardBox({required Widget child}) => LayoutBuilder(
-    builder: (BuildContext context, BoxConstraints constraints) => SizedBox(
-      width: constraints.maxWidth,
-      height: math.min(constraints.maxHeight, constraints.maxWidth / 0.62),
-      child: child,
-    ),
-  );
+  /// Портрет: доска во всю высоту, но не уже 0.62 ширины к высоте.
+  /// Альбом: во всю высоту, но не шире 1.7 высоты.
+  Widget _boardBox({required Widget child, bool landscape = false}) =>
+      LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) => SizedBox(
+          width: landscape
+              ? math.min(constraints.maxWidth, constraints.maxHeight * 1.7)
+              : constraints.maxWidth,
+          height: landscape
+              ? constraints.maxHeight
+              : math.min(constraints.maxHeight, constraints.maxWidth / 0.62),
+          child: child,
+        ),
+      );
 
   Widget _buildTopBar(AppText text) => Row(
     children: <Widget>[
@@ -322,11 +357,14 @@ class _GameScreenState extends State<GameScreen> {
             NardaAvatar(index: _avatarOf(player), size: 20),
             const SizedBox(width: 6),
           ],
-          Text(
-            _playerName(text, player),
-            style: const TextStyle(
-              fontWeight: FontWeight.w600,
-              color: NardaColors.textPrimary,
+          Flexible(
+            child: Text(
+              _playerName(text, player),
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                color: NardaColors.textPrimary,
+              ),
             ),
           ),
           const SizedBox(width: 10),

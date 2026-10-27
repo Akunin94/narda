@@ -16,7 +16,10 @@ Future<T?> showNardaSheet<T>(
   shape: const RoundedRectangleBorder(
     borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
   ),
-  builder: builder,
+  // В альбоме короткий лист может не влезть по высоте — тогда он прокручивается.
+  builder: scrollable
+      ? builder
+      : (BuildContext context) => SingleChildScrollView(child: builder(context)),
 );
 
 /// Заголовок листа или его раздела.

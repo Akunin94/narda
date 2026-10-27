@@ -30,7 +30,11 @@ class HomeScreen extends StatelessWidget {
     final SettingsController settings = SettingsScope.of(context);
     return Scaffold(
       body: SafeArea(
-        child: Padding(
+        child: FillOrScroll(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 480),
+              child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 28),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -106,6 +110,9 @@ class HomeScreen extends StatelessWidget {
               ),
               const Spacer(flex: 2),
             ],
+          ),
+              ),
+            ),
           ),
         ),
       ),
