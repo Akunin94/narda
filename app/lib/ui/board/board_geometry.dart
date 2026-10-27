@@ -30,8 +30,12 @@ class BoardGeometry {
     size.height - 2 * frame,
   );
 
-  /// Ширина лотка для выброшенных шашек.
-  late final double trayWidth = inner.width * 0.085;
+  /// Ширина лотка для выброшенных шашек; в альбоме ограничена высотой,
+  /// иначе широкая доска даёт слишком широкий лоток.
+  late final double trayWidth = math.min(
+    inner.width * 0.085,
+    inner.height * 0.07,
+  );
 
   /// Ширина «петли» посередине доски.
   late final double barWidth = inner.width * 0.04;

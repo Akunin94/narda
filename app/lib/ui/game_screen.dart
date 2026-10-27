@@ -211,7 +211,7 @@ class _GameScreenState extends State<GameScreen> {
         ),
       ),
       SizedBox(
-        width: 300,
+        width: 240,
         child: AdaptiveColumn(
           tallHeight: 360,
           children: (Widget Function(int flex) gap) => <Widget>[
@@ -234,7 +234,7 @@ class _GameScreenState extends State<GameScreen> {
               _controller.perspective,
               compact: true,
             ),
-            _buildActionBar(text),
+            _buildActionBar(text, compact: true),
           ],
         ),
       ),
@@ -353,7 +353,52 @@ class _GameScreenState extends State<GameScreen> {
             theme: theme,
           )
         : null;
-    final Widget strip = Container(
+    final List<Widget> identity = <Widget>[
+      Container(
+        width: 16,
+        height: 16,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: theme.checkerFace(player),
+          border: Border.all(color: theme.checkerEdge(player)),
+        ),
+      ),
+      const SizedBox(width: 8),
+      // В онлайне рядом с именем стоит аватар из профиля (§P5).
+      if (_isOnline) ...<Widget>[
+        NardaAvatar(index: _avatarOf(player), size: 20),
+        const SizedBox(width: 6),
+      ],
+      Flexible(
+        child: Text(
+          _playerName(text, player),
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            fontWeight: FontWeight.w600,
+            color: NardaColors.textPrimary,
+          ),
+        ),
+      ),
+      const SizedBox(width: 10),
+      if (_settings.showPips)
+        Text(
+          '${state.pipCount(player)} ${text.labelPip}',
+          style: const TextStyle(color: NardaColors.textMuted, fontSize: 13),
+        ),
+    ];
+    final Widget? borneOff = state.borneOff(player) > 0
+        ? Padding(
+            padding: const EdgeInsets.only(right: 10),
+            child: Text(
+              '${state.borneOff(player)} ${text.labelBorneOff}',
+              style: const TextStyle(
+                color: NardaColors.textMuted,
+                fontSize: 13,
+              ),
+            ),
+          )
+        : null;
+    return Container(
       margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
@@ -364,76 +409,53 @@ class _GameScreenState extends State<GameScreen> {
           width: 1.5,
         ),
       ),
-      child: Row(
-        children: <Widget>[
-          Container(
-            width: 16,
-            height: 16,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: theme.checkerFace(player),
-              border: Border.all(color: theme.checkerEdge(player)),
+      child: compact
+          ? Column(
+              children: <Widget>[
+                Row(children: identity),
+                if (borneOff != null || dice != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Row(
+                      children: <Widget>[
+                        ?borneOff,
+                        const Spacer(),
+                        ?dice,
+                      ],
+                    ),
+                  ),
+              ],
+            )
+          : Row(
+              children: <Widget>[
+                ...identity,
+                const Spacer(),
+                ?borneOff,
+                ?dice,
+              ],
             ),
-          ),
-          const SizedBox(width: 8),
-          // В онлайне рядом с именем стоит аватар из профиля (§P5).
-          if (_isOnline) ...<Widget>[
-            NardaAvatar(index: _avatarOf(player), size: 20),
-            const SizedBox(width: 6),
-          ],
-          Flexible(
-            child: Text(
-              _playerName(text, player),
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-                color: NardaColors.textPrimary,
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
-          if (_settings.showPips)
-            Text(
-              '${state.pipCount(player)} ${text.labelPip}',
-              style: const TextStyle(color: NardaColors.textMuted, fontSize: 13),
-            ),
-          const Spacer(),
-          if (state.borneOff(player) > 0)
-            Padding(
-              padding: const EdgeInsets.only(right: 10),
-              child: Text(
-                '${state.borneOff(player)} ${text.labelBorneOff}',
-                style: const TextStyle(
-                  color: NardaColors.textMuted,
-                  fontSize: 13,
-                ),
-              ),
-            ),
-          if (dice != null && !compact) dice,
-        ],
-      ),
-    );
-    if (dice == null || !compact) return strip;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: <Widget>[
-        strip,
-        Padding(padding: const EdgeInsets.only(right: 14), child: dice),
-      ],
     );
   }
 
-  Widget _buildActionBar(AppText text) => Padding(
+  /// [compact] — панель альбома: «отменить» только иконкой, без подписи.
+  Widget _buildActionBar(AppText text, {bool compact = false}) => Padding(
     padding: const EdgeInsets.fromLTRB(12, 4, 12, 10),
     child: Row(
       children: <Widget>[
-        Expanded(
-          child: OutlinedButton.icon(
+        if (compact)
+          IconButton.outlined(
             onPressed: _controller.canUndo ? _controller.undo : null,
             icon: const Icon(Icons.undo),
-            label: Text(text.actionUndo),
+            tooltip: text.actionUndo,
+          )
+        else
+          Expanded(
+            child: OutlinedButton.icon(
+              onPressed: _controller.canUndo ? _controller.undo : null,
+              icon: const Icon(Icons.undo),
+              label: Text(text.actionUndo),
+            ),
           ),
-        ),
         const SizedBox(width: 10),
         Expanded(
           child: FilledButton.icon(
