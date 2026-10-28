@@ -118,12 +118,16 @@ class MatchController extends ChangeNotifier {
   int _animationSerial = 0;
   int _generation = 0;
   bool _disposed = false;
+  bool _rollSkipped = false;
 
   /// Состояние доски: с учётом уже собранных, но ещё не подтверждённых
   /// перемещений.
   GameState get state => _planner?.current ?? _game.state;
 
   TurnPhase get phase => _phase;
+
+  /// Ход пропущен без броска: игрок заперт при любых костях.
+  bool get rollSkipped => _rollSkipped;
 
   GameResult? get result => _result;
 
@@ -335,6 +339,17 @@ class MatchController extends ChangeNotifier {
     if (isOver) return;
     final int generation = _generation;
     _clearDraft();
+    // Заперт при любом броске — кости не бросаем. Только оффлайн:
+    // в онлайне бросок нужен журналу комнаты.
+    _rollSkipped =
+        _coordinator == null && !_generator.canMoveWithAnyRoll(_game.state);
+    if (_rollSkipped) {
+      _phase = TurnPhase.noMoves;
+      _notify();
+      if (!await _wait(timing.noMoves, generation)) return;
+      await _passTurn(generation, forced: false);
+      return;
+    }
     _phase = TurnPhase.rolling;
     _feedback.dice();
     _notify();

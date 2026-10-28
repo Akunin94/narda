@@ -6,6 +6,31 @@ import 'support/positions.dart';
 void main() {
   const generator = MoveGenerator();
 
+  group('полная блокировка', () {
+    // Белые стоят на абс. 6–11 — перед головой чёрных (абс. 12).
+    final Map<int, int> wall = <int, int>{for (int abs = 6; abs <= 11; abs++) abs: 1};
+
+    test('заперт при любом броске — бросок не нужен', () {
+      final state = position(
+        turn: Player.black,
+        roll: const DiceRoll(6, 1),
+        white: wall,
+        black: <int, int>{12: 1},
+      );
+      expect(generator.canMoveWithAnyRoll(state), isFalse);
+    });
+
+    test('хоть один бросок даёт ход — бросок нужен', () {
+      final state = position(
+        turn: Player.white,
+        roll: const DiceRoll(6, 1),
+        white: wall,
+        black: <int, int>{12: 1},
+      );
+      expect(generator.canMoveWithAnyRoll(state), isTrue);
+    });
+  });
+
   group('занятость пунктов', () {
     test('нельзя встать на пункт, занятый хотя бы одной шашкой соперника', () {
       final state = position(

@@ -1,4 +1,5 @@
 import 'coords.dart';
+import 'dice.dart';
 import 'game_state.dart';
 import 'move.dart';
 import 'player.dart';
@@ -20,6 +21,18 @@ class MoveGenerator {
     final search = _Search(state)..run();
     return search.maximalSequences();
   }
+
+  /// Есть ли ход хоть при одном из 21 броска. `false` — игрок заперт
+  /// целиком, бросать кости бессмысленно.
+  bool canMoveWithAnyRoll(GameState state) => allDiceOutcomes.any(
+    (DiceOutcome outcome) => generate(
+      state.copyWith(
+        roll: outcome.roll,
+        remainingDice: outcome.roll.toRemaining(),
+        headMovesUsed: 0,
+      ),
+    ).isNotEmpty,
+  );
 
   /// Одиночные перемещения числом [die], легальные сами по себе.
   /// Не гарантируют максимальности хода — для выбора хода используй

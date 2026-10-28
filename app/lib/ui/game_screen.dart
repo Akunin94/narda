@@ -345,7 +345,7 @@ class _GameScreenState extends State<GameScreen> {
   }) {
     final GameState state = _controller.state;
     final bool active = state.turn == player;
-    final Widget? dice = active && !_controller.isOver
+    final Widget? dice = active && !_controller.isOver && !_controller.rollSkipped
         ? DiceView(
             roll: state.roll,
             remaining: state.remainingDice,
