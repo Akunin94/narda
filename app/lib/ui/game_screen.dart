@@ -461,10 +461,15 @@ class _GameScreenState extends State<GameScreen> {
           child: FilledButton.icon(
             onPressed: _controller.canConfirm ? _controller.confirm : null,
             icon: const Icon(Icons.check),
-            label: Text(
-              _controller.movesRequired > 0 && !_controller.canConfirm
-                  ? '${_controller.movesPlayed}/${_controller.movesRequired}'
-                  : text.actionConfirm,
+            // В узкой панели альбома подпись ужимается, а не переносится.
+            label: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                _controller.movesRequired > 0 && !_controller.canConfirm
+                    ? '${_controller.movesPlayed}/${_controller.movesRequired}'
+                    : text.actionConfirm,
+                maxLines: 1,
+              ),
             ),
           ),
         ),
