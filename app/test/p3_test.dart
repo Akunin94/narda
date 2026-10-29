@@ -5,6 +5,7 @@ import 'package:narda/app.dart';
 import 'package:narda/game/game_setup.dart';
 import 'package:narda/game/match_controller.dart';
 import 'package:narda/game/opponent.dart';
+import 'package:narda/game/saved_game.dart';
 import 'package:narda/game/settings.dart';
 import 'package:narda/game/stats.dart';
 import 'package:narda/theme/board_theme.dart';
@@ -260,6 +261,26 @@ void main() {
       expect(find.text('Partiya formati'), findsOneWidget);
       expect(find.text('Bitta partiya'), findsOneWidget);
       expect(find.text('Kuchli'), findsOneWidget);
+    });
+
+    testWidgets('прерванная партия с ботом предлагается продолжить', (
+      WidgetTester tester,
+    ) async {
+      final SavedBotGame saved = SavedBotGame(
+        BotLevel.kuchli,
+        const MatchScore(target: MatchTarget.to3, white: 1, gamesPlayed: 1),
+        GameState.initial(first: Player.white, roll: const DiceRoll(6, 5)),
+      );
+      final SavedBotGame back = SavedBotGame.decode(saved.encode())!;
+      expect(back.level, BotLevel.kuchli);
+      expect(back.score.toString(), saved.score.toString());
+      expect(back.state.encode(), saved.state.encode());
+
+      final SettingsController settings = SettingsController.inMemory()
+        ..savedBotGame = saved.encode();
+      await tester.pumpWidget(NardaApp(settings: settings));
+      await tester.pumpAndSettle();
+      expect(find.text("O'yinni davom ettirish"), findsOneWidget);
     });
 
     testWidgets('статистика показывает винрейт', (WidgetTester tester) async {

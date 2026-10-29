@@ -7,6 +7,9 @@
   "menuSubtitle": "Uzbek nardasi",
   "@menuSubtitle": { "description": "Подзаголовок на главном экране" },
 
+  "menuContinue": "O'yinni davom ettirish",
+  "@menuContinue": { "description": "Кнопка: продолжить прерванную партию с ботом" },
+
   "menuPlayBot": "Bot bilan o'ynash",
   "@menuPlayBot": { "description": "Кнопка: игра против бота" },
 
@@ -24,6 +27,9 @@
 
   "levelOrta": "O'rta",
   "@levelOrta": { "description": "Уровень бота: средний" },
+
+  "levelStart": "O'ynash",
+  "@levelStart": { "description": "Кнопка старта партии в листе выбора уровня" },
 
   "levelKuchli": "Kuchli",
   "@levelKuchli": { "description": "Уровень бота: сильный" },

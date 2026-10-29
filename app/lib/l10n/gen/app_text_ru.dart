@@ -15,6 +15,9 @@ class AppTextRu extends AppText {
   String get menuSubtitle => 'Узбекские нарды';
 
   @override
+  String get menuContinue => 'Продолжить партию';
+
+  @override
   String get menuPlayBot => 'Играть с ботом';
 
   @override
@@ -31,6 +34,9 @@ class AppTextRu extends AppText {
 
   @override
   String get levelOrta => 'Средний';
+
+  @override
+  String get levelStart => 'Играть';
 
   @override
   String get levelKuchli => 'Сильный';

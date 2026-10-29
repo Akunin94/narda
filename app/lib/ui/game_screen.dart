@@ -9,6 +9,7 @@ import '../app.dart';
 import '../game/feedback.dart';
 import '../game/game_setup.dart';
 import '../game/match_controller.dart';
+import '../game/saved_game.dart';
 import '../game/settings.dart';
 import '../game/stats.dart';
 import '../game/turn_coordinator.dart';
@@ -34,9 +35,13 @@ class GameScreen extends StatefulWidget {
     this.controller,
     this.online,
     this.rating,
+    this.resume,
   });
 
   final GameSetup setup;
+
+  /// Прерванная партия с ботом, которую надо продолжить.
+  final SavedBotGame? resume;
 
   /// Готовый контроллер — нужен тестам, чтобы подставить кости и соперника.
   final MatchController? controller;
@@ -71,6 +76,7 @@ class _GameScreenState extends State<GameScreen> {
             ? null
             : OnlineOpponent(widget.online!),
         coordinator: widget.online,
+        resume: widget.resume,
       );
 
   bool get _isOnline => widget.setup.mode == GameMode.online;
@@ -247,6 +253,7 @@ class _GameScreenState extends State<GameScreen> {
     perspective: _controller.perspective,
     selected: _controller.selected,
     destinations: _controller.destinations,
+    chained: _controller.chainedDestinations,
     movable: _controller.movableSources.toSet(),
     lastMoves: _controller.lastTurnMoves,
     animated: _controller.animated,

@@ -3,6 +3,7 @@
 
   "appTitle": "Длинные нарды",
   "menuSubtitle": "Узбекские нарды",
+  "menuContinue": "Продолжить партию",
   "menuPlayBot": "Играть с ботом",
   "menuPlayHotseat": "На одном устройстве",
   "menuSettings": "Настройки",
@@ -11,6 +12,7 @@
   "levelOson": "Лёгкий",
   "levelOrta": "Средний",
   "levelKuchli": "Сильный",
+  "levelStart": "Играть",
 
   "settingAutoMove": "Автоход",
   "settingAutoMoveHint": "Единственный возможный ход выполняется сам",

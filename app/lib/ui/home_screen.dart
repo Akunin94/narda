@@ -3,6 +3,7 @@ import 'package:narda_core/narda_core.dart';
 
 import '../app.dart';
 import '../game/game_setup.dart';
+import '../game/saved_game.dart';
 import '../game/settings.dart';
 import '../l10n/gen/app_text.dart';
 import '../profile/profile.dart';
@@ -28,6 +29,7 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final AppText text = AppText.of(context);
     final SettingsController settings = SettingsScope.of(context);
+    final SavedBotGame? saved = SavedBotGame.decode(settings.savedBotGame);
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -64,6 +66,19 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ),
                   gap(1),
+                  if (saved != null) ...<Widget>[
+                    FilledButton(
+                      onPressed: () => openScreen(
+                        context,
+                        GameScreen(
+                          setup: GameSetup.vsBot(saved.level, target: saved.score.target),
+                          resume: saved,
+                        ),
+                      ),
+                      child: Text(text.menuContinue),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
                   FilledButton(
                     onPressed: () => _chooseLevel(context, text, settings),
                     child: Text(text.menuPlayBot),
@@ -161,20 +176,24 @@ class HomeScreen extends StatelessWidget {
                         ? NardaColors.gold
                         : NardaColors.textMuted,
                   ),
-                  trailing: const Icon(
-                    Icons.chevron_right,
-                    color: NardaColors.textMuted,
-                  ),
-                  onTap: () => Navigator.of(context).pop(entry.level),
+                  onTap: () => settings.botLevel = entry.level,
                 ),
-              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    onPressed: () => Navigator.of(context).pop(settings.botLevel),
+                    child: Text(text.levelStart),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
       ),
     );
     if (level == null || !context.mounted) return;
-    settings.botLevel = level;
     await _startGame(
       context,
       settings,
@@ -249,6 +268,7 @@ class MatchTargetPicker extends StatelessWidget {
               target == MatchTarget.single
                   ? text.matchSingle
                   : '${target.points}',
+              textAlign: TextAlign.center,
             ),
           ),
       ],

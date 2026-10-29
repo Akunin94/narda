@@ -59,6 +59,27 @@ class TurnPlanner {
     return null;
   }
 
+  /// Куда шашка с [fromAbs] дойдёт одним или несколькими перемещениями подряд:
+  /// цель (`null` — выброс) -> кратчайшая цепочка.
+  Map<int?, List<Move>> pathsFrom(int fromAbs) {
+    final Map<int?, List<Move>> paths = <int?, List<Move>>{};
+    void walk(int from, List<Move> path) {
+      for (final Move move in movesFrom(from)) {
+        final List<Move> next = <Move>[...path, move];
+        final List<Move>? known = paths[move.toAbs];
+        if (known == null || known.length > next.length) paths[move.toAbs] = next;
+        final int? to = move.toAbs;
+        if (to == null) continue;
+        apply(move);
+        walk(to, next);
+        undo();
+      }
+    }
+
+    walk(fromAbs, const <Move>[]);
+    return paths;
+  }
+
   void apply(Move move) {
     _played.add(move);
     _states.add(current.applyMove(move));

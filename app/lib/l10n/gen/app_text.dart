@@ -109,6 +109,12 @@ abstract class AppText {
   /// **'Uzbek nardasi'**
   String get menuSubtitle;
 
+  /// Кнопка: продолжить прерванную партию с ботом
+  ///
+  /// In uz, this message translates to:
+  /// **'O\'yinni davom ettirish'**
+  String get menuContinue;
+
   /// Кнопка: игра против бота
   ///
   /// In uz, this message translates to:
@@ -144,6 +150,12 @@ abstract class AppText {
   /// In uz, this message translates to:
   /// **'O\'rta'**
   String get levelOrta;
+
+  /// Кнопка старта партии в листе выбора уровня
+  ///
+  /// In uz, this message translates to:
+  /// **'O\'ynash'**
+  String get levelStart;
 
   /// Уровень бота: сильный
   ///

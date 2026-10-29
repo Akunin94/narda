@@ -69,6 +69,28 @@ void main() {
     expect(controller.canUndo, isFalse);
   });
 
+  test('одна шашка ходит сразу на сумму костей', () async {
+    final MatchController controller = MatchController(
+      setup: const GameSetup.hotseat(),
+      settings: SettingsController.inMemory(autoMove: false),
+      dice: scriptedDice(roll: const DiceRoll(6, 5)),
+      opponent: const HotseatOpponent(Player.black),
+      timing: const MatchTiming.instant(),
+    );
+    addTearDown(controller.dispose);
+
+    controller.start();
+    await settle();
+
+    controller.tapPoint(24);
+    expect(controller.chainedDestinations, <int?>{13});
+    controller.tapPoint(13);
+    await settle();
+
+    expect(controller.state.checkersAt(Player.white, 13), 1);
+    expect(controller.canConfirm, isTrue);
+  });
+
   test('бот отвечает и очередь возвращается игроку', () async {
     final MatchController controller = MatchController(
       setup: const GameSetup.vsBot(BotLevel.orta),

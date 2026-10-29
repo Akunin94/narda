@@ -33,6 +33,7 @@ class Evaluator {
     score += weights.borneOff * state.borneOff(player);
     score -= weights.headCheckers * state.checkersOnHead(player);
     score += _blocks(state, player);
+    score -= _trapped(state, player);
     score += _stacksAndHome(state, player);
     if (state.allInHome(player)) score += weights.bearOffReady;
     return score;
@@ -42,11 +43,16 @@ class Evaluator {
   /// нумерации соперника — именно этот порядок он обязан пройти.
   double _blocks(GameState state, Player player) {
     final opponent = player.opponent;
+    // Пункты не дальше самой задней шашки соперника его уже не держат.
+    var farthest = 0;
+    for (var own = 1; own <= Coords.pointCount; own++) {
+      if (state.checkersAt(opponent, Coords.toAbsolute(opponent, own)) > 0) farthest = own;
+    }
     var score = 0.0;
     var run = 0;
     for (var own = 1; own <= Coords.pointCount + 1; own++) {
       final occupied =
-          own <= Coords.pointCount &&
+          own < farthest &&
           state.checkersAt(player, Coords.toAbsolute(opponent, own)) > 0;
       if (occupied) {
         run++;
@@ -56,7 +62,30 @@ class Evaluator {
       }
     }
     for (final abs in interceptZone(opponent)) {
-      if (state.checkersAt(player, abs) > 0) score += weights.intercept;
+      if (Coords.toOwn(opponent, abs) < farthest && state.checkersAt(player, abs) > 0) {
+        score += weights.intercept;
+      }
+    }
+    return score;
+  }
+
+  /// Шашки [player], которым ещё предстоит пройти стену соперника из 4+ пунктов.
+  double _trapped(GameState state, Player player) {
+    final opponent = player.opponent;
+    var score = 0.0;
+    var run = 0;
+    var behind = 0;
+    var trapped = 0;
+    for (var own = Coords.pointCount; own >= 0; own--) {
+      final abs = own == 0 ? null : Coords.toAbsolute(player, own);
+      if (abs != null && state.checkersAt(opponent, abs) > 0) {
+        if (run == 0) trapped = behind;
+        run++;
+      } else {
+        if (run >= 4) score += weights.trapped * (run - 3) * trapped;
+        run = 0;
+      }
+      if (abs != null) behind += state.checkersAt(player, abs);
     }
     return score;
   }

@@ -121,6 +121,7 @@ class BoardPiecesPainter extends CustomPainter {
     required this.state,
     required this.selected,
     required this.destinations,
+    this.chained = const <int?>{},
     required this.movable,
     required this.lastMoves,
     required this.flying,
@@ -138,6 +139,9 @@ class BoardPiecesPainter extends CustomPainter {
 
   /// Куда может пойти выбранная шашка; `null` — выброс.
   final List<int?> destinations;
+
+  /// Цели, куда шашка дойдёт несколькими перемещениями — рисуются двойным кольцом.
+  final Set<int?> chained;
 
   /// Пункты, с которых сейчас можно ходить.
   final Set<int> movable;
@@ -189,11 +193,11 @@ class BoardPiecesPainter extends CustomPainter {
       }
       canvas.drawPath(geometry.pointPath(abs), glow);
       final int count = state.checkersAt(mover, abs);
-      canvas.drawCircle(
-        geometry.checkerCenter(abs, count, count + 1),
-        geometry.checkerRadius * 0.9,
-        marker,
-      );
+      final Offset center = geometry.checkerCenter(abs, count, count + 1);
+      canvas.drawCircle(center, geometry.checkerRadius * 0.9, marker);
+      if (chained.contains(abs)) {
+        canvas.drawCircle(center, geometry.checkerRadius * 0.55, marker);
+      }
     }
   }
 

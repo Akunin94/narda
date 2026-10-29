@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:narda_core/narda_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -87,6 +89,7 @@ class SettingsController extends ChangeNotifier {
   static const String _keyBotLevel = 'bot_level';
   static const String _keyMatchTarget = 'match_target';
   static const String _unlockPrefix = 'theme_until_';
+  static const String _keySavedGame = 'saved_bot_game';
 
   /// Часы: подменяются в тестах, чтобы проверить истечение разблокировки.
   final DateTime Function() now;
@@ -101,6 +104,24 @@ class SettingsController extends ChangeNotifier {
   String _boardThemeId;
   BotLevel _botLevel;
   MatchTarget _matchTarget;
+
+  String? _memorySavedGame;
+
+  /// Прерванная партия с ботом в виде [SavedBotGame.encode]; `null` — её нет.
+  String? get savedBotGame => _prefs == null ? _memorySavedGame : _prefs.getString(_keySavedGame);
+
+  set savedBotGame(String? value) {
+    final bool changed = (savedBotGame == null) != (value == null);
+    _memorySavedGame = value;
+    if (value == null) {
+      _prefs?.remove(_keySavedGame);
+    } else {
+      _prefs?.setString(_keySavedGame, value);
+    }
+    // Пишется каждый ход — слушателей будим, лишь когда сохранение появилось или пропало.
+    // Микротаск: запись идёт и из didChangeDependencies, где будить виджеты нельзя.
+    if (changed) scheduleMicrotask(notifyListeners);
+  }
 
   /// Сроки разблокировки тем для варианта без диска.
   final Map<String, int> _memoryUnlocks = <String, int>{};

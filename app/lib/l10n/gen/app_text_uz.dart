@@ -15,6 +15,9 @@ class AppTextUz extends AppText {
   String get menuSubtitle => 'Uzbek nardasi';
 
   @override
+  String get menuContinue => 'O\'yinni davom ettirish';
+
+  @override
   String get menuPlayBot => 'Bot bilan o\'ynash';
 
   @override
@@ -31,6 +34,9 @@ class AppTextUz extends AppText {
 
   @override
   String get levelOrta => 'O\'rta';
+
+  @override
+  String get levelStart => 'O\'ynash';
 
   @override
   String get levelKuchli => 'Kuchli';

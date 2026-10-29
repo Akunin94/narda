@@ -5,6 +5,7 @@ import 'package:narda_core/narda_core.dart';
 
 import 'feedback.dart';
 import 'game_log.dart';
+import 'saved_game.dart';
 import 'game_setup.dart';
 import 'opponent.dart';
 import 'settings.dart';
@@ -80,11 +81,13 @@ class MatchController extends ChangeNotifier {
     TurnCoordinator? coordinator,
     this.onGameFinished,
     this.timing = const MatchTiming(),
-  }) : _game = Game(dice: dice ?? RandomDiceSource()),
+    SavedBotGame? resume,
+  }) : _resume = resume,
+       _game = Game(dice: dice ?? RandomDiceSource()),
        _opponent = opponent ?? createOpponent(setup),
        _feedback = feedback ?? const SilentFeedback(),
        _coordinator = coordinator,
-       _score = MatchScore(target: setup.target) {
+       _score = resume?.score ?? MatchScore(target: setup.target) {
     _signals = coordinator?.signals.listen(_handleSignal);
   }
 
@@ -108,6 +111,9 @@ class MatchController extends ChangeNotifier {
 
   MatchScore _score;
 
+  /// Сохранённая позиция, с которой продолжить первую партию.
+  SavedBotGame? _resume;
+
   TurnPhase _phase = TurnPhase.rolling;
   TurnPlanner? _planner;
   GameResult? _result;
@@ -119,6 +125,13 @@ class MatchController extends ChangeNotifier {
   int _generation = 0;
   bool _disposed = false;
   bool _rollSkipped = false;
+
+  /// Идёт анимация составного хода одной шашкой — доска ждёт.
+  bool _chaining = false;
+
+  /// Цепочки для выбранной шашки: считаются один раз на позицию и пункт.
+  (int, GameState)? _pathsKey;
+  Map<int?, List<Move>> _pathsCache = const <int?, List<Move>>{};
 
   /// Состояние доски: с учётом уже собранных, но ещё не подтверждённых
   /// перемещений.
@@ -160,7 +173,8 @@ class MatchController extends ChangeNotifier {
   bool get isLocalTurn =>
       _opponent.movesOnThisDevice || state.turn == setup.localPlayer;
 
-  bool get canInteract => _phase == TurnPhase.choosing && _planner != null;
+  bool get canInteract =>
+      _phase == TurnPhase.choosing && _planner != null && !_chaining;
 
   bool get canConfirm => canInteract && _planner!.isComplete;
 
@@ -171,10 +185,23 @@ class MatchController extends ChangeNotifier {
       canInteract ? _planner!.sources : const <int>[];
 
   /// Куда может пойти выбранная шашка; `null` в списке — выброс.
-  List<int?> get destinations {
+  List<int?> get destinations => _paths.keys.toList();
+
+  /// Цели из [destinations], куда шашка дойдёт только за несколько перемещений.
+  Set<int?> get chainedDestinations => <int?>{
+    for (final MapEntry<int?, List<Move>> entry in _paths.entries)
+      if (entry.value.length > 1) entry.key,
+  };
+
+  Map<int?, List<Move>> get _paths {
     final int? from = _selected;
-    if (from == null || !canInteract) return const <int?>[];
-    return <int?>[for (final Move move in _planner!.movesFrom(from)) move.toAbs];
+    if (from == null || !canInteract) return const <int?, List<Move>>{};
+    final (int, GameState) key = (from, _planner!.current);
+    if (key != _pathsKey) {
+      _pathsKey = key;
+      _pathsCache = _planner!.pathsFrom(from);
+    }
+    return _pathsCache;
   }
 
   /// Сколько перемещений уже собрано и сколько нужно всего.
@@ -187,7 +214,13 @@ class MatchController extends ChangeNotifier {
   void start() {
     final TurnCoordinator? coordinator = _coordinator;
     if (coordinator == null) {
-      _game.start();
+      final SavedBotGame? resume = _resume;
+      _resume = null;
+      if (resume == null) {
+        _game.start();
+      } else {
+        _game.restore(resume.state);
+      }
       unawaited(_runTurn());
       return;
     }
@@ -217,22 +250,21 @@ class MatchController extends ChangeNotifier {
     final TurnPlanner planner = _planner!;
     final int? from = _selected;
     if (from != null && from != abs) {
-      final Move? move = planner.moveTo(from, abs);
-      if (move != null) {
-        _selected = null;
-        _play(move);
+      final List<Move>? path = _paths[abs];
+      if (path != null) {
+        _playPath(path);
         return;
       }
     }
-    final List<Move> moves = planner.movesFrom(abs);
-    if (moves.isEmpty || from == abs) {
+    if (planner.movesFrom(abs).isEmpty || from == abs) {
       _selected = null;
       _notify();
       return;
     }
-    if (settings.autoMove && moves.length == 1) {
-      _selected = null;
-      _play(moves.single);
+    // Куда идти — однозначно (часто это выброс): ходим сразу, без второго тапа.
+    final Map<int?, List<Move>> paths = planner.pathsFrom(abs);
+    if (paths.length == 1) {
+      _playPath(paths.values.single);
       return;
     }
     _selected = abs;
@@ -242,12 +274,8 @@ class MatchController extends ChangeNotifier {
   /// Тап по лотку выброса выбранной шашкой (chiqarish).
   void tapBearOff() {
     if (!canInteract) return;
-    final int? from = _selected;
-    if (from == null) return;
-    final Move? move = _planner!.moveTo(from, null);
-    if (move == null) return;
-    _selected = null;
-    _play(move);
+    final List<Move>? path = _paths[null];
+    if (path != null) _playPath(path);
   }
 
   /// Начало перетаскивания: подсвечивает назначения, но ничего не двигает.
@@ -262,13 +290,32 @@ class MatchController extends ChangeNotifier {
   /// Промах оставляет шашку выбранной, чтобы можно было доходить тапом.
   void drop({required int fromAbs, required int? toAbs}) {
     if (!canInteract) return;
-    final Move? move = _planner!.moveTo(fromAbs, toAbs);
-    if (move == null) {
+    final List<Move>? path = _planner!.pathsFrom(fromAbs)[toAbs];
+    if (path == null) {
       _notify();
       return;
     }
+    _playPath(path);
+  }
+
+  /// Одно перемещение — сразу; цепочка одной шашкой — по шагам с анимацией.
+  void _playPath(List<Move> path) {
     _selected = null;
-    _play(move);
+    if (path.length == 1) {
+      _play(path.single);
+      return;
+    }
+    unawaited(_playChain(path));
+  }
+
+  Future<void> _playChain(List<Move> path) async {
+    _chaining = true;
+    try {
+      await _playSequence(MoveSequence(path), _generation);
+    } finally {
+      _chaining = false;
+      _notify();
+    }
   }
 
   /// Отмена последнего перемещения — до подтверждения хода.
@@ -339,6 +386,10 @@ class MatchController extends ChangeNotifier {
     if (isOver) return;
     final int generation = _generation;
     _clearDraft();
+    // shortcut: между партиями серии сохранения нет — выход на итоговом экране теряет счёт.
+    if (setup.mode == GameMode.bot) {
+      settings.savedBotGame = SavedBotGame(setup.botLevel!, _score, _game.state).encode();
+    }
     // Заперт при любом броске — кости не бросаем. Только оффлайн:
     // в онлайне бросок нужен журналу комнаты.
     _rollSkipped =
@@ -541,6 +592,7 @@ class MatchController extends ChangeNotifier {
 
   void _finish(GameResult result) {
     logResult(result);
+    if (setup.mode == GameMode.bot) settings.savedBotGame = null;
     _result = result;
     _score = _score.add(result);
     _phase = TurnPhase.finished;

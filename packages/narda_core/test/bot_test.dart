@@ -151,4 +151,27 @@ void main() {
       }
     });
   }, tags: <String>['perf']);
+
+  test('шашка, ушедшая из-за стены соперника, ценится выше', () {
+    const evaluator = Evaluator();
+    GameState black(Map<int, int> checkers) => position(
+      turn: Player.black,
+      roll: const DiceRoll(6, 1),
+      white: <int, int>{20: 1, 21: 1, 22: 1, 23: 1, 24: 1},
+      black: checkers,
+    );
+    // Те же pip: шашка с абс. 1 перепрыгнула стену 20–24 или ушла к ней в очередь.
+    expect(
+      evaluator.evaluate(black(<int, int>{19: 1, 7: 1}), Player.black),
+      greaterThan(evaluator.evaluate(black(<int, int>{1: 2}), Player.black)),
+    );
+  });
+
+  test('без контакта бот выбрасывает, а не держит блок (T78)', () {
+    final state = GameState.decode(
+      '7,2,2,2,0,1,1,0,0,0,0,0,-6,-1,-3,-1,0,-1,0,0,0,0,0,0|0|3|b|6-2|6,2|78|0',
+    );
+    final best = HeuristicBot(level: BotLevel.kuchli, seed: 1).choose(state)!;
+    expect(state.applySequence(best).borneOff(Player.black), 5);
+  });
 }

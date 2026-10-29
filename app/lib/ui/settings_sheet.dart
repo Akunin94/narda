@@ -89,15 +89,15 @@ class _SettingsSheetState extends State<_SettingsSheet> {
                       segments: <ButtonSegment<String>>[
                         ButtonSegment<String>(
                           value: 'auto',
-                          label: Text(text.languageAuto),
+                          label: Text(text.languageAuto, textAlign: TextAlign.center),
                         ),
                         ButtonSegment<String>(
                           value: 'uz',
-                          label: Text(text.languageUz),
+                          label: Text(text.languageUz, textAlign: TextAlign.center),
                         ),
                         ButtonSegment<String>(
                           value: 'ru',
-                          label: Text(text.languageRu),
+                          label: Text(text.languageRu, textAlign: TextAlign.center),
                         ),
                       ],
                       selected: <String>{settings.localeCode ?? 'auto'},
