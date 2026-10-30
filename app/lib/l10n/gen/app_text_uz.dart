@@ -12,7 +12,7 @@ class AppTextUz extends AppText {
   String get appTitle => 'Uzun narda';
 
   @override
-  String get menuSubtitle => 'Uzbek nardasi';
+  String get menuSubtitle => 'O\'zbek nardasi';
 
   @override
   String get menuContinue => 'O\'yinni davom ettirish';
@@ -145,7 +145,7 @@ class AppTextUz extends AppText {
   String get menuStats => 'Statistika';
 
   @override
-  String get menuThemes => 'Doska mavzusi';
+  String get menuThemes => 'Doska ko\'rinishi';
 
   @override
   String get matchTitle => 'Partiya formati';
@@ -172,10 +172,10 @@ class AppTextUz extends AppText {
   String get settingSoundHint => 'Zar, tosh va g\'alaba ovozlari';
 
   @override
-  String get settingVibration => 'Tebranish';
+  String get settingVibration => 'Vibratsiya';
 
   @override
-  String get settingVibrationHint => 'Yurish va zar tashlashda tebranish';
+  String get settingVibrationHint => 'Yurish va zar tashlashda vibratsiya';
 
   @override
   String get settingPrivacy => 'Reklama sozlamalari';
@@ -221,7 +221,7 @@ class AppTextUz extends AppText {
       'Faqat bot bilan o\'ynalgan partiyalar hisobga olinadi';
 
   @override
-  String get themesTitle => 'Doska mavzusi';
+  String get themesTitle => 'Doska ko\'rinishi';
 
   @override
   String get themeKlassik => 'Klassik';
@@ -242,7 +242,7 @@ class AppTextUz extends AppText {
   String get themeAdsUnavailable => 'Reklama hozircha tayyor emas';
 
   @override
-  String get themeUnlockedHint => 'Video ko\'rsangiz mavzu 24 soatga ochiladi';
+  String get themeUnlockedHint => 'Video ko\'rsangiz bu ko\'rinish 24 soatga ochiladi';
 
   @override
   String get rulesTitle => 'Qoidalar';

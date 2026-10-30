@@ -43,12 +43,12 @@ NIMALAR BOR
 • "Qoidalar" bo'limi rasmlar bilan — o'ynashni birinchi marta o'rganayotganlar
   uchun ham tushunarli.
 • Chiroyli doska: iliq yog'och, milliy naqsh, katta va aniq toshlar.
-• Ovoz va tebranish, avto-yurish, pip hisobi — hammasi sozlamalarda.
+• Ovoz va vibratsiya, avto-yurish, pip hisobi — hammasi sozlamalarda.
 • Bot bilan va bitta qurilmada internetsiz o'ynash mumkin.
 • Interfeys tili: o'zbekcha va ruscha.
 
 O'yin butunlay bepul. Reklama faqat partiyalar orasida ko'rsatiladi va o'yin
-davomida hech qachon chiqmaydi. Video ko'rib, doska mavzularini 24 soatga
+davomida hech qachon chiqmaydi. Video ko'rib, doska ko'rinishlarini 24 soatga
 ochish mumkin.
 ```
 
@@ -66,4 +66,4 @@ zar, backgammon uzbek, narda o'yini, onlayn narda
 | skrinshotlar | 1080×1920, 4–8 dona | qo'lda olinadi |
 
 Skrinshotlar uchun tavsiya: bosh menyu, bot bilan partiya (yurish
-belgilangan holatda), chiqarish payti, "Qoidalar", statistika, mavzular.
+belgilangan holatda), chiqarish payti, "Qoidalar", statistika, doska ko'rinishlari.

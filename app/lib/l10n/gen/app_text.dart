@@ -106,7 +106,7 @@ abstract class AppText {
   /// Подзаголовок на главном экране
   ///
   /// In uz, this message translates to:
-  /// **'Uzbek nardasi'**
+  /// **'O\'zbek nardasi'**
   String get menuSubtitle;
 
   /// Кнопка: продолжить прерванную партию с ботом
@@ -370,7 +370,7 @@ abstract class AppText {
   /// Кнопка: оформление доски
   ///
   /// In uz, this message translates to:
-  /// **'Doska mavzusi'**
+  /// **'Doska ko\'rinishi'**
   String get menuThemes;
 
   /// Заголовок выбора формата матча
@@ -424,13 +424,13 @@ abstract class AppText {
   /// Настройка вибрации
   ///
   /// In uz, this message translates to:
-  /// **'Tebranish'**
+  /// **'Vibratsiya'**
   String get settingVibration;
 
   /// Пояснение к вибрации
   ///
   /// In uz, this message translates to:
-  /// **'Yurish va zar tashlashda tebranish'**
+  /// **'Yurish va zar tashlashda vibratsiya'**
   String get settingVibrationHint;
 
   /// Кнопка окна согласия UMP
@@ -520,7 +520,7 @@ abstract class AppText {
   /// Заголовок экрана тем
   ///
   /// In uz, this message translates to:
-  /// **'Doska mavzusi'**
+  /// **'Doska ko\'rinishi'**
   String get themesTitle;
 
   /// Тема: классика
@@ -562,7 +562,7 @@ abstract class AppText {
   /// Пояснение: ролик открывает тему на 24 часа
   ///
   /// In uz, this message translates to:
-  /// **'Video ko\'rsangiz mavzu 24 soatga ochiladi'**
+  /// **'Video ko\'rsangiz bu ko\'rinish 24 soatga ochiladi'**
   String get themeUnlockedHint;
 
   /// Заголовок экрана правил

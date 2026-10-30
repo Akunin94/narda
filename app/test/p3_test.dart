@@ -241,7 +241,7 @@ void main() {
 
       expect(find.text('Qoidalar'), findsOneWidget);
       expect(find.text('Statistika'), findsOneWidget);
-      expect(find.text('Doska mavzusi'), findsOneWidget);
+      expect(find.text("Doska ko'rinishi"), findsOneWidget);
 
       await tester.tap(find.text('Qoidalar'));
       await tester.pumpAndSettle();

@@ -4,7 +4,7 @@
   "appTitle": "Uzun narda",
   "@appTitle": { "description": "Название игры" },
 
-  "menuSubtitle": "Uzbek nardasi",
+  "menuSubtitle": "O'zbek nardasi",
   "@menuSubtitle": { "description": "Подзаголовок на главном экране" },
 
   "menuContinue": "O'yinni davom ettirish",
@@ -136,7 +136,7 @@
   "menuStats": "Statistika",
   "@menuStats": { "description": "Кнопка: статистика" },
 
-  "menuThemes": "Doska mavzusi",
+  "menuThemes": "Doska ko'rinishi",
   "@menuThemes": { "description": "Кнопка: оформление доски" },
 
   "matchTitle": "Partiya formati",
@@ -163,10 +163,10 @@
   "settingSoundHint": "Zar, tosh va g'alaba ovozlari",
   "@settingSoundHint": { "description": "Пояснение к звуку" },
 
-  "settingVibration": "Tebranish",
+  "settingVibration": "Vibratsiya",
   "@settingVibration": { "description": "Настройка вибрации" },
 
-  "settingVibrationHint": "Yurish va zar tashlashda tebranish",
+  "settingVibrationHint": "Yurish va zar tashlashda vibratsiya",
   "@settingVibrationHint": { "description": "Пояснение к вибрации" },
 
   "settingPrivacy": "Reklama sozlamalari",
@@ -211,7 +211,7 @@
   "statsNote": "Faqat bot bilan o'ynalgan partiyalar hisobga olinadi",
   "@statsNote": { "description": "Пояснение: считаются только партии с ботом" },
 
-  "themesTitle": "Doska mavzusi",
+  "themesTitle": "Doska ko'rinishi",
   "@themesTitle": { "description": "Заголовок экрана тем" },
 
   "themeKlassik": "Klassik",
@@ -232,7 +232,7 @@
   "themeAdsUnavailable": "Reklama hozircha tayyor emas",
   "@themeAdsUnavailable": { "description": "Реклама сейчас недоступна" },
 
-  "themeUnlockedHint": "Video ko'rsangiz mavzu 24 soatga ochiladi",
+  "themeUnlockedHint": "Video ko'rsangiz bu ko'rinish 24 soatga ochiladi",
   "@themeUnlockedHint": { "description": "Пояснение: ролик открывает тему на 24 часа" },
 
   "rulesTitle": "Qoidalar",
