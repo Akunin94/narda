@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../l10n/gen/app_text.dart';
 import '../../online/online_match.dart';
+import '../../online/voice_chat.dart';
 import '../../theme/narda_theme.dart';
 import 'phrase_bar.dart';
 
@@ -14,9 +15,13 @@ class OnlineStatusBar extends StatelessWidget {
     super.key,
     required this.match,
     required this.isOver,
+    this.voice,
   });
 
   final OnlineMatch match;
+
+  /// Голосовая связь; `null` — кнопки микрофона нет.
+  final VoiceChat? voice;
 
   /// Партия доиграна: таймер и клейм больше не нужны.
   final bool isOver;
@@ -72,6 +77,31 @@ class OnlineStatusBar extends StatelessWidget {
                         : NardaColors.textMuted,
                   ),
                 ),
+              if (voice case final VoiceChat voice)
+                ListenableBuilder(
+                  listenable: voice,
+                  builder: (BuildContext context, Widget? child) => IconButton(
+                    onPressed: () => _toggleVoice(context, voice, text),
+                    // Точка: соперник уже включил голос и ждёт.
+                    icon: Badge(
+                      isLabelVisible: !voice.enabled && voice.peerEnabled,
+                      smallSize: 7,
+                      backgroundColor: NardaColors.gold,
+                      child: Icon(
+                        voice.enabled ? Icons.mic : Icons.mic_off,
+                        size: 18,
+                      ),
+                    ),
+                    color: voice.connected
+                        ? NardaColors.gold
+                        : voice.enabled
+                        ? NardaColors.textPrimary
+                        : NardaColors.textMuted,
+                    tooltip: !voice.enabled
+                        ? (voice.peerEnabled ? text.voicePeerOn : text.voiceTurnOn)
+                        : (voice.connected ? text.voiceOn : text.voiceWaiting),
+                  ),
+                ),
               IconButton(
                 onPressed: () => showPhraseSheet(
                   context,
@@ -86,5 +116,24 @@ class OnlineStatusBar extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  Future<void> _toggleVoice(
+    BuildContext context,
+    VoiceChat voice,
+    AppText text,
+  ) async {
+    final bool wasEnabled = voice.enabled;
+    await voice.toggle();
+    if (!context.mounted || wasEnabled) return;
+    final String? message = voice.denied
+        ? text.voiceDenied
+        : voice.enabled && !voice.peerEnabled
+        ? text.voiceWaiting
+        : null;
+    if (message == null) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
   }
 }

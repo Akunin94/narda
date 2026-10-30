@@ -397,6 +397,21 @@
   "onlineAbortedConnection": "Aloqa uzildi",
   "@onlineAbortedConnection": { "description": "Причина: обрыв связи" },
 
+  "voiceTurnOn": "Ovozli aloqani yoqish",
+  "@voiceTurnOn": { "description": "Подсказка кнопки микрофона: включить голос" },
+
+  "voiceWaiting": "Raqib ovozni yoqishini kutamiz",
+  "@voiceWaiting": { "description": "Голос включён, соперник ещё нет" },
+
+  "voiceOn": "Ovozli aloqa yoqilgan",
+  "@voiceOn": { "description": "Голос соединён" },
+
+  "voicePeerOn": "Raqib ovozni yoqdi — siz ham yoqing",
+  "@voicePeerOn": { "description": "Соперник включил голос, вы — нет" },
+
+  "voiceDenied": "Mikrofonga ruxsat berilmadi",
+  "@voiceDenied": { "description": "Пользователь не дал доступ к микрофону" },
+
   "onlinePhrasesTitle": "Iboralar",
   "@onlinePhrasesTitle": { "description": "Заголовок панели готовых фраз" },
 

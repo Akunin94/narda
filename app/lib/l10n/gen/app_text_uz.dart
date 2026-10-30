@@ -242,7 +242,8 @@ class AppTextUz extends AppText {
   String get themeAdsUnavailable => 'Reklama hozircha tayyor emas';
 
   @override
-  String get themeUnlockedHint => 'Video ko\'rsangiz bu ko\'rinish 24 soatga ochiladi';
+  String get themeUnlockedHint =>
+      'Video ko\'rsangiz bu ko\'rinish 24 soatga ochiladi';
 
   @override
   String get rulesTitle => 'Qoidalar';
@@ -412,6 +413,21 @@ class AppTextUz extends AppText {
 
   @override
   String get onlineAbortedConnection => 'Aloqa uzildi';
+
+  @override
+  String get voiceTurnOn => 'Ovozli aloqani yoqish';
+
+  @override
+  String get voiceWaiting => 'Raqib ovozni yoqishini kutamiz';
+
+  @override
+  String get voiceOn => 'Ovozli aloqa yoqilgan';
+
+  @override
+  String get voicePeerOn => 'Raqib ovozni yoqdi — siz ham yoqing';
+
+  @override
+  String get voiceDenied => 'Mikrofonga ruxsat berilmadi';
 
   @override
   String get onlinePhrasesTitle => 'Iboralar';

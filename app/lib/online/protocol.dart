@@ -12,6 +12,7 @@
 ///   outcome:  {winnerUid, reason, gameIndex}
 ///   presence/{uid}: bool
 ///   chat/{uid}: {phrase, ts}
+///   voice/{uid}: {gen, desc: {type, sdp, peerGen}, ice/{n}: <json>}
 ///   rematch/{uid}: <номер партии, с которой игрок готов играть новый матч>
 /// ```
 /// Отличие от §6 одно: журнал ходов лежит внутри `games/{gameIndex}`, потому
@@ -394,6 +395,7 @@ class RoomSnapshot {
     this.presence = const <String, bool>{},
     this.chat = const <String, String>{},
     this.rematch = const <String, int>{},
+    this.voice = const <String, VoiceSignal>{},
   });
 
   final String roomId;
@@ -413,6 +415,9 @@ class RoomSnapshot {
   /// Заявки на реванш: uid -> номер партии, с которой игрок готов начать
   /// новый матч в этой же комнате (§P5).
   final Map<String, int> rematch;
+
+  /// Голосовой сигналинг: есть запись — у игрока включён микрофон.
+  final Map<String, VoiceSignal> voice;
 
   bool get isFull => players.length >= 2;
 
@@ -445,6 +450,7 @@ class RoomSnapshot {
         json['rematch'],
         (String _, Object? value) => asInt(value),
       ),
+      voice: namedChildren(json['voice'], VoiceSignal.fromJson),
     );
   }
 
@@ -463,6 +469,49 @@ class RoomSnapshot {
   static String? _phrase(String _, Object? json) {
     final Object? phrase = childOf(json, 'phrase');
     return phrase is String ? phrase : null;
+  }
+}
+
+/// Сигналинг голоса одного игрока (WebRTC).
+class VoiceSignal {
+  const VoiceSignal({
+    required this.gen,
+    this.descType,
+    this.sdp,
+    this.descFor,
+    this.ice = const <String>[],
+  });
+
+  /// Номер сеанса: новый при каждом включении микрофона.
+  final int gen;
+
+  /// Предложение (`offer`) или ответ (`answer`) и его SDP.
+  final String? descType;
+  final String? sdp;
+
+  /// Для какого сеанса соперника написано описание.
+  final int? descFor;
+
+  /// ICE-кандидаты по порядку, JSON-строки.
+  final List<String> ice;
+
+  static VoiceSignal? fromJson(String _, Object? json) {
+    final int? gen = asInt(childOf(json, 'gen'));
+    if (gen == null) return null;
+    final Object? desc = childOf(json, 'desc');
+    final Object? type = childOf(desc, 'type');
+    final Object? sdp = childOf(desc, 'sdp');
+    final Map<int, String> ice = indexedChildren(
+      childOf(json, 'ice'),
+      (Object? value) => value is String ? value : null,
+    );
+    return VoiceSignal(
+      gen: gen,
+      descType: type is String ? type : null,
+      sdp: sdp is String ? sdp : null,
+      descFor: asInt(childOf(desc, 'peerGen')),
+      ice: <String>[for (final int key in ice.keys.toList()..sort()) ice[key]!],
+    );
   }
 }
 

@@ -413,6 +413,21 @@ class AppTextRu extends AppText {
   String get onlineAbortedConnection => 'Связь потеряна';
 
   @override
+  String get voiceTurnOn => 'Включить голос';
+
+  @override
+  String get voiceWaiting => 'Ждём, пока соперник включит голос';
+
+  @override
+  String get voiceOn => 'Голос включён';
+
+  @override
+  String get voicePeerOn => 'Соперник включил голос — включите и вы';
+
+  @override
+  String get voiceDenied => 'Нет доступа к микрофону';
+
+  @override
   String get onlinePhrasesTitle => 'Фразы';
 
   @override

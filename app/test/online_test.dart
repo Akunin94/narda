@@ -116,6 +116,26 @@ void main() {
       expect(fromList.game(0).moves[0]!.seq, <int>[24, 6, 24, 5]);
     });
 
+    test('сигналинг голоса: сеанс, описание и кандидаты по порядку', () {
+      final RoomSnapshot snapshot = RoomSnapshot.fromJson('r', <String, Object?>{
+        'voice': <String, Object?>{
+          'a': <String, Object?>{
+            'gen': 7,
+            'desc': <String, Object?>{'type': 'offer', 'sdp': 'v=0', 'peerGen': 3},
+            'ice': <Object?>['c0', 'c1'],
+          },
+          'b': <String, Object?>{'desc': <String, Object?>{'type': 'answer'}},
+        },
+      });
+
+      final VoiceSignal a = snapshot.voice['a']!;
+      expect(a.gen, 7);
+      expect(a.descType, 'offer');
+      expect(a.descFor, 3);
+      expect(a.ice, <String>['c0', 'c1']);
+      expect(snapshot.voice.containsKey('b'), isFalse, reason: 'без gen микрофон не включён');
+    });
+
     test('дырка в журнале обрывает его, а не собирает позицию по кускам', () {
       final RoomGame game = RoomGame(
         moves: <int, RoomMove>{

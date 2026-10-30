@@ -875,6 +875,36 @@ abstract class AppText {
   ///
   /// In uz, this message translates to:
   /// **'Iboralar'**
+  /// Подсказка кнопки микрофона: включить голос
+  ///
+  /// In uz, this message translates to:
+  /// **'Ovozli aloqani yoqish'**
+  String get voiceTurnOn;
+
+  /// Голос включён, соперник ещё нет
+  ///
+  /// In uz, this message translates to:
+  /// **'Raqib ovozni yoqishini kutamiz'**
+  String get voiceWaiting;
+
+  /// Голос соединён
+  ///
+  /// In uz, this message translates to:
+  /// **'Ovozli aloqa yoqilgan'**
+  String get voiceOn;
+
+  /// Соперник включил голос, вы — нет
+  ///
+  /// In uz, this message translates to:
+  /// **'Raqib ovozni yoqdi — siz ham yoqing'**
+  String get voicePeerOn;
+
+  /// Пользователь не дал доступ к микрофону
+  ///
+  /// In uz, this message translates to:
+  /// **'Mikrofonga ruxsat berilmadi'**
+  String get voiceDenied;
+
   String get onlinePhrasesTitle;
 
   /// Готовая фраза: приветствие

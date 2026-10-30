@@ -17,6 +17,7 @@ import '../l10n/gen/app_text.dart';
 import '../online/online_match.dart';
 import '../online/online_opponent.dart';
 import '../online/rating_service.dart';
+import '../online/voice_chat.dart';
 import '../profile/profile.dart';
 import '../theme/board_theme.dart';
 import '../theme/narda_theme.dart';
@@ -63,6 +64,11 @@ class _GameScreenState extends State<GameScreen> {
   late final AdsController _ads = AdsScope.of(context);
   late final ProfileController _profile = ProfileScope.of(context);
 
+  /// Голос в онлайне; микрофон включается только кнопкой.
+  late final VoiceChat? _voice = widget.online == null
+      ? null
+      : VoiceChat(widget.online!.room);
+
   /// Контроллер собирается лениво: настройки и реклама берутся из дерева,
   /// а к ним нельзя обращаться раньше, чем завершится initState.
   late final MatchController _controller =
@@ -107,6 +113,7 @@ class _GameScreenState extends State<GameScreen> {
   @override
   void dispose() {
     widget.online?.removeListener(_onOnlineChanged);
+    if (widget.online != null) _voice?.dispose();
     _controller.dispose();
     super.dispose();
   }
@@ -192,7 +199,11 @@ class _GameScreenState extends State<GameScreen> {
     children: <Widget>[
       _buildTopBar(text),
       if (_isOnline)
-        OnlineStatusBar(match: widget.online!, isOver: _controller.isOver),
+        OnlineStatusBar(
+          match: widget.online!,
+          isOver: _controller.isOver,
+          voice: _voice,
+        ),
       _buildPlayerStrip(text, theme, _controller.perspective.opponent),
       Expanded(
         child: Padding(
@@ -226,6 +237,7 @@ class _GameScreenState extends State<GameScreen> {
               OnlineStatusBar(
                 match: widget.online!,
                 isOver: _controller.isOver,
+                voice: _voice,
               ),
             _buildPlayerStrip(
               text,

@@ -68,6 +68,21 @@
           }
         },
 
+        "voice": {
+          "$uid": {
+            ".write": "auth !== null && $uid === auth.uid && data.parent().parent().child('players').child(auth.uid).exists()",
+            ".validate": "newData.hasChild('gen')",
+            "gen": { ".validate": "newData.isNumber()" },
+            "desc": {
+              ".validate": "newData.hasChildren(['type', 'sdp']) && newData.child('type').isString() && newData.child('sdp').isString() && newData.child('sdp').val().length < 20000"
+            },
+            "ice": {
+              "$i": { ".validate": "newData.isString() && newData.val().length < 1024" }
+            },
+            "$other": { ".validate": false }
+          }
+        },
+
         "state": {
           ".write": "auth !== null && data.parent().child('players').child(auth.uid).exists() && (!data.exists() || data.child('turnUid').val() === auth.uid || newData.child('gameIndex').val() > data.child('gameIndex').val())",
           ".validate": "newData.hasChildren(['points', 'turnUid', 'moveIndex', 'gameIndex'])"
