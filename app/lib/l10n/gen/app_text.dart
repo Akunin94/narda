@@ -871,10 +871,6 @@ abstract class AppText {
   /// **'Aloqa uzildi'**
   String get onlineAbortedConnection;
 
-  /// Заголовок панели готовых фраз
-  ///
-  /// In uz, this message translates to:
-  /// **'Iboralar'**
   /// Подсказка кнопки микрофона: включить голос
   ///
   /// In uz, this message translates to:
@@ -905,6 +901,10 @@ abstract class AppText {
   /// **'Mikrofonga ruxsat berilmadi'**
   String get voiceDenied;
 
+  /// Заголовок панели готовых фраз
+  ///
+  /// In uz, this message translates to:
+  /// **'Iboralar'**
   String get onlinePhrasesTitle;
 
   /// Готовая фраза: приветствие
