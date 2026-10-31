@@ -6,7 +6,7 @@ RELEASE := --release --dart-define-from-file=release.json -Padmob_app_id=$(ADMOB
 
 # Сборка с журналом → установка на все телефоны по USB → запуск → журнал в narda-game.log.
 dev:
-	app/tool/dev_install.sh
+	bash app/tool/dev_install.sh
 
 # Только запись журнала уже установленной игры (Ctrl+C — стоп).
 log:
