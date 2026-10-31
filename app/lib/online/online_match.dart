@@ -202,13 +202,12 @@ class OnlineMatch extends ChangeNotifier implements TurnCoordinator {
 
     // Реконнект в середине своего хода: бросок уже опубликован — он и в силе.
     final RoomState? published = _snapshot?.state;
-    final DiceRoll roll =
+    final bool resumed =
         published != null &&
-            published.gameIndex == game &&
-            published.moveIndex == index &&
-            published.dice != null
-        ? published.dice!
-        : _dice.roll();
+        published.gameIndex == game &&
+        published.moveIndex == index &&
+        published.dice != null;
+    final DiceRoll roll = resumed ? published.dice! : _dice.roll();
 
     final GameState turnState = state.copyWith(
       roll: roll,
@@ -216,7 +215,10 @@ class OnlineMatch extends ChangeNotifier implements TurnCoordinator {
       headMovesUsed: 0,
     );
     _turnState = turnState;
-    _deadline = _serverNow() + turnLimit.inMilliseconds;
+    // Переподключение таймер не продлевает: остаётся прежний дедлайн хода.
+    _deadline = resumed && published.deadline > 0
+        ? published.deadline
+        : _serverNow() + turnLimit.inMilliseconds;
     await room.update(<String, Object?>{
       'state': RoomState(
         points: turnState.encode(),

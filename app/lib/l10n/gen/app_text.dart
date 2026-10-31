@@ -115,17 +115,17 @@ abstract class AppText {
   /// **'O\'yinni davom ettirish'**
   String get menuContinue;
 
-  /// Кнопка: игра против бота
-  ///
-  /// In uz, this message translates to:
-  /// **'Bot bilan o\'ynash'**
-  String get menuPlayBot;
-
   /// Кнопка: вернуться в идущую онлайн-партию
   ///
   /// In uz, this message translates to:
   /// **'Onlayn o\'yinga qaytish'**
   String get menuRejoinOnline;
+
+  /// Кнопка: игра против бота
+  ///
+  /// In uz, this message translates to:
+  /// **'Bot bilan o\'ynash'**
+  String get menuPlayBot;
 
   /// Кнопка: hotseat на одном устройстве
   ///

@@ -227,9 +227,8 @@ class _OnlineScreenState extends State<OnlineScreen> {
   ]);
 
   /// Все состояния ожидания выглядят одинаково: столбик по центру экрана.
-  Widget _centered(List<Widget> children) => Column(
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: children,
+  Widget _centered(List<Widget> children) => Center(
+    child: Column(mainAxisSize: MainAxisSize.min, children: children),
   );
 
   static const Widget _spinner = CircularProgressIndicator(
