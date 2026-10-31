@@ -228,7 +228,11 @@ class OnlineMatch extends ChangeNotifier implements TurnCoordinator {
   }
 
   @override
-  Future<void> publish(GameState before, MoveSequence sequence) async {
+  Future<void> publish(
+    GameState before,
+    MoveSequence sequence, {
+    bool expired = false,
+  }) async {
     final int index = _moveIndex;
     final int game = _gameIndex;
     final GameState after = before.applySequence(sequence);
@@ -238,15 +242,14 @@ class OnlineMatch extends ChangeNotifier implements TurnCoordinator {
     _turnState = null;
     _deadline = 0;
     _position = next;
-    _localExpired = sequence.isEmpty && _generator.hasAnyMove(before)
-        ? _localExpired + 1
-        : 0;
+    _localExpired = expired ? _localExpired + 1 : 0;
 
     await room.update(<String, Object?>{
       'games/$game/moves/$index': RoomMove(
         uid: localUid,
         dice: before.roll,
         seq: encodeMoves(sequence),
+        expired: expired,
       ).toJson(),
       'state': RoomState(
         points: next.encode(),
@@ -298,7 +301,9 @@ class OnlineMatch extends ChangeNotifier implements TurnCoordinator {
       return _recover<MoveSequence?>();
     }
 
-    _opponentExpired = sequence.isEmpty && _generator.hasAnyMove(state)
+    // Старые клиенты вместо хода бота присылали пустой ход.
+    _opponentExpired =
+        move.expired || (sequence.isEmpty && _generator.hasAnyMove(state))
         ? _opponentExpired + 1
         : 0;
     _moveIndex = index + 1;
@@ -417,19 +422,25 @@ class OnlineMatch extends ChangeNotifier implements TurnCoordinator {
     }
     final GameState? turnState = _turnState;
     if (turnState != null && _deadline != 0 && _serverNow() > _deadline) {
-      unawaited(_passOnTimeout(turnState));
+      unawaited(_playOnTimeout(turnState));
     }
     notifyListeners();
   }
 
-  /// Просроченный ход — автопас (§6). Доска перезапускается с новой позиции.
-  Future<void> _passOnTimeout(GameState before) async {
+  /// Просроченный ход: за игрока ходит средний бот, второй подряд — поражение
+  /// (§6). Доска перезапускается с новой позиции.
+  Future<void> _playOnTimeout(GameState before) async {
     _turnState = null;
     _deadline = 0;
-    await publish(before, MoveSequence.empty);
+    final MoveSequence sequence =
+        _timeoutBot.choose(before) ?? MoveSequence.empty;
+    await publish(before, sequence, expired: true);
     if (_closed) return;
-    _emit(ResyncSignal(before.nextTurn(before.roll)));
+    final GameState after = before.applySequence(sequence);
+    _emit(ResyncSignal(after.isFinished ? after : after.nextTurn(before.roll)));
   }
+
+  static final HeuristicBot _timeoutBot = HeuristicBot(level: BotLevel.orta);
 
   /// Пересборка позиции реплеем журнала с нуля (§6).
   ///

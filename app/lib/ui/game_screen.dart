@@ -26,6 +26,7 @@ import 'board/board_view.dart';
 import 'chrome.dart';
 import 'dice_view.dart';
 import 'online/online_status_bar.dart';
+import 'online/phrase_bar.dart';
 import 'overlay_card.dart';
 
 /// Экран партии: доска, кости, счёт серии и кнопки хода.
@@ -191,6 +192,24 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
                 _buildLandscape(text, theme)
               else
                 _buildPortrait(text, theme),
+              // Фраза соперника — всплывашкой поверх доски, раскладку не двигает.
+              Positioned(
+                top: 8,
+                left: 0,
+                right: 0,
+                child: IgnorePointer(
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 200),
+                    child: switch (widget.online?.opponentPhrase) {
+                      final String phrase => PhraseBubble(
+                        key: ValueKey<String>(phrase),
+                        phrase: phrase,
+                      ),
+                      null => const SizedBox.shrink(),
+                    },
+                  ),
+                ),
+              ),
               if (_controller.phase == TurnPhase.finished && !_switchingGame)
                 Positioned.fill(child: _buildResultOverlay(text)),
               if (_controller.phase == TurnPhase.aborted)

@@ -286,10 +286,18 @@ class RoomState {
 
 /// Запись хода в журнале.
 class RoomMove {
-  const RoomMove({required this.uid, required this.dice, required this.seq});
+  const RoomMove({
+    required this.uid,
+    required this.dice,
+    required this.seq,
+    this.expired = false,
+  });
 
   final String uid;
   final DiceRoll dice;
+
+  /// Ход просрочен — за игрока сходил бот.
+  final bool expired;
 
   /// Плоский список пар `fromAbs, die`; пустой — пропуск хода.
   final List<int> seq;
@@ -301,6 +309,7 @@ class RoomMove {
     'dice': <int>[dice.a, dice.b],
     'seq': seq,
     'ts': serverTimestamp,
+    if (expired) 'expired': true,
   };
 
   static RoomMove? fromJson(Object? json) {
@@ -311,6 +320,7 @@ class RoomMove {
       uid: json['uid'] as String,
       dice: dice,
       seq: intList(json['seq']),
+      expired: json['expired'] == true,
     );
   }
 }

@@ -487,7 +487,7 @@ void main() {
       );
     });
 
-    test('просроченный ход пасуется автоматически', () async {
+    test('за просрочившего ходит бот, второй просроченный подряд — поражение', () async {
       final TestRoom room = await TestRoom.open();
       addTearDown(room.server.dispose);
       final TestClient white = TestClient(
@@ -522,8 +522,9 @@ void main() {
       }
 
       final List<RoomMove> log = room.white.snapshot.game(0).orderedMoves();
-      expect(log, isNotEmpty, reason: 'автопас попал в журнал');
-      expect(log.first.seq, isEmpty, reason: 'просроченный ход — пустой');
+      expect(log, isNotEmpty, reason: 'ход бота попал в журнал');
+      expect(log.first.expired, isTrue);
+      expect(log.first.seq, isNotEmpty, reason: 'за просрочившего сходил бот');
       expect(room.white.snapshot.outcome?.reason, OutcomeReason.timeout);
       await pump();
       expect(white.controller.phase, TurnPhase.finished);

@@ -66,12 +66,15 @@ class PhraseBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 6),
+    margin: const EdgeInsets.symmetric(horizontal: 48, vertical: 6),
     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
     decoration: BoxDecoration(
       color: NardaColors.surfaceHigh,
       borderRadius: BorderRadius.circular(14),
       border: Border.all(color: NardaColors.goldDeep),
+      boxShadow: const <BoxShadow>[
+        BoxShadow(color: Color(0x66000000), blurRadius: 12, offset: Offset(0, 4)),
+      ],
     ),
     child: Text(
       phraseText(AppText.of(context), phrase),

@@ -30,10 +30,8 @@ class OnlineStatusBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final AppText text = AppText.of(context);
     final Duration? left = match.turnRemaining;
-    final String? phrase = match.opponentPhrase;
     return Column(
       children: <Widget>[
-        if (phrase != null) PhraseBubble(phrase: phrase),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14),
           child: Row(
