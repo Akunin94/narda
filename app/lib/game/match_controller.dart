@@ -454,7 +454,7 @@ class MatchController extends ChangeNotifier {
       _notify();
       if (settings.autoMove && options.length == 1) {
         if (!await _playSequence(options.first, generation)) return;
-        await _commit(generation);
+        await _commit(generation, automatic: true);
       }
       return;
     }
@@ -502,7 +502,14 @@ class MatchController extends ChangeNotifier {
     _planner = null;
     logTurn(before, MoveSequence.empty, local: before.turn == setup.localPlayer);
     _game.pass(forced: forced);
-    if (!await _publishLocal(before, MoveSequence.empty, generation)) return;
+    if (!await _publishLocal(
+      before,
+      MoveSequence.empty,
+      generation,
+      automatic: true,
+    )) {
+      return;
+    }
     unawaited(_runTurn());
   }
 
@@ -525,7 +532,7 @@ class MatchController extends ChangeNotifier {
     _notify();
   }
 
-  Future<void> _commit(int generation) async {
+  Future<void> _commit(int generation, {bool automatic = false}) async {
     final TurnPlanner? planner = _planner;
     if (planner == null || !planner.isComplete) return;
     final MoveSequence sequence = planner.canonicalSequence!;
@@ -535,7 +542,14 @@ class MatchController extends ChangeNotifier {
     _lastTurnMoves = sequence.moves;
     logTurn(before, sequence, local: before.turn == setup.localPlayer);
     _game.play(sequence);
-    if (!await _publishLocal(before, sequence, generation)) return;
+    if (!await _publishLocal(
+      before,
+      sequence,
+      generation,
+      automatic: automatic,
+    )) {
+      return;
+    }
     if (_finishIfOver()) return;
     unawaited(_runTurn());
   }
@@ -545,14 +559,15 @@ class MatchController extends ChangeNotifier {
   Future<bool> _publishLocal(
     GameState before,
     MoveSequence sequence,
-    int generation,
-  ) async {
+    int generation, {
+    bool automatic = false,
+  }) async {
     final TurnCoordinator? coordinator = _coordinator;
     if (coordinator == null || before.turn != setup.localPlayer) {
       return !_isStale(generation);
     }
     try {
-      await coordinator.publish(before, sequence);
+      await coordinator.publish(before, sequence, automatic: automatic);
     } on Object {
       _abort(MatchAbortReason.connection);
       return false;

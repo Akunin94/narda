@@ -243,6 +243,7 @@ class OnlineMatch extends ChangeNotifier implements TurnCoordinator {
     GameState before,
     MoveSequence sequence, {
     bool expired = false,
+    bool automatic = false,
   }) async {
     final int index = _moveIndex;
     final int game = _gameIndex;
@@ -253,7 +254,10 @@ class OnlineMatch extends ChangeNotifier implements TurnCoordinator {
     _turnState = null;
     _deadline = 0;
     _position = next;
-    _localExpired = expired ? _localExpired + 1 : 0;
+    // Счётчик просрочек сбрасывает только ход, сделанный самим игроком.
+    _localExpired = expired
+        ? _localExpired + 1
+        : (automatic ? _localExpired : 0);
 
     await room.update(<String, Object?>{
       'games/$game/moves/$index': RoomMove(

@@ -19,8 +19,13 @@ abstract interface class TurnCoordinator {
   Future<DiceRoll> roll(GameState state);
 
   /// Подтверждённый локальный ход уходит сопернику. Пустая последовательность —
-  /// пропуск: ходов не было или ход просрочен по таймеру.
-  Future<void> publish(GameState before, MoveSequence sequence);
+  /// пропуск: ходов не было или ход просрочен по таймеру. [automatic] — ход
+  /// сделала сама игра (единственный вариант, пас): игрок этим не отметился.
+  Future<void> publish(
+    GameState before,
+    MoveSequence sequence, {
+    bool automatic = false,
+  });
 
   /// Локальный игрок сдался.
   Future<void> publishResign();
