@@ -444,6 +444,9 @@ class _FailingBackend implements OnlineBackend {
   }) async => throw const OnlineUnavailable(OnlineFailure.network);
 
   @override
+  Future<RoomHandle?> rejoin(String roomId) async => null;
+
+  @override
   Future<void> cancelQuickMatch() async {}
 
   @override

@@ -672,6 +672,9 @@ class _UnavailableBackend implements OnlineBackend {
   }) => signIn().then((_) => null);
 
   @override
+  Future<RoomHandle?> rejoin(String roomId) async => null;
+
+  @override
   Future<void> cancelQuickMatch() async {}
 
   @override
