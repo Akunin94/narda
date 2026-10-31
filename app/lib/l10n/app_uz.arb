@@ -10,6 +10,9 @@
   "menuContinue": "O'yinni davom ettirish",
   "@menuContinue": { "description": "Кнопка: продолжить прерванную партию с ботом" },
 
+  "menuRejoinOnline": "Onlayn o'yinga qaytish",
+  "@menuRejoinOnline": { "description": "Кнопка: вернуться в идущую онлайн-партию" },
+
   "menuPlayBot": "Bot bilan o'ynash",
   "@menuPlayBot": { "description": "Кнопка: игра против бота" },
 

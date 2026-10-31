@@ -38,7 +38,11 @@ class OnlineSession {
     required this.match,
     required this.setup,
     required this.rating,
+    this.score,
   });
+
+  /// Счёт серии при возврате в идущую партию; `null` — серия с нуля.
+  final MatchScore? score;
 
   final OnlineMatch match;
   final GameSetup setup;
@@ -138,6 +142,18 @@ class LobbyController extends ChangeNotifier {
   });
 
   /// Отмена ожидания: очередь освобождается, комната покидается.
+  /// Возврат в идущую партию после перезапуска приложения.
+  Future<void> rejoin(String roomId, {MatchScore? score}) => _run(() async {
+    _enter(LobbyStage.connecting);
+    await _signIn();
+    final RoomHandle? room = await _backend.rejoin(roomId);
+    if (room == null) throw const OnlineUnavailable(OnlineFailure.roomNotFound);
+    _score = score;
+    await _openWhenFull(room);
+  });
+
+  MatchScore? _score;
+
   Future<void> cancel() async {
     _cancelled = true;
     _botOfferTimer?.cancel();
@@ -185,6 +201,7 @@ class LobbyController extends ChangeNotifier {
     _session = OnlineSession(
       match: match,
       rating: _rating,
+      score: _score,
       setup: GameSetup.online(
         localPlayer: color,
         target: snapshot.meta?.matchTarget ?? MatchTarget.single,

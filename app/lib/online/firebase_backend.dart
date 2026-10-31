@@ -401,6 +401,21 @@ class FirebaseOnlineBackend implements OnlineBackend {
   }
 
   @override
+  Future<RoomHandle?> rejoin(String roomId) async {
+    await signIn();
+    try {
+      final DataSnapshot room = await _db.ref('rooms/$roomId').get();
+      final RoomSnapshot snapshot = RoomSnapshot.fromJson(roomId, room.value);
+      if (!snapshot.players.containsKey(_me)) return null;
+      return _FirebaseRoom(_db, roomId: roomId, uid: _me).._snapshot = snapshot;
+    } on FirebaseException catch (error) {
+      // Комнаты больше нет — правила не дают прочитать пустой узел.
+      if (error.code == 'permission-denied') return null;
+      throw const OnlineUnavailable(OnlineFailure.network);
+    }
+  }
+
+  @override
   Future<void> cancelQuickMatch() async {
     await _leaveQueue();
     final Completer<RoomHandle?>? completer = _queue;

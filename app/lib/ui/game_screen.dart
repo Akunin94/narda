@@ -39,9 +39,13 @@ class GameScreen extends StatefulWidget {
     this.online,
     this.rating,
     this.resume,
+    this.score,
   });
 
   final GameSetup setup;
+
+  /// Счёт серии при возврате в идущую онлайн-партию.
+  final MatchScore? score;
 
   /// Прерванная партия с ботом, которую надо продолжить.
   final SavedBotGame? resume;
@@ -85,6 +89,7 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
             : OnlineOpponent(widget.online!),
         coordinator: widget.online,
         resume: widget.resume,
+        initialScore: widget.score,
       );
 
   bool get _isOnline => widget.setup.mode == GameMode.online;
@@ -110,7 +115,25 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
     _started = true;
     widget.online?.addListener(_onOnlineChanged);
     WidgetsBinding.instance.addObserver(this);
+    if (_isOnline) _controller.addListener(_rememberOnline);
     _controller.start();
+  }
+
+  /// Идущая онлайн-партия запоминается, чтобы вернуться в неё после
+  /// перезапуска; доигранный матч и аннулированная партия — забываются.
+  void _rememberOnline() {
+    final OnlineMatch match = widget.online!;
+    final bool done =
+        _controller.phase == TurnPhase.aborted ||
+        (_controller.phase == TurnPhase.finished && _controller.isMatchOver);
+    final String? value = done
+        ? null
+        : SavedOnlineGame(
+            match.room.roomId,
+            widget.setup.localPlayer,
+            _controller.score,
+          ).encode();
+    if (_settings.savedOnlineGame != value) _settings.savedOnlineGame = value;
   }
 
   @override
@@ -120,6 +143,7 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
 
   @override
   void dispose() {
+    _controller.removeListener(_rememberOnline);
     widget.online?.removeListener(_onOnlineChanged);
     WidgetsBinding.instance.removeObserver(this);
     if (widget.online != null) _voice?.dispose();

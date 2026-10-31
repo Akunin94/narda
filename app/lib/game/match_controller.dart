@@ -82,12 +82,13 @@ class MatchController extends ChangeNotifier {
     this.onGameFinished,
     this.timing = const MatchTiming(),
     SavedBotGame? resume,
+    MatchScore? initialScore,
   }) : _resume = resume,
        _game = Game(dice: dice ?? RandomDiceSource()),
        _opponent = opponent ?? createOpponent(setup),
        _feedback = feedback ?? const SilentFeedback(),
        _coordinator = coordinator,
-       _score = resume?.score ?? MatchScore(target: setup.target) {
+       _score = resume?.score ?? initialScore ?? MatchScore(target: setup.target) {
     _signals = coordinator?.signals.listen(_handleSignal);
   }
 

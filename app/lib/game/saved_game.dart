@@ -33,3 +33,39 @@ class SavedBotGame {
     }
   }
 }
+
+/// Идущая онлайн-партия: в неё возвращаемся после перезапуска приложения.
+class SavedOnlineGame {
+  const SavedOnlineGame(this.roomId, this.color, this.score);
+
+  final String roomId;
+  final Player color;
+
+  /// Счёт серии на момент сохранения.
+  final MatchScore score;
+
+  String encode() =>
+      '${color.index},${score.target.index},${score.white},${score.black},'
+      '${score.gamesPlayed};$roomId';
+
+  /// `null` — сохранения нет или оно испорчено.
+  static SavedOnlineGame? decode(String? raw) {
+    if (raw == null) return null;
+    try {
+      final int split = raw.indexOf(';');
+      final List<int> head = raw.substring(0, split).split(',').map(int.parse).toList();
+      return SavedOnlineGame(
+        raw.substring(split + 1),
+        Player.values[head[0]],
+        MatchScore(
+          target: MatchTarget.values[head[1]],
+          white: head[2],
+          black: head[3],
+          gamesPlayed: head[4],
+        ),
+      );
+    } on Object {
+      return null;
+    }
+  }
+}

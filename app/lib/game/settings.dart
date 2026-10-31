@@ -90,6 +90,7 @@ class SettingsController extends ChangeNotifier {
   static const String _keyMatchTarget = 'match_target';
   static const String _unlockPrefix = 'theme_until_';
   static const String _keySavedGame = 'saved_bot_game';
+  static const String _keySavedOnline = 'saved_online_game';
 
   /// Часы: подменяются в тестах, чтобы проверить истечение разблокировки.
   final DateTime Function() now;
@@ -120,6 +121,23 @@ class SettingsController extends ChangeNotifier {
     }
     // Пишется каждый ход — слушателей будим, лишь когда сохранение появилось или пропало.
     // Микротаск: запись идёт и из didChangeDependencies, где будить виджеты нельзя.
+    if (changed) scheduleMicrotask(notifyListeners);
+  }
+
+  String? _memorySavedOnline;
+
+  /// Идущая онлайн-партия в виде [SavedOnlineGame.encode]; `null` — её нет.
+  String? get savedOnlineGame =>
+      _prefs == null ? _memorySavedOnline : _prefs.getString(_keySavedOnline);
+
+  set savedOnlineGame(String? value) {
+    final bool changed = (savedOnlineGame == null) != (value == null);
+    _memorySavedOnline = value;
+    if (value == null) {
+      _prefs?.remove(_keySavedOnline);
+    } else {
+      _prefs?.setString(_keySavedOnline, value);
+    }
     if (changed) scheduleMicrotask(notifyListeners);
   }
 

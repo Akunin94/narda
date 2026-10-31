@@ -121,6 +121,12 @@ abstract class AppText {
   /// **'Bot bilan o\'ynash'**
   String get menuPlayBot;
 
+  /// Кнопка: вернуться в идущую онлайн-партию
+  ///
+  /// In uz, this message translates to:
+  /// **'Onlayn o\'yinga qaytish'**
+  String get menuRejoinOnline;
+
   /// Кнопка: hotseat на одном устройстве
   ///
   /// In uz, this message translates to:

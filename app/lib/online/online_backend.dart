@@ -29,6 +29,9 @@ abstract interface class OnlineBackend {
     required PlayerCard card,
   });
 
+  /// Возврат в свою комнату после перезапуска; `null` — её нет или нас в ней нет.
+  Future<RoomHandle?> rejoin(String roomId);
+
   /// Снимает игрока с очереди быстрого матча.
   Future<void> cancelQuickMatch();
 

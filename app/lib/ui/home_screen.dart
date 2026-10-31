@@ -25,11 +25,24 @@ import 'themes_screen.dart';
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
+  /// Автовозврат в онлайн-партию — один раз за запуск, дальше только кнопкой.
+  static bool _autoRejoinTried = false;
+
   @override
   Widget build(BuildContext context) {
     final AppText text = AppText.of(context);
     final SettingsController settings = SettingsScope.of(context);
     final SavedBotGame? saved = SavedBotGame.decode(settings.savedBotGame);
+    final SavedOnlineGame? online = SavedOnlineGame.decode(
+      settings.savedOnlineGame,
+    );
+    // Запуск приложения посреди онлайн-партии — сразу обратно в неё.
+    if (online != null && !_autoRejoinTried) {
+      _autoRejoinTried = true;
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => openScreen(context, OnlineScreen(rejoin: online)),
+      );
+    }
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -66,6 +79,14 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ),
                   gap(1),
+                  if (online != null) ...<Widget>[
+                    FilledButton(
+                      onPressed: () =>
+                          openScreen(context, OnlineScreen(rejoin: online)),
+                      child: Text(text.menuRejoinOnline),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
                   if (saved != null) ...<Widget>[
                     FilledButton(
                       onPressed: () => openScreen(

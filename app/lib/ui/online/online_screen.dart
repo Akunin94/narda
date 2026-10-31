@@ -9,6 +9,7 @@ import '../../game/game_setup.dart';
 import '../../game/settings.dart';
 import '../../l10n/gen/app_text.dart';
 import '../../online/firebase_backend.dart';
+import '../../game/saved_game.dart';
 import '../../online/lobby_controller.dart';
 import '../../online/online_backend.dart';
 import '../../theme/narda_theme.dart';
@@ -20,7 +21,10 @@ import 'online_failure.dart';
 
 /// Вход в онлайн: быстрый матч и приватная комната по 6-значному коду (§6).
 class OnlineScreen extends StatefulWidget {
-  const OnlineScreen({super.key, this.backend});
+  const OnlineScreen({super.key, this.backend, this.rejoin});
+
+  /// Идущая партия, в которую возвращаемся сразу, минуя лобби.
+  final SavedOnlineGame? rejoin;
 
   /// Подменяется в тестах и превью на комнаты в памяти.
   final OnlineBackend? backend;
@@ -46,6 +50,9 @@ class _OnlineScreenState extends State<OnlineScreen> {
     if (_ready) return;
     _ready = true;
     _lobby.addListener(_onLobbyChanged);
+    if (widget.rejoin case final SavedOnlineGame saved) {
+      unawaited(_lobby.rejoin(saved.roomId, score: saved.score));
+    }
   }
 
   @override
@@ -60,6 +67,10 @@ class _OnlineScreenState extends State<OnlineScreen> {
   void _onLobbyChanged() {
     if (!mounted) return;
     setState(() {});
+    // Вернуться не вышло — партии больше нет, забываем её.
+    if (widget.rejoin != null && _lobby.stage == LobbyStage.failed) {
+      SettingsScope.of(context).savedOnlineGame = null;
+    }
     final OnlineSession? session = _lobby.session;
     if (session == null || _opened) return;
     _opened = true;
@@ -70,6 +81,7 @@ class _OnlineScreenState extends State<OnlineScreen> {
           setup: session.setup,
           online: session.match,
           rating: session.rating,
+          score: session.score,
         ),
       ),
     );

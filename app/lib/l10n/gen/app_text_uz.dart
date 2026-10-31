@@ -18,6 +18,9 @@ class AppTextUz extends AppText {
   String get menuContinue => 'O\'yinni davom ettirish';
 
   @override
+  String get menuRejoinOnline => 'Onlayn o\'yinga qaytish';
+
+  @override
   String get menuPlayBot => 'Bot bilan o\'ynash';
 
   @override
@@ -106,7 +109,8 @@ class AppTextUz extends AppText {
   String get resignSingleHint => 'Raqib rozi bo\'lishi kerak';
 
   @override
-  String get resignOfferIncoming => 'Raqib 1 ochkoga taslim bo\'lishni taklif qilmoqda. Qabul qilasizmi?';
+  String get resignOfferIncoming =>
+      'Raqib 1 ochkoga taslim bo\'lishni taklif qilmoqda. Qabul qilasizmi?';
 
   @override
   String get resignOfferWaiting => 'Raqib javobini kutamiz…';

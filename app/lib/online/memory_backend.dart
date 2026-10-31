@@ -234,6 +234,12 @@ class MemoryOnlineBackend implements OnlineBackend {
   }
 
   @override
+  Future<RoomHandle?> rejoin(String roomId) async =>
+      server.snapshot(roomId).players.containsKey(uid)
+      ? MemoryRoomHandle(server, roomId: roomId, uid: uid)
+      : null;
+
+  @override
   void dispose() {
     server.waiting.remove(uid);
     server.queue.remove(uid);

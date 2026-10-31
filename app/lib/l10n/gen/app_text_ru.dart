@@ -18,6 +18,9 @@ class AppTextRu extends AppText {
   String get menuContinue => 'Продолжить партию';
 
   @override
+  String get menuRejoinOnline => 'Вернуться в онлайн-партию';
+
+  @override
   String get menuPlayBot => 'Играть с ботом';
 
   @override
@@ -106,7 +109,8 @@ class AppTextRu extends AppText {
   String get resignSingleHint => 'Нужно согласие соперника';
 
   @override
-  String get resignOfferIncoming => 'Соперник предлагает сдаться на 1 очко. Принять?';
+  String get resignOfferIncoming =>
+      'Соперник предлагает сдаться на 1 очко. Принять?';
 
   @override
   String get resignOfferWaiting => 'Ждём ответа соперника…';

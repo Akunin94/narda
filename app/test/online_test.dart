@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:narda/app.dart';
 import 'package:narda/game/game_setup.dart';
 import 'package:narda/game/match_controller.dart';
+import 'package:narda/game/saved_game.dart';
 import 'package:narda/game/settings.dart';
 import 'package:narda/game/turn_coordinator.dart';
 import 'package:narda/online/lobby_controller.dart';
@@ -215,6 +216,30 @@ void main() {
 
       host.session!.match.dispose();
       guest.session!.match.dispose();
+    });
+
+    test('возврат в свою комнату после перезапуска, в чужую — нет', () async {
+      final TestRoom room = await TestRoom.open(target: MatchTarget.to3);
+      addTearDown(room.server.dispose);
+      final RoomHandle? back = await MemoryOnlineBackend(
+        room.server,
+        uid: 'b',
+      ).rejoin(room.black.roomId);
+      expect(back?.snapshot.isFull, isTrue);
+      expect(
+        await MemoryOnlineBackend(room.server, uid: 'z').rejoin(room.black.roomId),
+        isNull,
+      );
+
+      final SavedOnlineGame saved = SavedOnlineGame(
+        room.black.roomId,
+        Player.black,
+        const MatchScore(target: MatchTarget.to3, black: 2, gamesPlayed: 1),
+      );
+      final SavedOnlineGame decoded = SavedOnlineGame.decode(saved.encode())!;
+      expect(decoded.roomId, saved.roomId);
+      expect(decoded.color, Player.black);
+      expect(decoded.score.toString(), saved.score.toString());
     });
 
     test('быстрый матч спаривает первого ожидающего', () async {
