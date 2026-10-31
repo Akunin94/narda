@@ -36,12 +36,15 @@ class HomeScreen extends StatelessWidget {
     final SavedOnlineGame? online = SavedOnlineGame.decode(
       settings.savedOnlineGame,
     );
-    // Запуск приложения посреди онлайн-партии — сразу обратно в неё.
-    if (online != null && !_autoRejoinTried) {
+    // Только первая сборка после запуска: позже сохранённая партия — это
+    // та, что идёт прямо сейчас поверх главного экрана.
+    if (!_autoRejoinTried) {
       _autoRejoinTried = true;
-      WidgetsBinding.instance.addPostFrameCallback(
-        (_) => openScreen(context, OnlineScreen(rejoin: online)),
-      );
+      if (online != null) {
+        WidgetsBinding.instance.addPostFrameCallback(
+          (_) => openScreen(context, OnlineScreen(rejoin: online)),
+        );
+      }
     }
     return Scaffold(
       body: SafeArea(
