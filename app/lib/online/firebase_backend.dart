@@ -20,6 +20,8 @@ class FirebaseOnlineBackend implements OnlineBackend {
   String? _uid;
   Completer<RoomHandle?>? _queue;
   StreamSubscription<DatabaseEvent>? _queueWatch;
+  Timer? _retry;
+  bool _retrying = false;
 
   FirebaseDatabase get _db {
     final FirebaseDatabase? database = _database;
@@ -144,33 +146,134 @@ class FirebaseOnlineBackend implements OnlineBackend {
         _queue = null;
         return paired;
       }
-
       // Никого не нашли — встаём в очередь сами и ждём, пока подберут нас.
-      final DatabaseReference mine = _db.ref('matchmaking/$_me');
-      await mine.onDisconnect().remove();
-      await mine.set(<String, Object?>{'target': target.points});
-      _queueWatch = _db.ref('matchmaking/$_me/roomId').onValue.listen((
-        DatabaseEvent event,
-      ) async {
-        final Object? roomId = event.snapshot.value;
-        if (roomId is! String || completer.isCompleted) return;
-        await _leaveQueue();
-        // Комнату собрал тот, кто подобрал: свои ник, аватар и рейтинг
-        // (§P5) вписываем в готовую запись сами — цвет в ней не трогаем.
-        await _db.ref('rooms/$roomId/players/$_me').update(<String, Object?>{
-          'name': card.name,
-          'avatar': card.avatar,
-          'rating': card.rating,
-        });
-        await _db.ref('rooms/$roomId/presence/$_me').set(true);
-        if (!completer.isCompleted) {
-          completer.complete(_FirebaseRoom(_db, roomId: roomId, uid: _me));
-        }
-      });
+      await _enqueue(target, card, completer);
+      // Двое могли встать в очередь одновременно и не увидеть друг друга —
+      // заодно это пульс записи: молчащую запись другие пропускают.
+      _retry = Timer.periodic(
+        _queuePulse,
+        (Timer _) => unawaited(_retryClaim(target, card, completer)),
+      );
     } on FirebaseException {
       throw const OnlineUnavailable(OnlineFailure.network);
     }
     return completer.future;
+  }
+
+  /// Как часто ждущий обновляет метку в очереди и сам пробует подобрать соперника.
+  static const Duration _queuePulse = Duration(seconds: 5);
+
+  /// Запись без свежей метки — «зомби» от убитого приложения, её не берём.
+  static const Duration _queueStale = Duration(seconds: 30);
+
+  static const Duration _queueTimeout = Duration(seconds: 10);
+
+  Future<void> _enqueue(
+    MatchTarget target,
+    PlayerCard card,
+    Completer<RoomHandle?> completer,
+  ) async {
+    final DatabaseReference mine = _db.ref('matchmaking/$_me');
+    await mine.onDisconnect().remove();
+    await mine.set(<String, Object?>{
+      'target': target.points,
+      'ts': ServerValue.timestamp,
+    });
+    _queueWatch = _db.ref('matchmaking/$_me/roomId').onValue.listen((
+      DatabaseEvent event,
+    ) async {
+      final Object? roomId = event.snapshot.value;
+      if (roomId is! String || completer.isCompleted) return;
+      await _leaveQueue();
+      // Комнату собрал тот, кто подобрал: свои ник, аватар и рейтинг
+      // (§P5) вписываем в готовую запись сами — цвет в ней не трогаем.
+      await _db.ref('rooms/$roomId/players/$_me').update(<String, Object?>{
+        'name': card.name,
+        'avatar': card.avatar,
+        'rating': card.rating,
+      });
+      await _db.ref('rooms/$roomId/presence/$_me').set(true);
+      if (!completer.isCompleted) {
+        completer.complete(_FirebaseRoom(_db, roomId: roomId, uid: _me));
+      }
+    });
+  }
+
+  /// Пульс ждущего: обновить метку и, если в очереди есть ждущий с меньшим
+  /// uid, забрать его самому (больший забирает меньшего — встречных захватов нет).
+  Future<void> _retryClaim(
+    MatchTarget target,
+    PlayerCard card,
+    Completer<RoomHandle?> completer,
+  ) async {
+    if (_retrying || completer.isCompleted) return;
+    _retrying = true;
+    try {
+      await _db.ref('matchmaking/$_me/ts').set(ServerValue.timestamp);
+      if (!await _hasWaiting(target, below: _me)) return;
+      // Сначала уходим из очереди: если нас уже подобрали, транзакция не даст.
+      final TransactionResult left = await _db
+          .ref('matchmaking/$_me')
+          .runTransaction((Object? current) {
+            if (childrenOf(current)['roomId'] != null) {
+              return Transaction.abort();
+            }
+            return Transaction.success(null);
+          })
+          .timeout(_queueTimeout);
+      if (!left.committed || completer.isCompleted) return;
+      await _queueWatch?.cancel();
+      _queueWatch = null;
+      final RoomHandle? paired = await _claimWaiting(
+        target: target,
+        card: card,
+        below: _me,
+      );
+      if (paired != null) {
+        _retry?.cancel();
+        _retry = null;
+        _queue = null;
+        if (!completer.isCompleted) completer.complete(paired);
+        return;
+      }
+      if (!completer.isCompleted) await _enqueue(target, card, completer);
+    } on Object {
+      // Сеть моргнула — следующий пульс попробует снова.
+    } finally {
+      _retrying = false;
+    }
+  }
+
+  /// Свежие ждущие с тем же форматом матча: uid -> запись.
+  Future<Map<String, Map<String, Object?>>> _waiting(
+    DataSnapshot queue,
+    MatchTarget target, {
+    String? below,
+  }) async {
+    final int now =
+        DateTime.now().millisecondsSinceEpoch +
+        (await serverTimeOffset()).inMilliseconds;
+    return <String, Map<String, Object?>>{
+      for (final MapEntry<String, Object?> entry
+          in childrenOf(queue.value).entries)
+        if (entry.key != _me &&
+            (below == null || entry.key.compareTo(below) < 0))
+          if (childrenOf(entry.value) case final Map<String, Object?> waiting
+              when asInt(waiting['target']) == target.points &&
+                  waiting['roomId'] == null &&
+                  now - (asInt(waiting['ts']) ?? 0) <
+                      _queueStale.inMilliseconds)
+            entry.key: waiting,
+    };
+  }
+
+  Future<bool> _hasWaiting(MatchTarget target, {String? below}) async {
+    final DatabaseEvent event = await _db
+        .ref('matchmaking')
+        .onValue
+        .first
+        .timeout(_queueTimeout);
+    return (await _waiting(event.snapshot, target, below: below)).isNotEmpty;
   }
 
   /// Забирает первого подходящего из очереди транзакцией на его записи:
@@ -178,41 +281,54 @@ class FirebaseOnlineBackend implements OnlineBackend {
   Future<RoomHandle?> _claimWaiting({
     required MatchTarget target,
     required PlayerCard card,
+    String? below,
   }) async {
-    final DataSnapshot queue = await _db.ref('matchmaking').get();
-    for (final MapEntry<String, Object?> entry
-        in childrenOf(queue.value).entries) {
-      if (entry.key == _me) continue;
-      final Map<String, Object?> waiting = childrenOf(entry.value);
-      if (asInt(waiting['target']) != target.points) continue;
-      if (waiting['roomId'] != null) continue;
-
-      final String roomId = _db.ref('rooms').push().key!;
-      final TransactionResult claimed = await _db
-          .ref('matchmaking/${entry.key}')
-          .runTransaction((Object? current) {
-            final Map<String, Object?> value = childrenOf(current);
-            if (value.isEmpty || value['roomId'] != null) {
-              return Transaction.abort();
-            }
-            return Transaction.success(<String, Object?>{
-              ...value,
-              'roomId': roomId,
-              'guestUid': _me,
-            });
-          });
-      if (!claimed.committed) continue;
-
-      // Комнату собирает тот, кто подобрал: он точно на связи.
-      await _createPairedRoom(
-        roomId: roomId,
-        target: target,
-        card: card,
-        guestUid: entry.key,
+    final DatabaseReference queueRef = _db.ref('matchmaking');
+    // Подписка держит очередь в локальном кэше: без неё транзакция первым
+    // проходом видит null и сразу отказывается.
+    final StreamSubscription<DatabaseEvent> warm = queueRef.onValue.listen(
+      (DatabaseEvent _) {},
+    );
+    try {
+      final DatabaseEvent queue = await queueRef.onValue.first.timeout(
+        _queueTimeout,
       );
-      return _FirebaseRoom(_db, roomId: roomId, uid: _me);
+      final Map<String, Map<String, Object?>> waiting = await _waiting(
+        queue.snapshot,
+        target,
+        below: below,
+      );
+      for (final String guestUid in waiting.keys) {
+        final String roomId = _db.ref('rooms').push().key!;
+        final TransactionResult claimed = await _db
+            .ref('matchmaking/$guestUid')
+            .runTransaction((Object? current) {
+              final Map<String, Object?> value = childrenOf(current);
+              if (value.isEmpty || value['roomId'] != null) {
+                return Transaction.abort();
+              }
+              return Transaction.success(<String, Object?>{
+                ...value,
+                'roomId': roomId,
+                'guestUid': _me,
+              });
+            })
+            .timeout(_queueTimeout);
+        if (!claimed.committed) continue;
+
+        // Комнату собирает тот, кто подобрал: он точно на связи.
+        await _createPairedRoom(
+          roomId: roomId,
+          target: target,
+          card: card,
+          guestUid: guestUid,
+        );
+        return _FirebaseRoom(_db, roomId: roomId, uid: _me);
+      }
+      return null;
+    } finally {
+      await warm.cancel();
     }
-    return null;
   }
 
   Future<void> _createPairedRoom({
@@ -293,6 +409,8 @@ class FirebaseOnlineBackend implements OnlineBackend {
   }
 
   Future<void> _leaveQueue() async {
+    _retry?.cancel();
+    _retry = null;
     await _queueWatch?.cancel();
     _queueWatch = null;
     if (_uid == null) return;
