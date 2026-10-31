@@ -463,6 +463,10 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
             theme: theme,
           )
         : null;
+    final Widget pips = Text(
+      '${state.pipCount(player)} ${text.labelPip}',
+      style: const TextStyle(color: NardaColors.textMuted, fontSize: 13),
+    );
     final List<Widget> identity = <Widget>[
       Container(
         width: 16,
@@ -497,12 +501,11 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
           style: const TextStyle(color: NardaColors.gold, fontSize: 13),
         ),
       ],
-      const SizedBox(width: 10),
-      if (_settings.showPips)
-        Text(
-          '${state.pipCount(player)} ${text.labelPip}',
-          style: const TextStyle(color: NardaColors.textMuted, fontSize: 13),
-        ),
+      // В узкой панели альбома pip уезжает во вторую строку.
+      if (_settings.showPips && !compact) ...<Widget>[
+        const SizedBox(width: 10),
+        pips,
+      ],
     ];
     final Widget? borneOff = state.borneOff(player) > 0
         ? Padding(
@@ -531,11 +534,12 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
           ? Column(
               children: <Widget>[
                 Row(children: identity),
-                if (borneOff != null || dice != null)
+                if (borneOff != null || dice != null || _settings.showPips)
                   Padding(
                     padding: const EdgeInsets.only(top: 4),
                     child: Row(
                       children: <Widget>[
+                        if (_settings.showPips) ...<Widget>[pips, const SizedBox(width: 10)],
                         ?borneOff,
                         const Spacer(),
                         ?dice,
