@@ -489,6 +489,14 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
           ),
         ),
       ),
+      // В онлайне рядом с ником — рейтинг Elo (§P5).
+      if (_isOnline) ...<Widget>[
+        const SizedBox(width: 6),
+        Text(
+          '${player == widget.setup.localPlayer ? _profile.rating : widget.online!.opponentRating}',
+          style: const TextStyle(color: NardaColors.gold, fontSize: 13),
+        ),
+      ],
       const SizedBox(width: 10),
       if (_settings.showPips)
         Text(

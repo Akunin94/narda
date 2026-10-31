@@ -90,23 +90,52 @@ class HomeScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
                   ],
-                  if (saved != null) ...<Widget>[
+                  if (saved == null)
                     FilledButton(
-                      onPressed: () => openScreen(
-                        context,
-                        GameScreen(
-                          setup: GameSetup.vsBot(saved.level, target: saved.score.target),
-                          resume: saved,
-                        ),
+                      onPressed: () => _chooseLevel(context, text, settings),
+                      child: Text(text.menuPlayBot),
+                    )
+                  else
+                    // Обе кнопки про бота — в одной рамке, чтобы было видно связь.
+                    Container(
+                      padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: NardaColors.goldDeep),
+                        borderRadius: BorderRadius.circular(16),
                       ),
-                      child: Text(text.menuContinue),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: <Widget>[
+                          Text(
+                            text.menuPlayBot,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: NardaColors.textMuted,
+                              fontSize: 13,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          FilledButton(
+                            onPressed: () => openScreen(
+                              context,
+                              GameScreen(
+                                setup: GameSetup.vsBot(
+                                  saved.level,
+                                  target: saved.score.target,
+                                ),
+                                resume: saved,
+                              ),
+                            ),
+                            child: Text(text.menuContinue),
+                          ),
+                          const SizedBox(height: 8),
+                          OutlinedButton(
+                            onPressed: () => _chooseLevel(context, text, settings),
+                            child: Text(text.menuNewBotGame),
+                          ),
+                        ],
+                      ),
                     ),
-                    const SizedBox(height: 12),
-                  ],
-                  FilledButton(
-                    onPressed: () => _chooseLevel(context, text, settings),
-                    child: Text(text.menuPlayBot),
-                  ),
                   const SizedBox(height: 12),
                   OutlinedButton(
                     onPressed: () => openScreen(context, const OnlineScreen()),

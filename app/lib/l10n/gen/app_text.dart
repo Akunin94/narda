@@ -127,6 +127,12 @@ abstract class AppText {
   /// **'Bot bilan o\'ynash'**
   String get menuPlayBot;
 
+  /// Кнопка: новая партия с ботом рядом с «Продолжить»
+  ///
+  /// In uz, this message translates to:
+  /// **'Yangi partiya'**
+  String get menuNewBotGame;
+
   /// Кнопка: hotseat на одном устройстве
   ///
   /// In uz, this message translates to:
@@ -1075,17 +1081,17 @@ abstract class AppText {
   /// **'Raqibning javobi kutilmoqda'**
   String get rematchWaiting;
 
-  /// Соперник предложил реванш
-  ///
-  /// In uz, this message translates to:
-  /// **'Raqib revansh taklif qilyapti'**
-  String get rematchOffered;
-
   /// Соперник покинул доигранный матч — реванша не будет
   ///
   /// In uz, this message translates to:
   /// **'Raqib o\'yindan chiqdi'**
   String get rematchOpponentLeft;
+
+  /// Соперник предложил реванш
+  ///
+  /// In uz, this message translates to:
+  /// **'Raqib revansh taklif qilyapti'**
+  String get rematchOffered;
 
   /// Рейтинг после матча и его изменение
   ///

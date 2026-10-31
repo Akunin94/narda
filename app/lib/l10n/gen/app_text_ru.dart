@@ -21,6 +21,9 @@ class AppTextRu extends AppText {
   String get menuRejoinOnline => 'Вернуться в онлайн-партию';
 
   @override
+  String get menuNewBotGame => 'Новая партия';
+
+  @override
   String get menuPlayBot => 'Играть с ботом';
 
   @override

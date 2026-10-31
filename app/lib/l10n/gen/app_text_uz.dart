@@ -21,6 +21,9 @@ class AppTextUz extends AppText {
   String get menuRejoinOnline => 'Onlayn o\'yinga qaytish';
 
   @override
+  String get menuNewBotGame => 'Yangi partiya';
+
+  @override
   String get menuPlayBot => 'Bot bilan o\'ynash';
 
   @override

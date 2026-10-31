@@ -13,6 +13,9 @@
   "menuRejoinOnline": "Onlayn o'yinga qaytish",
   "@menuRejoinOnline": { "description": "Кнопка: вернуться в идущую онлайн-партию" },
 
+  "menuNewBotGame": "Yangi partiya",
+  "@menuNewBotGame": { "description": "Кнопка: новая партия с ботом рядом с «Продолжить»" },
+
   "menuPlayBot": "Bot bilan o'ynash",
   "@menuPlayBot": { "description": "Кнопка: игра против бота" },
 
