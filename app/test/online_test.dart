@@ -400,10 +400,11 @@ void main() {
       addTearDown(white.dispose);
       await pump();
 
-      // Телефон уснул — сервер снял присутствие по onDisconnect.
+      // Телефон уснул — сервер снял присутствие по onDisconnect; как только
+      // снимок дошёл, клиент отмечается снова.
       await room.white.update(<String, Object?>{'presence/a': false});
       await pump();
-      expect(room.black.snapshot.presence['a'], isFalse);
+      expect(room.black.snapshot.presence['a'], isTrue);
 
       await white.match.refresh();
       await pump();

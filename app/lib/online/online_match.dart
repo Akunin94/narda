@@ -436,6 +436,7 @@ class OnlineMatch extends ChangeNotifier implements TurnCoordinator {
   void _apply(RoomSnapshot snapshot) {
     if (_closed) return;
     _snapshot = snapshot;
+    _healPresence(snapshot);
 
     final String? uid = opponentUid;
     if (uid != null) {
@@ -463,6 +464,19 @@ class OnlineMatch extends ChangeNotifier implements TurnCoordinator {
     _checkOutcome(snapshot);
     notifyListeners();
   }
+
+  /// Сервер мог выполнить onDisconnect старого соединения уже после того,
+  /// как мы переподключились и отметились, — тогда в комнате висит `false`.
+  /// Раз снимки доходят, мы на связи: отмечаемся заново (не чаще раза в 5 с).
+  void _healPresence(RoomSnapshot snapshot) {
+    if (snapshot.presence[localUid] != false) return;
+    final int now = _clock().millisecondsSinceEpoch;
+    if (now - _presenceHealedAt < 5000) return;
+    _presenceHealedAt = now;
+    unawaited(room.keepPresence());
+  }
+
+  int _presenceHealedAt = 0;
 
   /// Внешний итог партии: сдача, тайм-аут, забранная победа.
   void _checkOutcome(RoomSnapshot snapshot) {
