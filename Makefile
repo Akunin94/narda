@@ -4,7 +4,7 @@ RELEASE := --release --dart-define-from-file=release.json -Padmob_app_id=$(ADMOB
 
 .PHONY: dev log check aab
 
-# Сборка с журналом → установка по USB → запуск → журнал в narda-game.log.
+# Сборка с журналом → установка на все телефоны по USB → запуск → журнал в narda-game.log.
 dev:
 	app/tool/dev_install.sh
 
