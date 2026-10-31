@@ -28,6 +28,7 @@ import 'dice_view.dart';
 import 'online/online_status_bar.dart';
 import 'online/phrase_bar.dart';
 import 'overlay_card.dart';
+import 'sheet.dart';
 
 /// Экран партии: доска, кости, счёт серии и кнопки хода.
 class GameScreen extends StatefulWidget {
@@ -210,6 +211,14 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
                   ),
                 ),
               ),
+              if (widget.online case final OnlineMatch match
+                  when match.incomingOffer != null && !_controller.isOver)
+                Positioned(
+                  top: 56,
+                  left: 0,
+                  right: 0,
+                  child: _buildOfferCard(text, match),
+                ),
               if (_controller.phase == TurnPhase.finished && !_switchingGame)
                 Positioned.fill(child: _buildResultOverlay(text)),
               if (_controller.phase == TurnPhase.aborted)
@@ -635,11 +644,97 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
     }
   }
 
+  /// Сдача: марс (2 очка) — сразу, обычная (1 очко) — с согласия соперника.
   Future<void> _confirmResign(AppText text) async {
-    if (await confirmAction(context, text.resignQuestion)) {
-      _controller.resign();
+    // Шашка уже выброшена — марса нет, выбирать не из чего.
+    if (_controller.resignationIsSingle) {
+      if (await confirmAction(context, text.resignQuestion)) {
+        _controller.resign();
+      }
+      return;
     }
+    final bool? mars = await showNardaSheet<bool>(
+      context,
+      builder: (BuildContext context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            NardaSheetTitle(text.resignQuestion),
+            for (final (bool value, String title, String hint)
+                in <(bool, String, String)>[
+                  (true, text.resignMars, text.resignMarsHint),
+                  (false, text.resignSingle, text.resignSingleHint),
+                ])
+              ListTile(
+                title: Text(
+                  title,
+                  style: const TextStyle(color: NardaColors.textPrimary),
+                ),
+                subtitle: Text(
+                  hint,
+                  style: const TextStyle(color: NardaColors.textMuted),
+                ),
+                onTap: () => Navigator.of(context).pop(value),
+              ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+    if (mars == null || !mounted) return;
+    if (mars) {
+      _controller.resign();
+      return;
+    }
+    // В hotseat отвечает второй игрок прямо на этом экране.
+    if (_isHotseat && !await confirmAction(context, text.resignOfferIncoming)) {
+      if (mounted) _snack(text.resignOfferDeclined);
+      return;
+    }
+    if (_isOnline) _snack(text.resignOfferWaiting);
+    final bool accepted = await _controller.offerResignation();
+    if (!accepted && mounted) _snack(text.resignOfferDeclined);
   }
+
+  void _snack(String message) => ScaffoldMessenger.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(SnackBar(content: Text(message)));
+
+  /// Соперник по сети предлагает сдаться на 1 очко — принять или отказать.
+  Widget _buildOfferCard(AppText text, OnlineMatch match) => Card(
+    color: NardaColors.surfaceHigh,
+    margin: const EdgeInsets.symmetric(horizontal: 16),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(14),
+      side: const BorderSide(color: NardaColors.goldDeep),
+    ),
+    child: Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 8, 4),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          Text(
+            text.resignOfferIncoming,
+            style: const TextStyle(color: NardaColors.textPrimary),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              TextButton(
+                onPressed: () => unawaited(match.declineOffer()),
+                child: Text(text.resignOfferDecline),
+              ),
+              TextButton(
+                onPressed: () => unawaited(match.acceptOffer()),
+                child: Text(text.resignOfferAccept),
+              ),
+            ],
+          ),
+        ],
+      ),
+    ),
+  );
 
   String _statusText(AppText text) => switch (_controller.phase) {
     TurnPhase.rolling => text.statusRolling,

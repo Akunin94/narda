@@ -14,6 +14,7 @@
 ///   chat/{uid}: {phrase, ts}
 ///   voice/{uid}: {gen, desc: {type, sdp, peerGen}, ice/{n}: <json>}
 ///   rematch/{uid}: <номер партии, с которой игрок готов играть новый матч>
+///   offer:    {from, game, move, status} — предложение сдаться на 1 очко
 /// ```
 /// Отличие от §6 одно: журнал ходов лежит внутри `games/{gameIndex}`, потому
 /// что комната играет серию до 3 / 5 / 7 очков (§3.4), а не одну партию.
@@ -42,7 +43,8 @@ const ServerTimestamp serverTimestamp = ServerTimestamp();
 enum RoomStatus { waiting, playing, finished }
 
 /// Почему партия закончилась не выбросом шашек.
-enum OutcomeReason { resign, timeout, disconnect, desync }
+/// `resignSingle` — обычная сдача на 1 очко, принятая соперником.
+enum OutcomeReason { resign, resignSingle, timeout, disconnect, desync }
 
 /// Как игрок представляется в комнате и в таблице лидеров: ник, аватар и
 /// рейтинг на момент входа (§P5).
@@ -406,6 +408,7 @@ class RoomSnapshot {
     this.chat = const <String, String>{},
     this.rematch = const <String, int>{},
     this.voice = const <String, VoiceSignal>{},
+    this.offer,
   });
 
   final String roomId;
@@ -428,6 +431,9 @@ class RoomSnapshot {
 
   /// Голосовой сигналинг: есть запись — у игрока включён микрофон.
   final Map<String, VoiceSignal> voice;
+
+  /// Последнее предложение обычной сдачи; `null` — не было.
+  final ResignOffer? offer;
 
   bool get isFull => players.length >= 2;
 
@@ -461,6 +467,7 @@ class RoomSnapshot {
         (String _, Object? value) => asInt(value),
       ),
       voice: namedChildren(json['voice'], VoiceSignal.fromJson),
+      offer: ResignOffer.fromJson(json['offer']),
     );
   }
 
@@ -481,6 +488,47 @@ class RoomSnapshot {
     return phrase is String ? phrase : null;
   }
 }
+
+/// Предложение сдаться на 1 очко. Действует, пока не сменился ход [move]
+/// партии [game] — дальше считается отклонённым.
+class ResignOffer {
+  const ResignOffer({
+    required this.from,
+    required this.game,
+    required this.move,
+    this.status = ResignOfferStatus.pending,
+  });
+
+  final String from;
+  final int game;
+  final int move;
+  final ResignOfferStatus status;
+
+  Map<String, Object?> toJson() => <String, Object?>{
+    'from': from,
+    'game': game,
+    'move': move,
+    'status': status.name,
+  };
+
+  static ResignOffer? fromJson(Object? json) {
+    final Object? from = childOf(json, 'from');
+    final int? game = asInt(childOf(json, 'game'));
+    final int? move = asInt(childOf(json, 'move'));
+    if (from is! String || game == null || move == null) return null;
+    return ResignOffer(
+      from: from,
+      game: game,
+      move: move,
+      status: ResignOfferStatus.values.firstWhere(
+        (ResignOfferStatus value) => value.name == childOf(json, 'status'),
+        orElse: () => ResignOfferStatus.declined,
+      ),
+    );
+  }
+}
+
+enum ResignOfferStatus { pending, accepted, declined }
 
 /// Сигналинг голоса одного игрока (WebRTC).
 class VoiceSignal {

@@ -68,6 +68,11 @@
           }
         },
 
+        "offer": {
+          ".write": "auth !== null && data.parent().child('players').child(auth.uid).exists()",
+          ".validate": "newData.hasChildren(['from', 'game', 'move', 'status'])"
+        },
+
         "voice": {
           "$uid": {
             ".write": "auth !== null && $uid === auth.uid && data.parent().parent().child('players').child(auth.uid).exists()",

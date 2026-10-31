@@ -20,6 +20,10 @@ class StubBot implements Opponent {
       _bot.choose(state);
 
   @override
+  Future<bool> acceptsSingleResignation(GameState state) async =>
+      singleResignationFair(state, resigning: player.opponent);
+
+  @override
   void dispose() {}
 }
 

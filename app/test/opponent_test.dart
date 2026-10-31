@@ -42,4 +42,24 @@ void main() {
     expect(sequence.moves.every((Move move) => move.isBearOff), isTrue);
     expect(state.applySequence(sequence).whiteBorneOff, 15);
   });
+
+  test('бот принимает обычную сдачу, только когда марс ему не светит', () {
+    // Белые сдаются со всеми 15 на голове, у чёрных все дома — марс почти наверняка.
+    final GameState hopeless = position(
+      turn: Player.white,
+      roll: const DiceRoll(6, 5),
+      white: <int, int>{24: 15},
+      black: <int, int>{13: 5, 14: 5, 15: 5},
+    );
+    expect(singleResignationFair(hopeless, resigning: Player.white), isFalse);
+
+    final GameState bornOff = position(
+      turn: Player.white,
+      roll: const DiceRoll(6, 5),
+      white: <int, int>{1: 14},
+      black: <int, int>{13: 15},
+      whiteBorneOff: 1,
+    );
+    expect(singleResignationFair(bornOff, resigning: Player.white), isTrue);
+  });
 }

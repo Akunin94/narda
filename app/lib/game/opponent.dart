@@ -18,6 +18,9 @@ abstract interface class Opponent {
   /// Ход соперника целиком. `null` — легальных ходов нет (пас).
   Future<MoveSequence?> chooseSequence(GameState state);
 
+  /// Принимает ли соперник обычную сдачу (1 очко) в позиции [state].
+  Future<bool> acceptsSingleResignation(GameState state);
+
   void dispose();
 }
 
@@ -34,6 +37,10 @@ class HotseatOpponent implements Opponent {
   @override
   Future<MoveSequence?> chooseSequence(GameState state) =>
       throw StateError('Hotseat opponent moves through the board');
+
+  /// Второй игрок уже согласился в диалоге на этом же экране.
+  @override
+  Future<bool> acceptsSingleResignation(GameState state) async => true;
 
   @override
   void dispose() {}
@@ -76,6 +83,11 @@ class BotOpponent implements Opponent {
     return decodeFlatSequence(state, flat);
   }
 
+  /// Бот принимает обычную сдачу, когда марс ему почти не светит.
+  @override
+  Future<bool> acceptsSingleResignation(GameState state) async =>
+      singleResignationFair(state, resigning: player.opponent);
+
   int _nextSeed() {
     _seed = _seed == 0
         ? DateTime.now().microsecondsSinceEpoch & 0x3FFFFFFF
@@ -101,6 +113,20 @@ Opponent createOpponent(GameSetup setup) => switch (setup.mode) {
     'Online opponent must be supplied by the lobby',
   ),
 };
+
+/// Марс маловероятен: сдающийся уже выбросил шашку или успеет завести всех
+/// домой и выбросить одну раньше, чем победитель доиграет.
+bool singleResignationFair(GameState state, {required Player resigning}) {
+  if (state.borneOff(resigning) > 0) return true;
+  int toHome = 0;
+  for (int own = Coords.homeSize + 1; own <= Coords.pointCount; own++) {
+    toHome +=
+        state.checkersAt(resigning, Coords.toAbsolute(resigning, own)) *
+        (own - Coords.homeSize);
+  }
+  // Ещё ~6 пунктов на выброс первой шашки.
+  return toHome + Coords.homeSize < state.pipCount(resigning.opponent);
+}
 
 /// Задание боту: состояние передаётся в изолят строкой, ход возвращается
 /// плоским списком пар `fromAbs, die` — оба формата сериализуемы без потерь.

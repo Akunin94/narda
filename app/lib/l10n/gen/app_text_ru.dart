@@ -94,6 +94,33 @@ class AppTextRu extends AppText {
   String get resignQuestion => 'Сдать партию?';
 
   @override
+  String get resignMars => 'Сдаться марсом (2 очка)';
+
+  @override
+  String get resignMarsHint => 'Сразу, без согласия соперника';
+
+  @override
+  String get resignSingle => 'Предложить обычную сдачу (1 очко)';
+
+  @override
+  String get resignSingleHint => 'Нужно согласие соперника';
+
+  @override
+  String get resignOfferIncoming => 'Соперник предлагает сдаться на 1 очко. Принять?';
+
+  @override
+  String get resignOfferWaiting => 'Ждём ответа соперника…';
+
+  @override
+  String get resignOfferDeclined => 'Соперник отказался — играем дальше';
+
+  @override
+  String get resignOfferAccept => 'Принять';
+
+  @override
+  String get resignOfferDecline => 'Отказать';
+
+  @override
   String get actionYes => 'Да';
 
   @override

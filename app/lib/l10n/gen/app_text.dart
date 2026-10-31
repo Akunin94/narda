@@ -265,6 +265,60 @@ abstract class AppText {
   /// **'Partiyada taslim bo\'lasizmi?'**
   String get resignQuestion;
 
+  /// Сдача на марс
+  ///
+  /// In uz, this message translates to:
+  /// **'Mars bilan taslim (2 ochko)'**
+  String get resignMars;
+
+  /// Пояснение к сдаче на марс
+  ///
+  /// In uz, this message translates to:
+  /// **'Darhol, raqib roziligisiz'**
+  String get resignMarsHint;
+
+  /// Предложить сдачу на 1 очко
+  ///
+  /// In uz, this message translates to:
+  /// **'Oddiy taslim taklif qilish (1 ochko)'**
+  String get resignSingle;
+
+  /// Пояснение к обычной сдаче
+  ///
+  /// In uz, this message translates to:
+  /// **'Raqib rozi bo\'lishi kerak'**
+  String get resignSingleHint;
+
+  /// Соперник предлагает обычную сдачу
+  ///
+  /// In uz, this message translates to:
+  /// **'Raqib 1 ochkoga taslim bo\'lishni taklif qilmoqda. Qabul qilasizmi?'**
+  String get resignOfferIncoming;
+
+  /// Ждём ответа на предложение сдачи
+  ///
+  /// In uz, this message translates to:
+  /// **'Raqib javobini kutamiz…'**
+  String get resignOfferWaiting;
+
+  /// Соперник отказался принять сдачу
+  ///
+  /// In uz, this message translates to:
+  /// **'Raqib rad etdi — o\'yin davom etadi'**
+  String get resignOfferDeclined;
+
+  /// Кнопка: принять сдачу
+  ///
+  /// In uz, this message translates to:
+  /// **'Qabul qilish'**
+  String get resignOfferAccept;
+
+  /// Кнопка: отказать
+  ///
+  /// In uz, this message translates to:
+  /// **'Rad etish'**
+  String get resignOfferDecline;
+
   /// Да
   ///
   /// In uz, this message translates to:

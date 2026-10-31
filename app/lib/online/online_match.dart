@@ -321,6 +321,71 @@ class OnlineMatch extends ChangeNotifier implements TurnCoordinator {
     return sequence.isEmpty ? null : sequence;
   }
 
+  // --- Обычная сдача на 1 очко ---------------------------------------
+
+  /// Предложение соперника сдаться на 1 очко, ждущее ответа здесь.
+  ResignOffer? get incomingOffer {
+    final ResignOffer? offer = _snapshot?.offer;
+    return offer != null && offer.from != localUid && _offerLive(offer)
+        ? offer
+        : null;
+  }
+
+  /// Живо, пока ждёт ответа и ход в партии не сменился.
+  bool _offerLive(ResignOffer offer) =>
+      offer.status == ResignOfferStatus.pending &&
+      offer.game == _gameIndex &&
+      offer.move == _moveIndex &&
+      _finishedGame != _gameIndex;
+
+  /// Предлагает сопернику принять сдачу на 1 очко и ждёт ответа до конца
+  /// текущего хода. `true` — принято, итог партии придёт сигналом.
+  Future<bool> offerResignation() async {
+    final ResignOffer offer = ResignOffer(
+      from: localUid,
+      game: _gameIndex,
+      move: _moveIndex,
+    );
+    await room.update(<String, Object?>{'offer': offer.toJson()});
+    return _awaitSnapshot<bool>((RoomSnapshot snapshot) {
+      final RoomOutcome? outcome = snapshot.outcome;
+      if (outcome != null && outcome.gameIndex == offer.game) {
+        return outcome.reason == OutcomeReason.resignSingle;
+      }
+      final ResignOffer? current = snapshot.offer;
+      if (current == null) return null;
+      if (current.from != localUid ||
+          current.game != offer.game ||
+          current.move != offer.move) {
+        return false;
+      }
+      if (current.status == ResignOfferStatus.declined) return false;
+      // Ход сменился, а ответа нет — предложение протухло.
+      return snapshot.game(offer.game).moves.length > offer.move ? false : null;
+    });
+  }
+
+  /// Принять сдачу соперника: он проигрывает 1 очко.
+  Future<void> acceptOffer() async {
+    if (incomingOffer == null) return;
+    await room.update(<String, Object?>{
+      'offer/status': ResignOfferStatus.accepted.name,
+      'outcome': RoomOutcome(
+        winnerUid: localUid,
+        reason: OutcomeReason.resignSingle,
+        gameIndex: _gameIndex,
+      ).toJson(),
+      'meta/status': RoomStatus.playing.name,
+    });
+  }
+
+  Future<void> declineOffer() async {
+    if (incomingOffer == null) return;
+    await room.update(<String, Object?>{
+      'offer/status': ResignOfferStatus.declined.name,
+    });
+  }
+
   // --- Реванш (§P5) ----------------------------------------------------
 
   /// Заявка на реванш: играем новый матч в этой же комнате, начиная со
@@ -412,7 +477,11 @@ class OnlineMatch extends ChangeNotifier implements TurnCoordinator {
     final GameState position = _position ?? _turnState ?? _initialPosition();
     _emit(
       FinishSignal(
-        GameResult.resignation(resigning: winner.opponent, state: position),
+        GameResult.resignation(
+          resigning: winner.opponent,
+          state: position,
+          mars: outcome.reason != OutcomeReason.resignSingle,
+        ),
       ),
     );
   }

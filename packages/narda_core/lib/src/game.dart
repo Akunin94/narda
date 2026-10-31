@@ -111,9 +111,9 @@ class Game {
   }
 
   /// Сдача партии игроком [player].
-  void resign(Player player) {
+  void resign(Player player, {bool mars = true}) {
     _ensureRunning();
-    _result = GameResult.resignation(resigning: player, state: state);
+    _result = GameResult.resignation(resigning: player, state: state, mars: mars);
   }
 
   void _advance(GameState played) {

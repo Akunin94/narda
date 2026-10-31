@@ -385,6 +385,44 @@ void main() {
       expect(room.black.snapshot.presence['a'], isTrue);
     });
 
+    test('обычная сдача: принятая даёт 1 очко, отклонённая — игра идёт', () async {
+      final TestRoom room = await TestRoom.open();
+      addTearDown(room.server.dispose);
+      final TestClient white = TestClient(
+        room.white,
+        color: Player.white,
+        target: MatchTarget.single,
+        dice: RandomDiceSource.seeded(3),
+      );
+      final TestClient black = TestClient(
+        room.black,
+        color: Player.black,
+        target: MatchTarget.single,
+        dice: RandomDiceSource.seeded(4),
+      );
+      addTearDown(white.dispose);
+      addTearDown(black.dispose);
+      white.controller.start();
+      black.controller.start();
+      await pump();
+
+      final Future<bool> declined = white.controller.offerResignation();
+      await pump();
+      expect(black.match.incomingOffer, isNotNull);
+      await black.match.declineOffer();
+      expect(await declined, isFalse);
+      expect(white.controller.isOver, isFalse);
+
+      final Future<bool> accepted = white.controller.offerResignation();
+      await pump();
+      await black.match.acceptOffer();
+      expect(await accepted, isTrue);
+      await pump();
+      expect(white.controller.result!.winner, Player.black);
+      expect(white.controller.result!.points, 1);
+      expect(black.controller.result!.points, 1);
+    });
+
     test('нелегальный ход соперника аннулирует партию', () async {
       final TestRoom room = await TestRoom.open();
       addTearDown(room.server.dispose);

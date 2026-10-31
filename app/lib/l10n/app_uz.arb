@@ -85,6 +85,33 @@
   "resignQuestion": "Partiyada taslim bo'lasizmi?",
   "@resignQuestion": { "description": "Вопрос перед сдачей партии" },
 
+  "resignMars": "Mars bilan taslim (2 ochko)",
+  "@resignMars": { "description": "Сдача на марс" },
+
+  "resignMarsHint": "Darhol, raqib roziligisiz",
+  "@resignMarsHint": { "description": "Пояснение к сдаче на марс" },
+
+  "resignSingle": "Oddiy taslim taklif qilish (1 ochko)",
+  "@resignSingle": { "description": "Предложить сдачу на 1 очко" },
+
+  "resignSingleHint": "Raqib rozi bo'lishi kerak",
+  "@resignSingleHint": { "description": "Пояснение к обычной сдаче" },
+
+  "resignOfferIncoming": "Raqib 1 ochkoga taslim bo'lishni taklif qilmoqda. Qabul qilasizmi?",
+  "@resignOfferIncoming": { "description": "Соперник предлагает обычную сдачу" },
+
+  "resignOfferWaiting": "Raqib javobini kutamiz…",
+  "@resignOfferWaiting": { "description": "Ждём ответа на предложение сдачи" },
+
+  "resignOfferDeclined": "Raqib rad etdi — o'yin davom etadi",
+  "@resignOfferDeclined": { "description": "Соперник отказался принять сдачу" },
+
+  "resignOfferAccept": "Qabul qilish",
+  "@resignOfferAccept": { "description": "Кнопка: принять сдачу" },
+
+  "resignOfferDecline": "Rad etish",
+  "@resignOfferDecline": { "description": "Кнопка: отказать" },
+
   "actionYes": "Ha",
   "@actionYes": { "description": "Да" },
 

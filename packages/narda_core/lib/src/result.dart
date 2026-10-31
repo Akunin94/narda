@@ -35,13 +35,15 @@ class GameResult {
   }
 
   /// Сдача партии: соперник получает 1 очко, а при нуле выброшенных
-  /// у сдавшегося — 2 (явный марс).
+  /// у сдавшегося — 2 (явный марс). [mars] `false` — обычная сдача
+  /// на 1 очко, принятая соперником.
   factory GameResult.resignation({
     required Player resigning,
     required GameState state,
+    bool mars = true,
   }) => GameResult(
     winner: resigning.opponent,
-    isMars: state.borneOff(resigning) == 0,
+    isMars: mars && state.borneOff(resigning) == 0,
     byResignation: true,
   );
 

@@ -24,5 +24,9 @@ class OnlineOpponent implements Opponent {
       match.awaitOpponentMove(state);
 
   @override
+  Future<bool> acceptsSingleResignation(GameState state) =>
+      match.offerResignation();
+
+  @override
   void dispose() => match.dispose();
 }

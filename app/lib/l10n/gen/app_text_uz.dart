@@ -94,6 +94,33 @@ class AppTextUz extends AppText {
   String get resignQuestion => 'Partiyada taslim bo\'lasizmi?';
 
   @override
+  String get resignMars => 'Mars bilan taslim (2 ochko)';
+
+  @override
+  String get resignMarsHint => 'Darhol, raqib roziligisiz';
+
+  @override
+  String get resignSingle => 'Oddiy taslim taklif qilish (1 ochko)';
+
+  @override
+  String get resignSingleHint => 'Raqib rozi bo\'lishi kerak';
+
+  @override
+  String get resignOfferIncoming => 'Raqib 1 ochkoga taslim bo\'lishni taklif qilmoqda. Qabul qilasizmi?';
+
+  @override
+  String get resignOfferWaiting => 'Raqib javobini kutamiz…';
+
+  @override
+  String get resignOfferDeclined => 'Raqib rad etdi — o\'yin davom etadi';
+
+  @override
+  String get resignOfferAccept => 'Qabul qilish';
+
+  @override
+  String get resignOfferDecline => 'Rad etish';
+
+  @override
   String get actionYes => 'Ha';
 
   @override

@@ -334,16 +334,35 @@ class MatchController extends ChangeNotifier {
   }
 
   /// Сдача партии (§3.4): сдаётся тот, чей сейчас ход.
-  void resign() {
+  void resign({bool mars = true}) {
     if (isOver) return;
     _generation++;
-    final Player resigning = _opponent.movesOnThisDevice
-        ? _game.state.turn
-        : setup.localPlayer;
     _clearDraft();
-    _game.resign(resigning);
+    _game.resign(resigningPlayer, mars: mars);
     unawaited(_coordinator?.publishResign());
     _finish(_game.result!);
+  }
+
+  /// Кто сдаётся с этого экрана: в hotseat — тот, чей ход.
+  Player get resigningPlayer =>
+      _opponent.movesOnThisDevice ? _game.state.turn : setup.localPlayer;
+
+  /// Сдача на марс ничего не меняет: у сдающегося уже есть выброшенная шашка.
+  bool get resignationIsSingle => _game.state.borneOff(resigningPlayer) > 0;
+
+  /// Обычная сдача на 1 очко — только с согласия соперника. `true` — принята.
+  /// В онлайне итог приезжает сигналом от комнаты.
+  Future<bool> offerResignation() async {
+    if (isOver) return false;
+    final bool accepted = await _opponent.acceptsSingleResignation(_game.state);
+    if (!accepted || isOver || _disposed) return accepted;
+    if (_coordinator == null) {
+      _generation++;
+      _clearDraft();
+      _game.resign(resigningPlayer, mars: false);
+      _finish(_game.result!);
+    }
+    return true;
   }
 
   @override
