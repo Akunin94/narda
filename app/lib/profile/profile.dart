@@ -160,6 +160,17 @@ class ProfileController extends ChangeNotifier {
   /// Записывает новый профиль: в памяти, на диск (если он есть) и в экраны.
   /// [persist] вызывается уже после подмены [_profile] — счётчики в нём
   /// читаются новые.
+  /// Профиль с сервера после входа через Google на новом телефоне.
+  void restore(PlayerProfile next) => _update(
+    next,
+    (SharedPreferences prefs) => prefs
+      ..setString(_keyName, next.name)
+      ..setInt(_keyAvatar, next.avatar)
+      ..setInt(_keyRating, next.rating)
+      ..setInt(_keyRatedGames, next.ratedGames)
+      ..setInt(_keyRatedWins, next.ratedWins),
+  );
+
   void _update(
     PlayerProfile next,
     void Function(SharedPreferences prefs) persist,

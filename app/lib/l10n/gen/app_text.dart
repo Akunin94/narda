@@ -1009,6 +1009,36 @@ abstract class AppText {
   /// **'Profil'**
   String get menuProfile;
 
+  /// Кнопка входа через Google в профиле
+  ///
+  /// In uz, this message translates to:
+  /// **'Google orqali kirish'**
+  String get accountGoogleSignIn;
+
+  /// Зачем входить через Google
+  ///
+  /// In uz, this message translates to:
+  /// **'Reyting Google akkauntga bog\'lanadi va ilovani qayta o\'rnatganda yoki telefon almashtirganda saqlanadi'**
+  String get accountGoogleHint;
+
+  /// Google-аккаунт уже привязан
+  ///
+  /// In uz, this message translates to:
+  /// **'Google akkaunt ulangan'**
+  String get accountGoogleLinked;
+
+  /// Профиль восстановлен с сервера после входа
+  ///
+  /// In uz, this message translates to:
+  /// **'Profil tiklandi'**
+  String get accountRestored;
+
+  /// Ошибка входа через Google
+  ///
+  /// In uz, this message translates to:
+  /// **'Kirib bo\'lmadi, keyinroq urinib ko\'ring'**
+  String get accountSignInFailed;
+
   /// Заголовок экрана профиля
   ///
   /// In uz, this message translates to:

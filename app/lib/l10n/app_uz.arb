@@ -469,6 +469,21 @@
   "menuProfile": "Profil",
   "@menuProfile": { "description": "Кнопка: профиль игрока" },
 
+  "accountGoogleSignIn": "Google orqali kirish",
+  "@accountGoogleSignIn": { "description": "Кнопка входа через Google в профиле" },
+
+  "accountGoogleHint": "Reyting Google akkauntga bog'lanadi va ilovani qayta o'rnatganda yoki telefon almashtirganda saqlanadi",
+  "@accountGoogleHint": { "description": "Зачем входить через Google" },
+
+  "accountGoogleLinked": "Google akkaunt ulangan",
+  "@accountGoogleLinked": { "description": "Google-аккаунт уже привязан" },
+
+  "accountRestored": "Profil tiklandi",
+  "@accountRestored": { "description": "Профиль восстановлен с сервера после входа" },
+
+  "accountSignInFailed": "Kirib bo'lmadi, keyinroq urinib ko'ring",
+  "@accountSignInFailed": { "description": "Ошибка входа через Google" },
+
   "profileTitle": "Profil",
   "@profileTitle": { "description": "Заголовок экрана профиля" },
 

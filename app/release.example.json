@@ -5,5 +5,6 @@
   "FIREBASE_PROJECT_ID": "uzun-narda",
   "FIREBASE_DATABASE_URL": "https://uzun-narda-default-rtdb.firebaseio.com",
   "ADMOB_INTERSTITIAL": "ca-app-pub-XXXXXXXXXXXXXXXX/AAAAAAAAAA",
-  "ADMOB_REWARDED": "ca-app-pub-XXXXXXXXXXXXXXXX/BBBBBBBBBB"
+  "ADMOB_REWARDED": "ca-app-pub-XXXXXXXXXXXXXXXX/BBBBBBBBBB",
+  "GOOGLE_SERVER_CLIENT_ID": "000000000000-xxxxxxxx.apps.googleusercontent.com"
 }

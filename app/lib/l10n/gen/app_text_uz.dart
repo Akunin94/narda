@@ -487,6 +487,21 @@ class AppTextUz extends AppText {
   String get menuProfile => 'Profil';
 
   @override
+  String get accountGoogleSignIn => 'Google orqali kirish';
+
+  @override
+  String get accountGoogleHint => 'Reyting Google akkauntga bog\'lanadi va ilovani qayta o\'rnatganda yoki telefon almashtirganda saqlanadi';
+
+  @override
+  String get accountGoogleLinked => 'Google akkaunt ulangan';
+
+  @override
+  String get accountRestored => 'Profil tiklandi';
+
+  @override
+  String get accountSignInFailed => 'Kirib bo\'lmadi, keyinroq urinib ko\'ring';
+
+  @override
   String get profileTitle => 'Profil';
 
   @override

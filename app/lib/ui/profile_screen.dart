@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 import '../app.dart';
 import '../l10n/gen/app_text.dart';
+import '../online/google_account.dart';
 import '../online/online_backend.dart';
+import '../online/protocol.dart';
 import '../profile/profile.dart';
 import '../theme/narda_theme.dart';
 import 'avatar.dart';
@@ -101,6 +104,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             const SizedBox(height: 24),
             _RatingCard(profile: _profile),
+            if (GoogleAccount.isConfigured) ...<Widget>[
+              const SizedBox(height: 12),
+              _GoogleAccountTile(profile: _profile),
+            ],
             const SizedBox(height: 12),
             OutlinedButton.icon(
               onPressed: () =>
@@ -113,6 +120,109 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Вход через Google: рейтинг переживает переустановку и смену телефона.
+class _GoogleAccountTile extends StatefulWidget {
+  const _GoogleAccountTile({required this.profile});
+
+  final ProfileController profile;
+
+  @override
+  State<_GoogleAccountTile> createState() => _GoogleAccountTileState();
+}
+
+class _GoogleAccountTileState extends State<_GoogleAccountTile> {
+  String? _email;
+  bool _busy = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    String? email;
+    try {
+      email = await GoogleAccount.email();
+    } on Object {
+      email = null;
+    }
+    if (!mounted) return;
+    setState(() {
+      _email = email;
+      _busy = false;
+    });
+  }
+
+  Future<void> _signIn(AppText text) async {
+    setState(() => _busy = true);
+    String? message;
+    try {
+      final RatingEntry? saved = await GoogleAccount.signIn();
+      if (saved != null) {
+        widget.profile.restore(
+          PlayerProfile(
+            name: saved.name,
+            avatar: saved.avatar,
+            rating: saved.rating,
+            ratedGames: saved.games,
+            ratedWins: saved.wins,
+          ),
+        );
+        message = text.accountRestored;
+      }
+    } on GoogleSignInException catch (error) {
+      // Окно выбора аккаунта просто закрыли — это не ошибка.
+      if (error.code != GoogleSignInExceptionCode.canceled) {
+        message = text.accountSignInFailed;
+      }
+    } on Object {
+      message = text.accountSignInFailed;
+    }
+    await _load();
+    if (message != null && mounted) {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(message)));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final AppText text = AppText.of(context);
+    final String? email = _email;
+    if (email != null) {
+      return NardaCard(
+        child: ListTile(
+          leading: const Icon(Icons.verified_user, color: NardaColors.gold),
+          title: Text(
+            text.accountGoogleLinked,
+            style: const TextStyle(color: NardaColors.textPrimary),
+          ),
+          subtitle: email.isEmpty
+              ? null
+              : Text(
+                  email,
+                  style: const TextStyle(color: NardaColors.textMuted),
+                ),
+        ),
+      );
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        FilledButton.icon(
+          onPressed: _busy ? null : () => _signIn(text),
+          icon: const Icon(Icons.login),
+          label: Text(text.accountGoogleSignIn),
+        ),
+        const SizedBox(height: 8),
+        NardaHint(text.accountGoogleHint),
+      ],
     );
   }
 }

@@ -485,6 +485,21 @@ class AppTextRu extends AppText {
   String get menuProfile => 'Профиль';
 
   @override
+  String get accountGoogleSignIn => 'Войти через Google';
+
+  @override
+  String get accountGoogleHint => 'Рейтинг привяжется к Google-аккаунту и сохранится при переустановке и смене телефона';
+
+  @override
+  String get accountGoogleLinked => 'Google-аккаунт подключён';
+
+  @override
+  String get accountRestored => 'Профиль восстановлен';
+
+  @override
+  String get accountSignInFailed => 'Не удалось войти, попробуйте позже';
+
+  @override
   String get profileTitle => 'Профиль';
 
   @override

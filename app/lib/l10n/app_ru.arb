@@ -300,6 +300,11 @@
   },
 
   "menuProfile": "Профиль",
+  "accountGoogleSignIn": "Войти через Google",
+  "accountGoogleHint": "Рейтинг привяжется к Google-аккаунту и сохранится при переустановке и смене телефона",
+  "accountGoogleLinked": "Google-аккаунт подключён",
+  "accountRestored": "Профиль восстановлен",
+  "accountSignInFailed": "Не удалось войти, попробуйте позже",
   "profileTitle": "Профиль",
   "profileName": "Ник",
   "profileNameHint": "Введите ник",
