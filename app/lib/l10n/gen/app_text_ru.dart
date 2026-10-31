@@ -462,7 +462,8 @@ class AppTextRu extends AppText {
   String get voiceDenied => 'Нет доступа к микрофону';
 
   @override
-  String get onlineOpponentFound => 'Соперник найден! Переходим в онлайн-партию';
+  String get onlineOpponentFound =>
+      'Соперник найден! Переходим в онлайн-партию';
 
   @override
   String get onlinePhrasesTitle => 'Фразы';

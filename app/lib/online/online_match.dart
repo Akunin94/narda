@@ -33,7 +33,13 @@ class OnlineMatch extends ChangeNotifier implements TurnCoordinator {
   static const MoveGenerator _generator = MoveGenerator();
 
   /// Сколько просроченных ходов подряд дают поражение.
-  static const int maxExpiredInRow = 3;
+  static const int maxExpiredInRow = 4;
+
+  /// Доля [turnLimit] на ход после k просрочек подряд: 60 → 30 → 15 → 15 с.
+  static const List<double> _limitShare = <double>[1, 0.5, 0.25, 0.25];
+
+  Duration get _currentTurnLimit =>
+      turnLimit * _limitShare[_localExpired.clamp(0, _limitShare.length - 1)];
 
   /// Сколько раз перебрасываем при равных кубиках розыгрыша, прежде чем
   /// признать комнату сломанной.
@@ -218,7 +224,7 @@ class OnlineMatch extends ChangeNotifier implements TurnCoordinator {
     // Переподключение таймер не продлевает: остаётся прежний дедлайн хода.
     _deadline = resumed && published.deadline > 0
         ? published.deadline
-        : _serverNow() + turnLimit.inMilliseconds;
+        : _serverNow() + _currentTurnLimit.inMilliseconds;
     await room.update(<String, Object?>{
       'state': RoomState(
         points: turnState.encode(),
@@ -266,7 +272,7 @@ class OnlineMatch extends ChangeNotifier implements TurnCoordinator {
     });
 
     if (_localExpired >= maxExpiredInRow) {
-      // Три просроченных хода подряд — поражение (§6).
+      // Четыре просроченных хода подряд — поражение (§6).
       await _writeOutcome(
         winnerUid: _opponentOrSelf,
         reason: OutcomeReason.timeout,
@@ -515,7 +521,7 @@ class OnlineMatch extends ChangeNotifier implements TurnCoordinator {
     notifyListeners();
   }
 
-  /// Просроченный ход: за игрока ходит средний бот, третий подряд — поражение
+  /// Просроченный ход: за игрока ходит средний бот, четвёртый подряд — поражение
   /// (§6). Доска перезапускается с новой позиции.
   Future<void> _playOnTimeout(GameState before) async {
     _turnState = null;

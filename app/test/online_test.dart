@@ -551,7 +551,7 @@ void main() {
       );
     });
 
-    test('за просрочившего ходит бот, третий просроченный подряд — поражение', () async {
+    test('за просрочившего ходит бот, четвёртый просроченный подряд — поражение', () async {
       final TestRoom room = await TestRoom.open();
       addTearDown(room.server.dispose);
       final TestClient white = TestClient(
@@ -578,7 +578,7 @@ void main() {
       white.controller.start();
       black.controller.start();
 
-      // Никто не ходит: каждый ход просрачивается, третий подряд — поражение.
+      // Никто не ходит: каждый ход просрачивается, четвёртый подряд — поражение.
       int guard = 0;
       while (room.white.snapshot.outcome == null && guard++ < 200) {
         await Future<void>.delayed(const Duration(milliseconds: 20));
