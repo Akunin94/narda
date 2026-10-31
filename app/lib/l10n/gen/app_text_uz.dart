@@ -520,6 +520,9 @@ class AppTextUz extends AppText {
   String get rematchWaiting => 'Raqibning javobi kutilmoqda';
 
   @override
+  String get rematchOpponentLeft => 'Raqib o\'yindan chiqdi';
+
+  @override
   String get rematchOffered => 'Raqib revansh taklif qilyapti';
 
   @override

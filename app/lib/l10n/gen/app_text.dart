@@ -1081,6 +1081,12 @@ abstract class AppText {
   /// **'Raqib revansh taklif qilyapti'**
   String get rematchOffered;
 
+  /// Соперник покинул доигранный матч — реванша не будет
+  ///
+  /// In uz, this message translates to:
+  /// **'Raqib o\'yindan chiqdi'**
+  String get rematchOpponentLeft;
+
   /// Рейтинг после матча и его изменение
   ///
   /// In uz, this message translates to:

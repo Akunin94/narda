@@ -312,6 +312,7 @@
   "actionRematchOnline": "Реванш",
   "rematchWaiting": "Ждём ответа соперника",
   "rematchOffered": "Соперник предлагает реванш",
+  "rematchOpponentLeft": "Соперник вышел из игры",
 
   "ratingResult": "Рейтинг: {rating} ({delta})",
   "@ratingResult": {

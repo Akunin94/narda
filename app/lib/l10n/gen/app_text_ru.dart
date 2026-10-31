@@ -518,6 +518,9 @@ class AppTextRu extends AppText {
   String get rematchWaiting => 'Ждём ответа соперника';
 
   @override
+  String get rematchOpponentLeft => 'Соперник вышел из игры';
+
+  @override
   String get rematchOffered => 'Соперник предлагает реванш';
 
   @override

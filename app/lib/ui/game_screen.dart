@@ -644,6 +644,16 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
     required bool matchOver,
   }) {
     final OnlineMatch? match = widget.online;
+    // Соперник ушёл в меню или закрыл игру — реванш предлагать некому.
+    if (match != null && matchOver && !match.opponentOnline) {
+      return <Widget>[
+        Text(
+          text.rematchOpponentLeft,
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: NardaColors.textMuted),
+        ),
+      ];
+    }
     if (match != null && matchOver) {
       return <Widget>[
         if (match.rematchRequestedByOpponent && !match.rematchRequestedByMe)
