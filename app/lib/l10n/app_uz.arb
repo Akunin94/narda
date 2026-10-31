@@ -445,6 +445,9 @@
   "voiceDenied": "Mikrofonga ruxsat berilmadi",
   "@voiceDenied": { "description": "Пользователь не дал доступ к микрофону" },
 
+  "onlineOpponentFound": "Raqib topildi! Onlayn o'yinga o'tamiz",
+  "@onlineOpponentFound": { "description": "Нашёлся живой соперник, пока шла партия с ботом" },
+
   "onlinePhrasesTitle": "Iboralar",
   "@onlinePhrasesTitle": { "description": "Заголовок панели готовых фраз" },
 

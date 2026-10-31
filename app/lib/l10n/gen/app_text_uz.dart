@@ -464,6 +464,9 @@ class AppTextUz extends AppText {
   String get voiceDenied => 'Mikrofonga ruxsat berilmadi';
 
   @override
+  String get onlineOpponentFound => 'Raqib topildi! Onlayn o\'yinga o\'tamiz';
+
+  @override
   String get onlinePhrasesTitle => 'Iboralar';
 
   @override
@@ -490,7 +493,8 @@ class AppTextUz extends AppText {
   String get accountGoogleSignIn => 'Google orqali kirish';
 
   @override
-  String get accountGoogleHint => 'Reyting Google akkauntga bog\'lanadi va ilovani qayta o\'rnatganda yoki telefon almashtirganda saqlanadi';
+  String get accountGoogleHint =>
+      'Reyting Google akkauntga bog\'lanadi va ilovani qayta o\'rnatganda yoki telefon almashtirganda saqlanadi';
 
   @override
   String get accountGoogleLinked => 'Google akkaunt ulangan';
@@ -526,7 +530,8 @@ class AppTextUz extends AppText {
   String get leaderboardTitle => 'Reyting jadvali';
 
   @override
-  String get leaderboardGoogleOnly => 'Jadvalda faqat Google orqali kirgan o\'yinchilar ko\'rsatiladi';
+  String get leaderboardGoogleOnly =>
+      'Jadvalda faqat Google orqali kirgan o\'yinchilar ko\'rsatiladi';
 
   @override
   String get leaderboardEmpty => 'Jadval hozircha bo\'sh';

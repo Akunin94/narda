@@ -462,6 +462,9 @@ class AppTextRu extends AppText {
   String get voiceDenied => 'Нет доступа к микрофону';
 
   @override
+  String get onlineOpponentFound => 'Соперник найден! Переходим в онлайн-партию';
+
+  @override
   String get onlinePhrasesTitle => 'Фразы';
 
   @override
@@ -488,7 +491,8 @@ class AppTextRu extends AppText {
   String get accountGoogleSignIn => 'Войти через Google';
 
   @override
-  String get accountGoogleHint => 'Рейтинг привяжется к Google-аккаунту и сохранится при переустановке и смене телефона';
+  String get accountGoogleHint =>
+      'Рейтинг привяжется к Google-аккаунту и сохранится при переустановке и смене телефона';
 
   @override
   String get accountGoogleLinked => 'Google-аккаунт подключён';
@@ -524,7 +528,8 @@ class AppTextRu extends AppText {
   String get leaderboardTitle => 'Таблица лидеров';
 
   @override
-  String get leaderboardGoogleOnly => 'В таблице только игроки, вошедшие через Google';
+  String get leaderboardGoogleOnly =>
+      'В таблице только игроки, вошедшие через Google';
 
   @override
   String get leaderboardEmpty => 'Таблица пока пуста';

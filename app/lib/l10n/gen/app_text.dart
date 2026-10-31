@@ -121,17 +121,17 @@ abstract class AppText {
   /// **'Onlayn o\'yinga qaytish'**
   String get menuRejoinOnline;
 
-  /// Кнопка: игра против бота
-  ///
-  /// In uz, this message translates to:
-  /// **'Bot bilan o\'ynash'**
-  String get menuPlayBot;
-
   /// Кнопка: новая партия с ботом рядом с «Продолжить»
   ///
   /// In uz, this message translates to:
   /// **'Yangi partiya'**
   String get menuNewBotGame;
+
+  /// Кнопка: игра против бота
+  ///
+  /// In uz, this message translates to:
+  /// **'Bot bilan o\'ynash'**
+  String get menuPlayBot;
 
   /// Кнопка: hotseat на одном устройстве
   ///
@@ -966,6 +966,12 @@ abstract class AppText {
   /// In uz, this message translates to:
   /// **'Mikrofonga ruxsat berilmadi'**
   String get voiceDenied;
+
+  /// Нашёлся живой соперник, пока шла партия с ботом
+  ///
+  /// In uz, this message translates to:
+  /// **'Raqib topildi! Onlayn o\'yinga o\'tamiz'**
+  String get onlineOpponentFound;
 
   /// Заголовок панели готовых фраз
   ///

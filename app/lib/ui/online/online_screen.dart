@@ -6,10 +6,10 @@ import 'package:narda_core/narda_core.dart';
 
 import '../../app.dart';
 import '../../game/game_setup.dart';
+import '../../game/saved_game.dart';
 import '../../game/settings.dart';
 import '../../l10n/gen/app_text.dart';
 import '../../online/firebase_backend.dart';
-import '../../game/saved_game.dart';
 import '../../online/lobby_controller.dart';
 import '../../online/online_backend.dart';
 import '../../theme/narda_theme.dart';
@@ -74,17 +74,54 @@ class _OnlineScreenState extends State<OnlineScreen> {
     final OnlineSession? session = _lobby.session;
     if (session == null || _opened) return;
     _opened = true;
-    unawaited(
-      replaceScreen(
-        context,
-        GameScreen(
-          setup: session.setup,
-          online: session.match,
-          rating: session.rating,
-          score: session.score,
+    unawaited(_openSession(session));
+  }
+
+  /// Ждём живого соперника, пока играем с ботом.
+  bool _botWhileSearching = false;
+
+  Future<void> _openSession(OnlineSession session) async {
+    if (_botWhileSearching) {
+      // Партия с ботом сохраняется сама — закрываем её и явно говорим, что
+      // дальше играем с живым соперником.
+      final ModalRoute<dynamic>? own = ModalRoute.of(context);
+      Navigator.of(context).popUntil((Route<dynamic> route) => route == own);
+      await _announceOpponent();
+    }
+    if (!mounted) return;
+    await replaceScreen(
+      context,
+      GameScreen(
+        setup: session.setup,
+        online: session.match,
+        rating: session.rating,
+        score: session.score,
+      ),
+    );
+  }
+
+  /// Окно «Соперник найден» само закрывается через пару секунд: соперник ждёт.
+  Future<void> _announceOpponent() async {
+    final AppText text = AppText.of(context);
+    final NavigatorState navigator = Navigator.of(context);
+    bool open = true;
+    Timer(const Duration(seconds: 2), () {
+      if (open && mounted) navigator.pop();
+    });
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) => AlertDialog(
+        backgroundColor: NardaColors.surface,
+        icon: const Icon(Icons.person_search, color: NardaColors.gold),
+        content: Text(
+          text.onlineOpponentFound,
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: NardaColors.textPrimary),
         ),
       ),
     );
+    open = false;
   }
 
   @override
@@ -240,16 +277,21 @@ class _OnlineScreenState extends State<OnlineScreen> {
     child: Text(text.onlineCancelSearch),
   );
 
-  /// Пока ищем — можно сыграть с ботом. Ботов за живых не выдаём (§6).
+  /// Пока ищем — можно сыграть с ботом, поиск при этом идёт дальше. Ботов
+  /// за живых не выдаём (§6): найдётся соперник — переключим явно.
   Future<void> _playBot(SettingsController settings) async {
-    await _lobby.cancel();
-    if (!mounted) return;
-    await replaceScreen(
+    final SavedBotGame? saved = SavedBotGame.decode(settings.savedBotGame);
+    _botWhileSearching = true;
+    await openScreen(
       context,
       GameScreen(
-        setup: GameSetup.vsBot(settings.botLevel, target: settings.matchTarget),
+        setup: saved == null
+            ? GameSetup.vsBot(settings.botLevel, target: settings.matchTarget)
+            : GameSetup.vsBot(saved.level, target: saved.score.target),
+        resume: saved,
       ),
     );
+    _botWhileSearching = false;
   }
 
   Future<void> _askCode(AppText text) async {
