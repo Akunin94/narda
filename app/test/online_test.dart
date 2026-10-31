@@ -363,6 +363,28 @@ void main() {
       expect(black.controller.result!.isMars, isTrue, reason: 'ни одной шашки');
     });
 
+    test('возврат из фона снова отмечает присутствие', () async {
+      final TestRoom room = await TestRoom.open();
+      addTearDown(room.server.dispose);
+      final TestClient white = TestClient(
+        room.white,
+        color: Player.white,
+        target: MatchTarget.single,
+        dice: RandomDiceSource.seeded(3),
+      );
+      addTearDown(white.dispose);
+      await pump();
+
+      // Телефон уснул — сервер снял присутствие по onDisconnect.
+      await room.white.update(<String, Object?>{'presence/a': false});
+      await pump();
+      expect(room.black.snapshot.presence['a'], isFalse);
+
+      await white.match.refresh();
+      await pump();
+      expect(room.black.snapshot.presence['a'], isTrue);
+    });
+
     test('нелегальный ход соперника аннулирует партию', () async {
       final TestRoom room = await TestRoom.open();
       addTearDown(room.server.dispose);

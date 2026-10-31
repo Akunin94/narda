@@ -58,7 +58,7 @@ class GameScreen extends StatefulWidget {
   State<GameScreen> createState() => _GameScreenState();
 }
 
-class _GameScreenState extends State<GameScreen> {
+class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
   late final SettingsController _settings = SettingsScope.of(context);
   late final StatsStore _stats = StatsScope.of(context);
   late final AdsController _ads = AdsScope.of(context);
@@ -107,12 +107,19 @@ class _GameScreenState extends State<GameScreen> {
     if (_started) return;
     _started = true;
     widget.online?.addListener(_onOnlineChanged);
+    WidgetsBinding.instance.addObserver(this);
     _controller.start();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) unawaited(widget.online?.refresh());
   }
 
   @override
   void dispose() {
     widget.online?.removeListener(_onOnlineChanged);
+    WidgetsBinding.instance.removeObserver(this);
     if (widget.online != null) _voice?.dispose();
     _controller.dispose();
     super.dispose();

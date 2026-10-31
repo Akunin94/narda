@@ -258,6 +258,9 @@ class MemoryRoomHandle implements RoomHandle {
   Stream<RoomSnapshot> get snapshots => _server.watch(roomId);
 
   @override
+  Future<RoomSnapshot> fetch() async => snapshot;
+
+  @override
   Future<void> update(Map<String, Object?> values) async =>
       _server.update(roomId, values);
 

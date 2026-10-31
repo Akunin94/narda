@@ -151,6 +151,19 @@ class OnlineMatch extends ChangeNotifier implements TurnCoordinator {
     _ticker = Timer.periodic(tickInterval, (_) => _tick());
   }
 
+  /// Возврат из фона: заново отметиться и перечитать комнату — подписка
+  /// могла пропустить ход соперника, пока телефон спал.
+  Future<void> refresh() async {
+    if (!_started || _closed) return;
+    unawaited(room.keepPresence());
+    try {
+      final RoomSnapshot fresh = await room.fetch();
+      _apply(fresh);
+    } on Object {
+      // Сети ещё нет — подписка догонит, когда связь вернётся.
+    }
+  }
+
   // --- TurnCoordinator -------------------------------------------------
 
   @override

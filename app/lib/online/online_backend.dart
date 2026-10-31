@@ -62,6 +62,9 @@ abstract interface class RoomHandle {
   /// значение `null` удаляет узел, [serverTimestamp] — серверное время.
   Future<void> update(Map<String, Object?> values);
 
+  /// Свежий снимок с сервера — после возврата из фона подписка могла отстать.
+  Future<RoomSnapshot> fetch();
+
   /// Отмечает присутствие. При обрыве связи сервер сам ставит `false` (§6).
   Future<void> keepPresence();
 

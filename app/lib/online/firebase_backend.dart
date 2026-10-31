@@ -450,6 +450,13 @@ class _FirebaseRoom implements RoomHandle {
 
   late RoomSnapshot _snapshot;
   late final Stream<RoomSnapshot> _stream;
+  StreamSubscription<DatabaseEvent>? _connection;
+
+  @override
+  Future<RoomSnapshot> fetch() async {
+    final DataSnapshot room = await _db.ref('rooms/$roomId').get();
+    return _snapshot = RoomSnapshot.fromJson(roomId, room.value);
+  }
 
   @override
   RoomSnapshot get snapshot => _snapshot;
@@ -469,12 +476,26 @@ class _FirebaseRoom implements RoomHandle {
   @override
   Future<void> keepPresence() async {
     final DatabaseReference presence = _db.ref('rooms/$roomId/presence/$uid');
-    await presence.onDisconnect().set(false);
-    await presence.set(true);
+    await _connection?.cancel();
+    // После обрыва (телефон уснул) сервер ставит false — на каждом
+    // переподключении отмечаемся заново.
+    _connection = _db.ref('.info/connected').onValue.listen((
+      DatabaseEvent event,
+    ) async {
+      if (event.snapshot.value != true) return;
+      try {
+        await presence.onDisconnect().set(false);
+        await presence.set(true);
+      } on FirebaseException {
+        // Связь снова пропала — следующее подключение повторит.
+      }
+    });
   }
 
   @override
   Future<void> leave() async {
+    await _connection?.cancel();
+    _connection = null;
     final DatabaseReference presence = _db.ref('rooms/$roomId/presence/$uid');
     await presence.onDisconnect().cancel();
     await presence.set(false);
