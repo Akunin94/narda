@@ -64,6 +64,8 @@ abstract final class GoogleAccount {
       try {
         // Тот же uid — рейтинг и история остаются как есть.
         await current.linkWithCredential(credential);
+        // Свежий токен с почтой — по ней правила пускают в таблицу лидеров.
+        await current.getIdToken(true);
         return null;
       } on FirebaseAuthException catch (error) {
         if (error.code != 'credential-already-in-use') rethrow;

@@ -524,6 +524,9 @@ class AppTextRu extends AppText {
   String get leaderboardTitle => 'Таблица лидеров';
 
   @override
+  String get leaderboardGoogleOnly => 'В таблице только игроки, вошедшие через Google';
+
+  @override
   String get leaderboardEmpty => 'Таблица пока пуста';
 
   @override

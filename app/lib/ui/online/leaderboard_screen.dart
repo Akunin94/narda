@@ -95,12 +95,17 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
     }
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
-      itemCount: entries.length,
-      itemBuilder: (BuildContext context, int index) => _Row(
-        place: index + 1,
-        entry: entries[index],
-        isMe: entries[index].uid == _uid,
-      ),
+      itemCount: entries.length + 1,
+      itemBuilder: (BuildContext context, int index) => index == 0
+          ? Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: NardaHint(text.leaderboardGoogleOnly),
+            )
+          : _Row(
+              place: index,
+              entry: entries[index - 1],
+              isMe: entries[index - 1].uid == _uid,
+            ),
     );
   }
 }

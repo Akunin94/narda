@@ -3,9 +3,11 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 import '../app.dart';
 import '../l10n/gen/app_text.dart';
+import '../online/firebase_backend.dart';
 import '../online/google_account.dart';
 import '../online/online_backend.dart';
 import '../online/protocol.dart';
+import '../online/rating_service.dart';
 import '../profile/profile.dart';
 import '../theme/narda_theme.dart';
 import 'avatar.dart';
@@ -175,6 +177,11 @@ class _GoogleAccountTileState extends State<_GoogleAccountTile> {
         );
         message = text.accountRestored;
       }
+      // Публикуем профиль заново — теперь с отметкой Google, он появится в таблице лидеров.
+      await RatingService(
+        backend: FirebaseOnlineBackend(),
+        profile: widget.profile,
+      ).publish();
     } on GoogleSignInException catch (error) {
       // Окно выбора аккаунта просто закрыли — это не ошибка.
       if (error.code != GoogleSignInExceptionCode.canceled) {

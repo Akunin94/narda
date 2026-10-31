@@ -24,7 +24,7 @@
       ".indexOn": ["rating"],
       "$uid": {
         ".write": "auth !== null && $uid === auth.uid",
-        ".validate": "newData.hasChildren(['name', 'rating']) && newData.child('name').isString() && newData.child('name').val().length <= 24 && newData.child('rating').isNumber() && newData.child('rating').val() >= 100 && newData.child('rating').val() <= 4000 && (!data.exists() || (newData.child('rating').val() - data.child('rating').val() <= 64 && data.child('rating').val() - newData.child('rating').val() <= 64))"
+        ".validate": "(!newData.hasChild('google') || auth.token.email != null) && newData.hasChildren(['name', 'rating']) && newData.child('name').isString() && newData.child('name').val().length <= 24 && newData.child('rating').isNumber() && newData.child('rating').val() >= 100 && newData.child('rating').val() <= 4000 && (!data.exists() || (newData.child('rating').val() - data.child('rating').val() <= 64 && data.child('rating').val() - newData.child('rating').val() <= 64))"
       }
     },
 

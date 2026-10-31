@@ -1087,6 +1087,12 @@ abstract class AppText {
   /// **'Reyting jadvali'**
   String get leaderboardTitle;
 
+  /// Пояснение: в таблице лидеров только вошедшие через Google
+  ///
+  /// In uz, this message translates to:
+  /// **'Jadvalda faqat Google orqali kirgan o\'yinchilar ko\'rsatiladi'**
+  String get leaderboardGoogleOnly;
+
   /// Таблица лидеров пуста
   ///
   /// In uz, this message translates to:

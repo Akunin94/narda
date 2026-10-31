@@ -508,6 +508,9 @@
   "leaderboardTitle": "Reyting jadvali",
   "@leaderboardTitle": { "description": "Заголовок таблицы лидеров" },
 
+  "leaderboardGoogleOnly": "Jadvalda faqat Google orqali kirgan o'yinchilar ko'rsatiladi",
+  "@leaderboardGoogleOnly": { "description": "Пояснение: в таблице лидеров только вошедшие через Google" },
+
   "leaderboardEmpty": "Jadval hozircha bo'sh",
   "@leaderboardEmpty": { "description": "Таблица лидеров пуста" },
 

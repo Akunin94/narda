@@ -31,6 +31,15 @@ class FirebaseOnlineBackend implements OnlineBackend {
     return database;
   }
 
+  bool get _signedInWithGoogle {
+    if (Firebase.apps.isEmpty) return false;
+    final User? user = FirebaseAuth.instanceFor(app: Firebase.app()).currentUser;
+    return user?.providerData.any(
+          (UserInfo info) => info.providerId == GoogleAuthProvider.PROVIDER_ID,
+        ) ??
+        false;
+  }
+
   String get _me {
     final String? uid = _uid;
     if (uid == null) throw const OnlineUnavailable(OnlineFailure.notConfigured);
@@ -378,7 +387,10 @@ class FirebaseOnlineBackend implements OnlineBackend {
           rating: card.rating,
           games: games,
           wins: wins,
-        ).toJson()..['updatedAt'] = ServerValue.timestamp,
+        ).toJson()
+          ..['updatedAt'] = ServerValue.timestamp
+          // В таблицу лидеров попадают только вошедшие через Google (правила проверяют почту в токене).
+          ..['google'] = _signedInWithGoogle ? true : null,
       );
     } on FirebaseException {
       throw const OnlineUnavailable(OnlineFailure.network);
@@ -389,12 +401,17 @@ class FirebaseOnlineBackend implements OnlineBackend {
   Future<List<RatingEntry>> leaderboard({int limit = 50}) async {
     await signIn();
     try {
+      // shortcut: анонимных отсеиваем на клиенте из запаса ×4; при тысячах игроков — отдельный узел только для Google.
       final DataSnapshot top = await _db
           .ref('users')
           .orderByChild('rating')
-          .limitToLast(limit)
+          .limitToLast(limit * 4)
           .get();
-      return ratingTable(top.value, limit: limit);
+      return ratingTable(<String, Object?>{
+        for (final MapEntry<String, Object?> entry
+            in childrenOf(top.value).entries)
+          if (childOf(entry.value, 'google') == true) entry.key: entry.value,
+      }, limit: limit);
     } on FirebaseException {
       throw const OnlineUnavailable(OnlineFailure.network);
     }

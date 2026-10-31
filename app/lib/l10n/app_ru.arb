@@ -313,6 +313,7 @@
   "profileRatedGames": "Рейтинговые матчи",
   "profileRatingNote": "Рейтинг меняется только в онлайн-матчах",
   "leaderboardTitle": "Таблица лидеров",
+  "leaderboardGoogleOnly": "В таблице только игроки, вошедшие через Google",
   "leaderboardEmpty": "Таблица пока пуста",
   "leaderboardYou": "Вы",
   "actionRematchOnline": "Реванш",

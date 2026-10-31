@@ -526,6 +526,9 @@ class AppTextUz extends AppText {
   String get leaderboardTitle => 'Reyting jadvali';
 
   @override
+  String get leaderboardGoogleOnly => 'Jadvalda faqat Google orqali kirgan o\'yinchilar ko\'rsatiladi';
+
+  @override
   String get leaderboardEmpty => 'Jadval hozircha bo\'sh';
 
   @override
