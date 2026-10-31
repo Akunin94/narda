@@ -488,6 +488,8 @@ class MatchController extends ChangeNotifier {
 
   Future<bool> _playSequence(MoveSequence sequence, int generation) async {
     for (final Move move in sequence.moves) {
+      // Нулевая пауза не ждёт: пересборка могла случиться уже после проверки в _wait.
+      if (_isStale(generation)) return false;
       _play(move);
       if (!await _wait(timing.move + timing.betweenMoves, generation)) {
         return false;
