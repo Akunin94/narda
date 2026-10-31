@@ -537,13 +537,20 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
                 if (borneOff != null || dice != null || _settings.showPips)
                   Padding(
                     padding: const EdgeInsets.only(top: 4),
-                    child: Row(
+                    // Wrap: при дубле (4 кости) с pip и выброшенными не влезает в одну строку.
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: Wrap(
+                      spacing: 10,
+                      runSpacing: 4,
+                      alignment: WrapAlignment.spaceBetween,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: <Widget>[
-                        if (_settings.showPips) ...<Widget>[pips, const SizedBox(width: 10)],
+                        if (_settings.showPips) pips,
                         ?borneOff,
-                        const Spacer(),
                         ?dice,
                       ],
+                    ),
                     ),
                   ),
               ],
