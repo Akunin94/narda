@@ -115,8 +115,37 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
     _started = true;
     widget.online?.addListener(_onOnlineChanged);
     WidgetsBinding.instance.addObserver(this);
-    if (_isOnline) _controller.addListener(_rememberOnline);
+    if (_isOnline) {
+      _controller
+        ..addListener(_rememberOnline)
+        ..addListener(_scheduleAutoNext);
+    }
     _controller.start();
+  }
+
+  /// Онлайн-серия сама переходит к следующей партии: иначе тот, кто нажал
+  /// раньше, ждал бы соперника, который отвлёкся, без всякого таймера.
+  static const int _autoNextSeconds = 10;
+  Timer? _autoNext;
+  int _autoNextLeft = 0;
+
+  void _scheduleAutoNext() {
+    final bool waiting =
+        _controller.phase == TurnPhase.finished &&
+        widget.setup.target != MatchTarget.single &&
+        !_controller.isMatchOver;
+    if (!waiting) {
+      _autoNext?.cancel();
+      _autoNext = null;
+      return;
+    }
+    if (_autoNext != null) return;
+    _autoNextLeft = _autoNextSeconds;
+    _autoNext = Timer.periodic(const Duration(seconds: 1), (Timer timer) {
+      if (!mounted) return timer.cancel();
+      setState(() => _autoNextLeft--);
+      if (_autoNextLeft <= 0) unawaited(_continue());
+    });
   }
 
   /// Идущая онлайн-партия запоминается, чтобы вернуться в неё после
@@ -143,7 +172,10 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
 
   @override
   void dispose() {
-    _controller.removeListener(_rememberOnline);
+    _autoNext?.cancel();
+    _controller
+      ..removeListener(_rememberOnline)
+      ..removeListener(_scheduleAutoNext);
     widget.online?.removeListener(_onOnlineChanged);
     WidgetsBinding.instance.removeObserver(this);
     if (widget.online != null) _voice?.dispose();
@@ -640,7 +672,9 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
         onPressed: _continue,
         child: Text(
           series && !matchOver
-              ? text.actionNextGame
+              ? (_autoNext == null
+                    ? text.actionNextGame
+                    : '${text.actionNextGame} ($_autoNextLeft)')
               : series
               ? text.actionNewMatch
               : text.actionRematch,
@@ -655,6 +689,8 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
   /// партиями и никогда во время партии (§P3). В онлайне его нет вовсе:
   /// соперник не должен ждать чужой ролик.
   Future<void> _continue() async {
+    _autoNext?.cancel();
+    _autoNext = null;
     final bool startNewMatch =
         widget.setup.target != MatchTarget.single && _controller.isMatchOver;
     setState(() => _switchingGame = true);
