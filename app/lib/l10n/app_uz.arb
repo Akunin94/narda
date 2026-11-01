@@ -448,6 +448,21 @@
   "onlineOpponentFound": "Raqib topildi! Onlayn o'yinga o'tamiz",
   "@onlineOpponentFound": { "description": "Нашёлся живой соперник, пока шла партия с ботом" },
 
+  "diceStatsTitle": "Bu partiyadagi zarlar",
+  "@diceStatsTitle": { "description": "Заголовок окна статистики бросков" },
+
+  "diceStatsRolls": "Tashlashlar",
+  "@diceStatsRolls": { "description": "Подпись: число бросков" },
+
+  "diceStatsDoubles": "Dubllar",
+  "@diceStatsDoubles": { "description": "Подпись: число дублей" },
+
+  "diceStatsAverage": "O'rtacha ochko",
+  "@diceStatsAverage": { "description": "Подпись: среднее очков за бросок (дубль ×4)" },
+
+  "diceStatsFair": "Onlayn zarlar ikkala telefonning tasodifiy sonlaridan birga hosil qilinadi — ularni hech kim o'zgartira olmaydi.",
+  "@diceStatsFair": { "description": "Пояснение про честные кости в онлайне" },
+
   "onlinePhrasesTitle": "Iboralar",
   "@onlinePhrasesTitle": { "description": "Заголовок панели готовых фраз" },
 

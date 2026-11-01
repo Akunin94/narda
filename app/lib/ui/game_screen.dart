@@ -437,6 +437,12 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
         ),
       ),
       IconButton(
+        onPressed: () => _showDiceStats(text),
+        icon: const Icon(Icons.casino_outlined),
+        tooltip: text.diceStatsTitle,
+        color: NardaColors.textMuted,
+      ),
+      IconButton(
         onPressed: _controller.isOver ? null : () => _confirmResign(text),
         icon: const Icon(Icons.flag_outlined),
         tooltip: text.actionResign,
@@ -783,6 +789,82 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
     if (_isOnline) _snack(text.resignOfferWaiting);
     final bool accepted = await _controller.offerResignation();
     if (!accepted && mounted) _snack(text.resignOfferDeclined);
+  }
+
+  /// Кто сколько выбросил в этой партии.
+  void _showDiceStats(AppText text) {
+    const TextStyle muted = TextStyle(color: NardaColors.textMuted);
+    const TextStyle value = TextStyle(
+      color: NardaColors.textPrimary,
+      fontWeight: FontWeight.w600,
+    );
+    final List<Player> players = <Player>[
+      widget.setup.localPlayer,
+      widget.setup.localPlayer.opponent,
+    ];
+    unawaited(
+      showNardaSheet<void>(
+        context,
+        builder: (BuildContext context) => SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                NardaSheetTitle(text.diceStatsTitle),
+                Table(
+                  defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                  children: <TableRow>[
+                    TableRow(
+                      children: <Widget>[
+                        const SizedBox.shrink(),
+                        for (final Player player in players)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: Text(
+                              _playerName(text, player),
+                              textAlign: TextAlign.center,
+                              overflow: TextOverflow.ellipsis,
+                              style: value,
+                            ),
+                          ),
+                      ],
+                    ),
+                    for (final (String label, String Function(DiceStats) cell)
+                        in <(String, String Function(DiceStats))>[
+                          (text.diceStatsRolls, (DiceStats d) => '${d.rolls}'),
+                          (text.diceStatsDoubles, (DiceStats d) => '${d.doubles}'),
+                          (
+                            text.diceStatsAverage,
+                            (DiceStats d) => d.average.toStringAsFixed(1),
+                          ),
+                        ])
+                      TableRow(
+                        children: <Widget>[
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 6),
+                            child: Text(label, style: muted),
+                          ),
+                          for (final Player player in players)
+                            Text(
+                              cell(_controller.diceStats[player]!),
+                              textAlign: TextAlign.center,
+                              style: value,
+                            ),
+                        ],
+                      ),
+                  ],
+                ),
+                if (_isOnline) ...<Widget>[
+                  const SizedBox(height: 12),
+                  Text(text.diceStatsFair, style: muted),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   void _snack(String message) => ScaffoldMessenger.of(context)

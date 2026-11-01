@@ -467,6 +467,21 @@ class AppTextUz extends AppText {
   String get onlineOpponentFound => 'Raqib topildi! Onlayn o\'yinga o\'tamiz';
 
   @override
+  String get diceStatsTitle => 'Bu partiyadagi zarlar';
+
+  @override
+  String get diceStatsRolls => 'Tashlashlar';
+
+  @override
+  String get diceStatsDoubles => 'Dubllar';
+
+  @override
+  String get diceStatsAverage => 'O\'rtacha ochko';
+
+  @override
+  String get diceStatsFair => 'Onlayn zarlar ikkala telefonning tasodifiy sonlaridan birga hosil qilinadi — ularni hech kim o\'zgartira olmaydi.';
+
+  @override
   String get onlinePhrasesTitle => 'Iboralar';
 
   @override

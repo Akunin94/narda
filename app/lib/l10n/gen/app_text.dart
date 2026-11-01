@@ -973,6 +973,36 @@ abstract class AppText {
   /// **'Raqib topildi! Onlayn o\'yinga o\'tamiz'**
   String get onlineOpponentFound;
 
+  /// Заголовок окна статистики бросков
+  ///
+  /// In uz, this message translates to:
+  /// **'Bu partiyadagi zarlar'**
+  String get diceStatsTitle;
+
+  /// Подпись: число бросков
+  ///
+  /// In uz, this message translates to:
+  /// **'Tashlashlar'**
+  String get diceStatsRolls;
+
+  /// Подпись: число дублей
+  ///
+  /// In uz, this message translates to:
+  /// **'Dubllar'**
+  String get diceStatsDoubles;
+
+  /// Подпись: среднее очков за бросок (дубль ×4)
+  ///
+  /// In uz, this message translates to:
+  /// **'O\'rtacha ochko'**
+  String get diceStatsAverage;
+
+  /// Пояснение про честные кости в онлайне
+  ///
+  /// In uz, this message translates to:
+  /// **'Onlayn zarlar ikkala telefonning tasodifiy sonlaridan birga hosil qilinadi — ularni hech kim o\'zgartira olmaydi.'**
+  String get diceStatsFair;
+
   /// Заголовок панели готовых фраз
   ///
   /// In uz, this message translates to:

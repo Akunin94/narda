@@ -164,4 +164,14 @@ void main() {
     expect(result.isMars, isTrue);
     expect(result.points, 2);
   });
+
+  test('статистика костей: дубль считается четырежды', () {
+    final DiceStats stats = DiceStats()
+      ..add(const DiceRoll(6, 5))
+      ..add(const DiceRoll(3, 3));
+    expect(stats.rolls, 2);
+    expect(stats.doubles, 1);
+    expect(stats.pips, 23);
+    expect(stats.average, 11.5);
+  });
 }

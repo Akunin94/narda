@@ -466,6 +466,21 @@ class AppTextRu extends AppText {
       'Соперник найден! Переходим в онлайн-партию';
 
   @override
+  String get diceStatsTitle => 'Кости в этой партии';
+
+  @override
+  String get diceStatsRolls => 'Бросков';
+
+  @override
+  String get diceStatsDoubles => 'Дублей';
+
+  @override
+  String get diceStatsAverage => 'В среднем очков';
+
+  @override
+  String get diceStatsFair => 'В онлайне кости складываются из случайных чисел обоих телефонов — подкрутить их не может никто.';
+
+  @override
   String get onlinePhrasesTitle => 'Фразы';
 
   @override

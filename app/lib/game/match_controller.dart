@@ -12,6 +12,23 @@ import 'settings.dart';
 import 'turn_coordinator.dart';
 import 'turn_planner.dart';
 
+/// Броски одного игрока за партию — ответ на «кости подкручены».
+class DiceStats {
+  int rolls = 0;
+  int doubles = 0;
+
+  /// Сумма очков; дубль считается четырежды, как он и ходит.
+  int pips = 0;
+
+  double get average => rolls == 0 ? 0 : pips / rolls;
+
+  void add(DiceRoll roll) {
+    rolls++;
+    if (roll.isDouble) doubles++;
+    pips += roll.isDouble ? roll.a * 4 : roll.a + roll.b;
+  }
+}
+
 /// Что происходит в партии прямо сейчас.
 enum TurnPhase {
   /// Катятся кости нового хода.
@@ -127,6 +144,17 @@ class MatchController extends ChangeNotifier {
   bool _disposed = false;
   bool _rollSkipped = false;
 
+  /// Броски текущей партии; ход учитывается один раз даже после пересборки.
+  Map<Player, DiceStats> _diceStats = _freshStats();
+  int _countedTurn = -1;
+
+  Map<Player, DiceStats> get diceStats => _diceStats;
+
+  static Map<Player, DiceStats> _freshStats() => <Player, DiceStats>{
+    Player.white: DiceStats(),
+    Player.black: DiceStats(),
+  };
+
   /// Идёт анимация составного хода одной шашкой — доска ждёт.
   bool _chaining = false;
 
@@ -213,6 +241,8 @@ class MatchController extends ChangeNotifier {
   /// Начинает партию: розыгрыш первого хода и первый бросок (§3.2.1).
   /// В онлайне и то и другое согласуется с соперником.
   void start() {
+    _diceStats = _freshStats();
+    _countedTurn = -1;
     final TurnCoordinator? coordinator = _coordinator;
     if (coordinator == null) {
       final SavedBotGame? resume = _resume;
@@ -428,6 +458,12 @@ class MatchController extends ChangeNotifier {
     final TurnCoordinator? coordinator = _coordinator;
     if (coordinator != null && !await _syncRoll(coordinator, generation)) {
       return;
+    }
+
+    final GameState rolled = _game.state;
+    if (rolled.turnIndex != _countedTurn) {
+      _countedTurn = rolled.turnIndex;
+      _diceStats[rolled.turn]!.add(rolled.roll);
     }
 
     if (!await _wait(timing.dice, generation)) return;
