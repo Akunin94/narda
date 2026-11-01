@@ -5,6 +5,7 @@ import 'package:narda_core/narda_core.dart';
 
 import '../game/turn_coordinator.dart';
 import '../profile/elo.dart';
+import 'fair_dice.dart';
 import 'online_backend.dart';
 import 'protocol.dart';
 
@@ -20,14 +21,14 @@ class OnlineMatch extends ChangeNotifier implements TurnCoordinator {
     required this.room,
     required this.localColor,
     Duration serverOffset = Duration.zero,
-    DiceSource? dice,
+    String? diceSecret,
     this.turnLimit = const Duration(seconds: 60),
     this.absenceLimit = const Duration(seconds: 60),
     this.phraseLifetime = const Duration(seconds: 6),
     this.tickInterval = const Duration(seconds: 1),
     DateTime Function() clock = DateTime.now,
   }) : _serverOffset = serverOffset,
-       _dice = dice ?? RandomDiceSource(),
+       _secret = diceSecret ?? newFairSecret(),
        _clock = clock;
 
   static const MoveGenerator _generator = MoveGenerator();
@@ -62,8 +63,11 @@ class OnlineMatch extends ChangeNotifier implements TurnCoordinator {
   /// Как часто пересчитываются таймеры — он же шаг обратного отсчёта.
   final Duration tickInterval;
 
-  /// Кости активного игрока — точка замены на серверные (§6).
-  final DiceSource _dice;
+  /// Секрет устройства: из него растут цепочки честных костей. Тот же
+  /// секрет после перезапуска даёт ту же цепочку — партию можно доиграть.
+  final String _secret;
+  FairChain? _chain;
+  int _chainGame = -1;
 
   final Duration _serverOffset;
   final DateTime Function() _clock;
@@ -187,7 +191,9 @@ class OnlineMatch extends ChangeNotifier implements TurnCoordinator {
     _first = await _resolveFirstMover(_gameIndex);
 
     final ReplayResult replay = _replay(_snapshot!, _first!, _gameIndex);
-    if (!replay.isLegal) return _abortDesync<GameState>();
+    if (!replay.isLegal || !_logDiceFair(_snapshot!, _gameIndex)) {
+      return _abortDesync<GameState>();
+    }
     _adoptReplay(_snapshot!, replay.state);
     return replay.state;
   }
@@ -199,11 +205,9 @@ class OnlineMatch extends ChangeNotifier implements TurnCoordinator {
 
     if (state.turn != localColor) {
       _turnState = null;
-      return _awaitSnapshot<DiceRoll>((RoomSnapshot snapshot) {
-        final RoomState? node = snapshot.state;
-        if (node == null || node.gameIndex != game) return null;
-        return node.moveIndex == index ? node.dice : null;
-      });
+      // Свою половину броска соперника раскрываем сразу — кости он узнает,
+      // только раскрыв свою, а она задана заранее.
+      return _fairRoll(game, _moveSlot(index));
     }
 
     // Реконнект в середине своего хода: бросок уже опубликован — он и в силе.
@@ -213,7 +217,9 @@ class OnlineMatch extends ChangeNotifier implements TurnCoordinator {
         published.gameIndex == game &&
         published.moveIndex == index &&
         published.dice != null;
-    final DiceRoll roll = resumed ? published.dice! : _dice.roll();
+    final DiceRoll roll = resumed
+        ? published.dice!
+        : await _fairRoll(game, _moveSlot(index));
 
     final GameState turnState = state.copyWith(
       roll: roll,
@@ -266,6 +272,11 @@ class OnlineMatch extends ChangeNotifier implements TurnCoordinator {
         seq: encodeMoves(sequence),
         expired: expired,
       ).toJson(),
+      // Свою половину следующего броска раскрываем сразу: соперник бросит
+      // без лишнего круга по сети.
+      if (!after.isFinished && _moveSlot(index + 1) <= fairChainLength)
+        'games/$game/reveal/$localUid/${_moveSlot(index + 1)}':
+            _chainFor(game).reveal(_moveSlot(index + 1)),
       'state': RoomState(
         points: next.encode(),
         turnUid: after.isFinished ? localUid : _opponentOrSelf,
@@ -549,7 +560,9 @@ class OnlineMatch extends ChangeNotifier implements TurnCoordinator {
     final Player? first = _first;
     if (snapshot == null || first == null) return _abortDesync<T>();
     final ReplayResult replay = _replay(snapshot, first, _gameIndex);
-    if (!replay.isLegal) return _abortDesync<T>();
+    if (!replay.isLegal || !_logDiceFair(snapshot, _gameIndex)) {
+      return _abortDesync<T>();
+    }
     _adoptReplay(snapshot, replay.state);
     _deadline = 0;
     _turnState = null;
@@ -615,31 +628,111 @@ class OnlineMatch extends ChangeNotifier implements TurnCoordinator {
     return _replay(snapshot, first, index).isFinished;
   }
 
-  /// Розыгрыш первого хода: каждый пишет свой кубик сам, при равенстве —
-  /// новая попытка (§3.2.1).
+  /// Розыгрыш первого хода честными костями: белым — первый кубик броска,
+  /// чёрным — второй, при равенстве — новая попытка (§3.2.1). Свой кубик
+  /// пишется в `opening` только для реконнекта.
   Future<Player> _resolveFirstMover(int game) async {
+    await _publishCommit(game);
     for (int attempt = 0; attempt < _maxOpeningAttempts; attempt++) {
+      final DiceRoll roll = await _fairRoll(game, attempt + 1);
+      final int mine = localColor == Player.white ? roll.a : roll.b;
+      final int theirs = localColor == Player.white ? roll.b : roll.a;
       final Map<String, int> known =
           _snapshot?.game(game).opening[attempt] ?? const <String, int>{};
       if (!known.containsKey(localUid)) {
         await room.update(<String, Object?>{
-          'games/$game/opening/$attempt/$localUid': _dice.rollOne(),
+          'games/$game/opening/$attempt/$localUid': mine,
         });
       }
-      final String uid = await _awaitSnapshot<String>((RoomSnapshot snapshot) {
-        final String? other = snapshot.opponentOf(localUid)?.uid;
-        final Map<String, int>? dice = snapshot.game(game).opening[attempt];
-        if (other == null || dice == null) return null;
-        final int? mine = dice[localUid];
-        final int? theirs = dice[other];
-        if (mine == null || theirs == null) return null;
-        if (mine == theirs) return '';
-        return mine > theirs ? localUid : other;
-      });
-      if (uid.isEmpty) continue;
-      return uid == localUid ? localColor : localColor.opponent;
+      if (mine == theirs) continue;
+      return mine > theirs ? localColor : localColor.opponent;
     }
     throw const OnlineUnavailable(OnlineFailure.network);
+  }
+
+  // --- Честные кости ---------------------------------------------------
+
+  /// Номер броска хода [index] в цепочке: первые — под розыгрыш.
+  static int _moveSlot(int index) => _maxOpeningAttempts + 1 + index;
+
+  FairChain _chainFor(int game) {
+    if (_chainGame != game || _chain == null) {
+      _chain = FairChain('$_secret|${room.roomId}|$game');
+      _chainGame = game;
+    }
+    return _chain!;
+  }
+
+  Future<void> _publishCommit(int game) async {
+    if (_snapshot?.game(game).commits.containsKey(localUid) ?? false) return;
+    await room.update(<String, Object?>{
+      'games/$game/commit/$localUid': _chainFor(game).commit,
+    });
+  }
+
+  /// Бросок [slot]: раскрываем свою половину, когда оба обязательства уже
+  /// лежат в комнате, и ждём чужую. Подложное раскрытие — партия аннулируется.
+  Future<DiceRoll> _fairRoll(int game, int slot) async {
+    if (slot > fairChainLength) return _abortDesync<DiceRoll>();
+    await _awaitSnapshot<bool>((RoomSnapshot snapshot) =>
+        snapshot.game(game).commits.length >= 2 ? true : null);
+    final String mine = _chainFor(game).reveal(slot);
+    if (_snapshot?.game(game).reveals[localUid]?[slot] != mine) {
+      await room.update(<String, Object?>{
+        'games/$game/reveal/$localUid/$slot': mine,
+      });
+    }
+    final Object result = await _awaitSnapshot<Object>(
+      (RoomSnapshot snapshot) => _derive(snapshot, game, slot),
+    );
+    return result is DiceRoll ? result : _abortDesync<DiceRoll>();
+  }
+
+  /// Кости броска [slot] из комнаты: `null` — раскрыты не оба, `false` —
+  /// раскрытие не сходится с обязательством.
+  Object? _derive(RoomSnapshot snapshot, int game, int slot) {
+    final RoomGame node = snapshot.game(game);
+    final String? other = snapshot.opponentOf(localUid)?.uid;
+    if (other == null) return null;
+    final String? mine = node.reveals[localUid]?[slot];
+    final String? theirs = node.reveals[other]?[slot];
+    if (mine == null || theirs == null) return null;
+    for (final (String uid, String value) in <(String, String)>[
+      (localUid, mine),
+      (other, theirs),
+    ]) {
+      if (!_verified(game, uid, node.commits[uid], slot, value)) return false;
+    }
+    return localColor == Player.white
+        ? fairRoll(mine, theirs, slot)
+        : fairRoll(theirs, mine, slot);
+  }
+
+  /// Последнее проверенное звено каждой цепочки: следующее проверяется от
+  /// него за несколько хешей, а не от вершины.
+  final Map<String, (int, String)> _anchors = <String, (int, String)>{};
+
+  bool _verified(int game, String uid, String? commit, int slot, String value) {
+    if (commit == null) return false;
+    final String key = '$game/$uid';
+    final (int, String)? anchor = _anchors[key];
+    if (anchor != null && anchor.$1 == slot) return anchor.$2 == value;
+    final bool ok = anchor != null && anchor.$1 < slot
+        ? verifyReveal(anchor.$2, slot, value, anchorSlot: anchor.$1)
+        : verifyReveal(commit, slot, value);
+    if (ok && (anchor == null || anchor.$1 < slot)) _anchors[key] = (slot, value);
+    return ok;
+  }
+
+  /// Каждый бросок журнала совпадает с честными костями — иначе журнал
+  /// подложный (кости хода можно было бы вписать любые).
+  bool _logDiceFair(RoomSnapshot snapshot, int game) {
+    final List<RoomMove> moves = snapshot.game(game).orderedMoves();
+    for (int index = 0; index < moves.length; index++) {
+      final Object? roll = _derive(snapshot, game, _moveSlot(index));
+      if (roll is! DiceRoll || roll != moves[index].dice) return false;
+    }
+    return true;
   }
 
   Future<void> _writeOutcome({

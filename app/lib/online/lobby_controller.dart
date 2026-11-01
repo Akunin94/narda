@@ -196,6 +196,7 @@ class LobbyController extends ChangeNotifier {
       room: room,
       localColor: color,
       serverOffset: await _backend.serverTimeOffset(),
+      diceSecret: _profile.diceSecret,
     )..start();
 
     _session = OnlineSession(

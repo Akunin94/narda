@@ -243,12 +243,12 @@ void main() {
       final OnlineMatch host = OnlineMatch(
         room: room.host,
         localColor: Player.white,
-        dice: RandomDiceSource.seeded(41),
+        diceSecret: 's41',
       )..start();
       final OnlineMatch guest = OnlineMatch(
         room: room.guest,
         localColor: Player.black,
-        dice: RandomDiceSource.seeded(42),
+        diceSecret: 's42',
       )..start();
       addTearDown(host.dispose);
       addTearDown(guest.dispose);
@@ -362,12 +362,12 @@ void _screens() {
     final OnlineMatch host = OnlineMatch(
       room: room.host,
       localColor: Player.white,
-      dice: RandomDiceSource.seeded(51),
+      diceSecret: 's51',
     )..start();
     final OnlineMatch guest = OnlineMatch(
       room: room.guest,
       localColor: Player.black,
-      dice: RandomDiceSource.seeded(52),
+      diceSecret: 's52',
     )..start();
 
     await tester.pumpWidget(

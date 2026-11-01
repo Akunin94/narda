@@ -8,6 +8,8 @@
 ///   state:    {points, turnUid, dice, remainingDice, whiteOff, blackOff,
 ///              moveIndex, gameIndex, deadline}
 ///   games/{gameIndex}/opening/{attempt}/{uid}: <кубик>
+///   games/{gameIndex}/commit/{uid}: <вершина цепочки честных костей>
+///   games/{gameIndex}/reveal/{uid}/{slot}: <раскрытие для броска slot>
 ///   games/{gameIndex}/moves/{index}: {uid, dice, seq, ts}
 ///   outcome:  {winnerUid, reason, gameIndex}
 ///   presence/{uid}: bool
@@ -363,7 +365,15 @@ class RoomGame {
   const RoomGame({
     this.opening = const <int, Map<String, int>>{},
     this.moves = const <int, RoomMove>{},
+    this.commits = const <String, String>{},
+    this.reveals = const <String, Map<int, String>>{},
   });
+
+  /// Обязательства честных костей: uid -> вершина цепочки.
+  final Map<String, String> commits;
+
+  /// Раскрытия: uid -> номер броска -> значение.
+  final Map<String, Map<int, String>> reveals;
 
   /// Розыгрыш первого хода: попытка -> uid -> кубик (§3.2.1).
   final Map<int, Map<String, int>> opening;
@@ -474,7 +484,15 @@ class RoomSnapshot {
   static RoomGame _game(Object? json) => RoomGame(
     opening: indexedChildren(childOf(json, 'opening'), _openingDice),
     moves: indexedChildren(childOf(json, 'moves'), RoomMove.fromJson),
+    commits: namedChildren(childOf(json, 'commit'), (String _, Object? v) => _hex(v)),
+    reveals: namedChildren(
+      childOf(json, 'reveal'),
+      (String _, Object? v) => indexedChildren(v, _hex),
+    ),
   );
+
+  static String? _hex(Object? value) =>
+      value is String && value.length == 64 ? value : null;
 
   /// Кубики одной попытки розыгрыша первого хода: uid -> грань (§3.2.1).
   static Map<String, int> _openingDice(Object? json) =>

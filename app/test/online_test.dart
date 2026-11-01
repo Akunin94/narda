@@ -8,6 +8,7 @@ import 'package:narda/game/match_controller.dart';
 import 'package:narda/game/saved_game.dart';
 import 'package:narda/game/settings.dart';
 import 'package:narda/game/turn_coordinator.dart';
+import 'package:narda/online/fair_dice.dart';
 import 'package:narda/online/lobby_controller.dart';
 import 'package:narda/online/memory_backend.dart';
 import 'package:narda/online/online_backend.dart';
@@ -62,14 +63,14 @@ class TestClient {
     RoomHandle room, {
     required Player color,
     required MatchTarget target,
-    required DiceSource dice,
+    required String diceSecret,
     bool autoMove = true,
     Duration turnLimit = const Duration(seconds: 60),
     Duration tickInterval = const Duration(seconds: 1),
   }) : match = OnlineMatch(
          room: room,
          localColor: color,
-         dice: dice,
+         diceSecret: diceSecret,
          turnLimit: turnLimit,
          tickInterval: tickInterval,
        ) {
@@ -318,13 +319,13 @@ void main() {
         room.white,
         color: Player.white,
         target: MatchTarget.single,
-        dice: RandomDiceSource.seeded(11),
+        diceSecret: 's11',
       );
       final TestClient black = TestClient(
         room.black,
         color: Player.black,
         target: MatchTarget.single,
-        dice: RandomDiceSource.seeded(12),
+        diceSecret: 's12',
       );
       addTearDown(white.dispose);
       addTearDown(black.dispose);
@@ -363,13 +364,13 @@ void main() {
         room.white,
         color: Player.white,
         target: MatchTarget.single,
-        dice: RandomDiceSource.seeded(3),
+        diceSecret: 's3',
       );
       final TestClient black = TestClient(
         room.black,
         color: Player.black,
         target: MatchTarget.single,
-        dice: RandomDiceSource.seeded(4),
+        diceSecret: 's4',
       );
       addTearDown(white.dispose);
       addTearDown(black.dispose);
@@ -395,7 +396,7 @@ void main() {
         room.white,
         color: Player.white,
         target: MatchTarget.single,
-        dice: RandomDiceSource.seeded(3),
+        diceSecret: 's3',
       );
       addTearDown(white.dispose);
       await pump();
@@ -418,13 +419,13 @@ void main() {
         room.white,
         color: Player.white,
         target: MatchTarget.single,
-        dice: RandomDiceSource.seeded(3),
+        diceSecret: 's3',
       );
       final TestClient black = TestClient(
         room.black,
         color: Player.black,
         target: MatchTarget.single,
-        dice: RandomDiceSource.seeded(4),
+        diceSecret: 's4',
       );
       addTearDown(white.dispose);
       addTearDown(black.dispose);
@@ -450,50 +451,60 @@ void main() {
     });
 
     test('нелегальный ход соперника аннулирует партию', () async {
-      final TestRoom room = await TestRoom.open();
-      addTearDown(room.server.dispose);
-      final OnlineMatch host = OnlineMatch(
-        room: room.white,
-        localColor: Player.white,
-        dice: ScriptedDiceSource(<int>[6], <DiceRoll>[const DiceRoll(6, 5)]),
-      )..start();
-      final OnlineMatch guest = OnlineMatch(
-        room: room.black,
-        localColor: Player.black,
-        dice: ScriptedDiceSource(<int>[3], <DiceRoll>[const DiceRoll(1, 1)]),
-      )..start();
-      addTearDown(host.dispose);
-      addTearDown(guest.dispose);
+      final _Duel duel = await _Duel.open();
+      final DiceRoll roll = await duel.roll();
 
-      final List<GameState> opened = await Future.wait(<Future<GameState>>[
-        host.opening(),
-        guest.opening(),
-      ]);
-      expect(opened.first.turn, Player.white, reason: '6 против 3');
-
-      final DiceRoll roll = await host.roll(opened.first);
-      final GameState guestTurn = opened.last.copyWith(
-        roll: roll,
-        remainingDice: roll.toRemaining(),
-      );
-      expect(await guest.roll(opened.last), roll);
-
-      final Future<MatchSignal> signal = guest.signals.first;
+      final Future<MatchSignal> signal = duel.checker.signals.first;
       // Шашка «улетает» с пустого пункта: правилами такой ход не порождается.
-      await room.white.update(<String, Object?>{
-        'games/0/moves/0': const RoomMove(
-          uid: 'a',
-          dice: DiceRoll(6, 5),
-          seq: <int>[7, 6, 7, 5],
+      await duel.moverRoom.update(<String, Object?>{
+        'games/0/moves/0': RoomMove(
+          uid: duel.moverRoom.uid,
+          dice: roll,
+          seq: <int>[7, roll.a],
         ).toJson(),
       });
-      unawaited(guest.awaitOpponentMove(guestTurn));
+      unawaited(duel.checker.awaitOpponentMove(duel.checkerTurn(roll)));
 
       expect(await signal, isA<AbortSignal>());
-      expect(
-        (await signal as AbortSignal).reason,
-        MatchAbortReason.desync,
+      expect((await signal as AbortSignal).reason, MatchAbortReason.desync);
+    });
+
+    test('честные кости: бросок один на двоих, подлог броска аннулирует партию', () async {
+      final _Duel duel = await _Duel.open();
+      final DiceRoll roll = await duel.roll();
+      // Ход легален только под подложные кости.
+      final DiceRoll forged = DiceRoll(roll.a % 6 + 1, roll.b);
+      const MoveGenerator generator = MoveGenerator();
+      final List<MoveSequence> honest = generator.generate(duel.moverTurn(roll));
+      final List<int> seq = encodeMoves(
+        generator
+            .generate(duel.moverTurn(forged))
+            .firstWhere((MoveSequence s) => !honest.contains(s)),
       );
+
+      final Future<MatchSignal> signal = duel.checker.signals.first;
+      await duel.moverRoom.update(<String, Object?>{
+        'games/0/moves/0': RoomMove(
+          uid: duel.moverRoom.uid,
+          dice: forged,
+          seq: seq,
+        ).toJson(),
+      });
+      unawaited(duel.checker.awaitOpponentMove(duel.checkerTurn(roll)));
+
+      expect(await signal, isA<AbortSignal>());
+    });
+
+    test('раскрытие, не сходящееся с обязательством, аннулирует партию', () async {
+      final _Duel duel = await _Duel.open();
+      final Future<MatchSignal> signal = duel.checker.signals.first;
+      final String fake = FairChain('чужой').reveal(_firstMoveSlot);
+      await duel.moverRoom.update(<String, Object?>{
+        'games/0/reveal/${duel.moverRoom.uid}/$_firstMoveSlot': fake,
+      });
+      unawaited(duel.checker.roll(duel.checkerState));
+
+      expect(await signal, isA<AbortSignal>());
     });
 
     test('реконнект восстанавливает позицию реплеем журнала', () async {
@@ -503,13 +514,13 @@ void main() {
         room.white,
         color: Player.white,
         target: MatchTarget.single,
-        dice: RandomDiceSource.seeded(21),
+        diceSecret: 's21',
       );
       final TestClient black = TestClient(
         room.black,
         color: Player.black,
         target: MatchTarget.single,
-        dice: RandomDiceSource.seeded(22),
+        diceSecret: 's22',
       );
       addTearDown(white.dispose);
       addTearDown(black.dispose);
@@ -538,7 +549,7 @@ void main() {
       final OnlineMatch restored = OnlineMatch(
         room: rejoined,
         localColor: Player.black,
-        dice: RandomDiceSource.seeded(23),
+        diceSecret: 's22', // то же устройство — та же цепочка
       )..start();
       addTearDown(restored.dispose);
 
@@ -558,7 +569,7 @@ void main() {
         room.white,
         color: Player.white,
         target: MatchTarget.single,
-        dice: RandomDiceSource.seeded(31),
+        diceSecret: 's31',
         autoMove: false,
         turnLimit: const Duration(milliseconds: 5),
         tickInterval: const Duration(milliseconds: 20),
@@ -567,7 +578,7 @@ void main() {
         room.black,
         color: Player.black,
         target: MatchTarget.single,
-        dice: RandomDiceSource.seeded(32),
+        diceSecret: 's32',
         autoMove: false,
         turnLimit: const Duration(milliseconds: 5),
         tickInterval: const Duration(milliseconds: 20),
@@ -691,4 +702,61 @@ class _UnavailableBackend implements OnlineBackend {
 
   @override
   void dispose() {}
+}
+
+/// Номер броска первого хода партии: до него — попытки розыгрыша.
+const int _firstMoveSlot = 25;
+
+/// Две сессии без досок: розыгрыш сыгран, известно, кто ходит первым.
+class _Duel {
+  _Duel._(this.room, this.mover, this.checker, this.moverState, this.checkerState);
+
+  static Future<_Duel> open() async {
+    final TestRoom room = await TestRoom.open();
+    addTearDown(room.server.dispose);
+    final OnlineMatch white = OnlineMatch(
+      room: room.white,
+      localColor: Player.white,
+      diceSecret: 'w',
+    )..start();
+    final OnlineMatch black = OnlineMatch(
+      room: room.black,
+      localColor: Player.black,
+      diceSecret: 'b',
+    )..start();
+    addTearDown(white.dispose);
+    addTearDown(black.dispose);
+    final List<GameState> opened = await Future.wait(<Future<GameState>>[
+      white.opening(),
+      black.opening(),
+    ]);
+    expect(opened.first.turn, opened.last.turn, reason: 'розыгрыш один на двоих');
+    return opened.first.turn == Player.white
+        ? _Duel._(room, white, black, opened.first, opened.last)
+        : _Duel._(room, black, white, opened.last, opened.first);
+  }
+
+  final TestRoom room;
+  final OnlineMatch mover;
+  final OnlineMatch checker;
+  final GameState moverState;
+  final GameState checkerState;
+
+  RoomHandle get moverRoom => mover.room;
+
+  /// Первый бросок: оба раскрывают свои половины и получают одни кости.
+  Future<DiceRoll> roll() async {
+    final List<DiceRoll> rolls = await Future.wait(<Future<DiceRoll>>[
+      mover.roll(moverState),
+      checker.roll(checkerState),
+    ]);
+    expect(rolls.last, rolls.first, reason: 'кости одни на двоих');
+    return rolls.first;
+  }
+
+  GameState moverTurn(DiceRoll roll) =>
+      moverState.copyWith(roll: roll, remainingDice: roll.toRemaining(), headMovesUsed: 0);
+
+  GameState checkerTurn(DiceRoll roll) =>
+      checkerState.copyWith(roll: roll, remainingDice: roll.toRemaining(), headMovesUsed: 0);
 }

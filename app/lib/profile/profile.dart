@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../online/fair_dice.dart';
 import 'elo.dart';
 
 /// Сколько аватаров в наборе (§P5: ник + аватар из набора).
@@ -60,7 +61,8 @@ class RatingChange {
 
 /// Хранилище профиля поверх shared_preferences.
 class ProfileController extends ChangeNotifier {
-  ProfileController._(this._prefs, this._profile);
+  ProfileController._(this._prefs, this._profile, [String? diceSecret])
+    : diceSecret = diceSecret ?? newFairSecret();
 
   /// Без диска — для тестов и превью.
   ProfileController.inMemory([PlayerProfile? profile])
@@ -71,6 +73,8 @@ class ProfileController extends ChangeNotifier {
     final String? stored = prefs.getString(_keyName);
     final String name = stored ?? defaultName();
     if (stored == null) await prefs.setString(_keyName, name);
+    final String secret = prefs.getString(_keyDiceSecret) ?? newFairSecret();
+    await prefs.setString(_keyDiceSecret, secret);
     return ProfileController._(
       prefs,
       PlayerProfile(
@@ -80,6 +84,7 @@ class ProfileController extends ChangeNotifier {
         ratedGames: prefs.getInt(_keyRatedGames) ?? 0,
         ratedWins: prefs.getInt(_keyRatedWins) ?? 0,
       ),
+      secret,
     );
   }
 
@@ -88,6 +93,10 @@ class ProfileController extends ChangeNotifier {
   static const String _keyRating = 'profile_rating';
   static const String _keyRatedGames = 'profile_rated_games';
   static const String _keyRatedWins = 'profile_rated_wins';
+  static const String _keyDiceSecret = 'dice_secret';
+
+  /// Секрет честных костей: не покидает устройство (§6).
+  final String diceSecret;
 
   /// Ник по умолчанию — «O'yinchi 1234»: играть можно сразу, не заходя в
   /// профиль, а сменить ник — в любой момент.

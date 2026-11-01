@@ -108,6 +108,20 @@
                 }
               }
             },
+            "commit": {
+              "$uid": {
+                ".write": "auth !== null && $uid === auth.uid && (!data.exists() || data.val() === newData.val())",
+                ".validate": "newData.isString() && newData.val().length === 64"
+              }
+            },
+            "reveal": {
+              "$uid": {
+                "$slot": {
+                  ".write": "auth !== null && $uid === auth.uid && (!data.exists() || data.val() === newData.val())",
+                  ".validate": "newData.isString() && newData.val().length === 64"
+                }
+              }
+            },
             "moves": {
               "$index": {
                 ".write": "auth !== null && !data.exists() && newData.child('uid').val() === auth.uid",
