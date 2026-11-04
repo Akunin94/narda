@@ -20,6 +20,8 @@
   "settingAutoMoveHint": "Единственный возможный ход выполняется сам",
   "settingShowPips": "Счёт pip",
   "settingShowPipsHint": "Показывать счёт pip обоих игроков",
+  "settingShowLastMove": "Последний ход",
+  "settingShowLastMoveHint": "Подсвечивать на доске последний ход соперника",
   "actionClose": "Закрыть",
 
   "statusRolling": "Бросок костей",

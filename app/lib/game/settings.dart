@@ -14,6 +14,7 @@ class SettingsController extends ChangeNotifier {
     this._prefs, {
     required bool autoMove,
     required bool showPips,
+    required bool showLastMove,
     required bool sound,
     required bool vibration,
     required String? localeCode,
@@ -23,6 +24,7 @@ class SettingsController extends ChangeNotifier {
     required this.now,
   }) : _autoMove = autoMove,
        _showPips = showPips,
+       _showLastMove = showLastMove,
        _sound = sound,
        _vibration = vibration,
        _localeCode = localeCode,
@@ -34,6 +36,7 @@ class SettingsController extends ChangeNotifier {
   SettingsController.inMemory({
     bool autoMove = true,
     bool showPips = true,
+    bool showLastMove = false,
     bool sound = true,
     bool vibration = true,
     String? localeCode,
@@ -45,6 +48,7 @@ class SettingsController extends ChangeNotifier {
          null,
          autoMove: autoMove,
          showPips: showPips,
+         showLastMove: showLastMove,
          sound: sound,
          vibration: vibration,
          localeCode: localeCode,
@@ -61,6 +65,7 @@ class SettingsController extends ChangeNotifier {
       prefs,
       autoMove: prefs.getBool(_keyAutoMove) ?? false,
       showPips: prefs.getBool(_keyShowPips) ?? false,
+      showLastMove: prefs.getBool(_keyShowLastMove) ?? false,
       sound: prefs.getBool(_keySound) ?? true,
       vibration: prefs.getBool(_keyVibration) ?? true,
       localeCode: prefs.getString(_keyLocale),
@@ -82,6 +87,7 @@ class SettingsController extends ChangeNotifier {
 
   static const String _keyAutoMove = 'auto_move';
   static const String _keyShowPips = 'show_pips';
+  static const String _keyShowLastMove = 'show_last_move';
   static const String _keySound = 'sound';
   static const String _keyVibration = 'vibration';
   static const String _keyLocale = 'locale';
@@ -99,6 +105,7 @@ class SettingsController extends ChangeNotifier {
 
   bool _autoMove;
   bool _showPips;
+  bool _showLastMove;
   bool _sound;
   bool _vibration;
   String? _localeCode;
@@ -158,6 +165,14 @@ class SettingsController extends ChangeNotifier {
   set showPips(bool value) => _set(value, _showPips, () {
     _showPips = value;
     _prefs?.setBool(_keyShowPips, value);
+  });
+
+  /// Подсвечивать на доске последний ход.
+  bool get showLastMove => _showLastMove;
+
+  set showLastMove(bool value) => _set(value, _showLastMove, () {
+    _showLastMove = value;
+    _prefs?.setBool(_keyShowLastMove, value);
   });
 
   /// Звуки костей, шашек и победы.

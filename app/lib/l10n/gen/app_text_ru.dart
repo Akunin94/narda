@@ -61,6 +61,12 @@ class AppTextRu extends AppText {
   String get settingShowPipsHint => 'Показывать счёт pip обоих игроков';
 
   @override
+  String get settingShowLastMove => 'Последний ход';
+
+  @override
+  String get settingShowLastMoveHint => 'Подсвечивать на доске последний ход соперника';
+
+  @override
   String get actionClose => 'Закрыть';
 
   @override

@@ -141,6 +141,12 @@ class _SettingsSheetState extends State<_SettingsSheet> {
                 value: settings.showPips,
                 onChanged: (bool value) => settings.showPips = value,
               ),
+              _switch(
+                title: text.settingShowLastMove,
+                hint: text.settingShowLastMoveHint,
+                value: settings.showLastMove,
+                onChanged: (bool value) => settings.showLastMove = value,
+              ),
               if (_privacyAvailable)
                 ListTile(
                   leading: const Icon(

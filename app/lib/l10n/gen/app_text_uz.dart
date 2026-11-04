@@ -61,6 +61,12 @@ class AppTextUz extends AppText {
   String get settingShowPipsHint => 'Ikkala tomonning pip hisobi ko\'rsatiladi';
 
   @override
+  String get settingShowLastMove => 'Oxirgi yurish';
+
+  @override
+  String get settingShowLastMoveHint => 'Raqibning oxirgi yurishi doskada belgilanadi';
+
+  @override
   String get actionClose => 'Yopish';
 
   @override

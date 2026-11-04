@@ -199,6 +199,18 @@ abstract class AppText {
   /// **'Ikkala tomonning pip hisobi ko\'rsatiladi'**
   String get settingShowPipsHint;
 
+  /// Настройка подсветки последнего хода
+  ///
+  /// In uz, this message translates to:
+  /// **'Oxirgi yurish'**
+  String get settingShowLastMove;
+
+  /// Пояснение к подсветке последнего хода
+  ///
+  /// In uz, this message translates to:
+  /// **'Raqibning oxirgi yurishi doskada belgilanadi'**
+  String get settingShowLastMoveHint;
+
   /// Закрыть
   ///
   /// In uz, this message translates to:

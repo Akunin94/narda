@@ -394,7 +394,9 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
     destinations: _controller.destinations,
     chained: _controller.chainedDestinations,
     movable: _controller.movableSources.toSet(),
-    lastMoves: _controller.lastTurnMoves,
+    lastMoves: _settings.showLastMove
+        ? _controller.lastTurnMoves
+        : const <Move>[],
     animated: _controller.animated,
     interactive: _controller.canInteract,
     moveDuration: _controller.timing.move,

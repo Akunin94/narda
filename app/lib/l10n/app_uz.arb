@@ -52,6 +52,12 @@
   "settingShowPipsHint": "Ikkala tomonning pip hisobi ko'rsatiladi",
   "@settingShowPipsHint": { "description": "Пояснение к pip-счёту" },
 
+  "settingShowLastMove": "Oxirgi yurish",
+  "@settingShowLastMove": { "description": "Настройка подсветки последнего хода" },
+
+  "settingShowLastMoveHint": "Raqibning oxirgi yurishi doskada belgilanadi",
+  "@settingShowLastMoveHint": { "description": "Пояснение к подсветке последнего хода" },
+
   "actionClose": "Yopish",
   "@actionClose": { "description": "Закрыть" },
 
