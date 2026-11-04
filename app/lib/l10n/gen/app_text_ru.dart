@@ -478,7 +478,8 @@ class AppTextRu extends AppText {
   String get diceStatsAverage => 'В среднем очков';
 
   @override
-  String get diceStatsFair => 'В онлайне кости складываются из случайных чисел обоих телефонов — подкрутить их не может никто.';
+  String get diceStatsFair =>
+      'В онлайне кости складываются из случайных чисел обоих телефонов — подкрутить их не может никто.';
 
   @override
   String get actionReconnect => 'Переподключиться';

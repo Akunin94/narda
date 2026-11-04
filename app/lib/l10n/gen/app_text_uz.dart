@@ -479,7 +479,8 @@ class AppTextUz extends AppText {
   String get diceStatsAverage => 'O\'rtacha ochko';
 
   @override
-  String get diceStatsFair => 'Onlayn zarlar ikkala telefonning tasodifiy sonlaridan birga hosil qilinadi — ularni hech kim o\'zgartira olmaydi.';
+  String get diceStatsFair =>
+      'Onlayn zarlar ikkala telefonning tasodifiy sonlaridan birga hosil qilinadi — ularni hech kim o\'zgartira olmaydi.';
 
   @override
   String get actionReconnect => 'Qayta ulanish';
