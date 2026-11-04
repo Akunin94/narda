@@ -463,6 +463,9 @@
   "diceStatsFair": "Onlayn zarlar ikkala telefonning tasodifiy sonlaridan birga hosil qilinadi — ularni hech kim o'zgartira olmaydi.",
   "@diceStatsFair": { "description": "Пояснение про честные кости в онлайне" },
 
+  "actionReconnect": "Qayta ulanish",
+  "@actionReconnect": { "description": "Кнопка: вернуться в онлайн-партию после обрыва связи" },
+
   "onlinePhrasesTitle": "Iboralar",
   "@onlinePhrasesTitle": { "description": "Заголовок панели готовых фраз" },
 

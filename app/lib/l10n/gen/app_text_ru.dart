@@ -481,6 +481,9 @@ class AppTextRu extends AppText {
   String get diceStatsFair => 'В онлайне кости складываются из случайных чисел обоих телефонов — подкрутить их не может никто.';
 
   @override
+  String get actionReconnect => 'Переподключиться';
+
+  @override
   String get onlinePhrasesTitle => 'Фразы';
 
   @override

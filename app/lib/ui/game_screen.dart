@@ -25,6 +25,7 @@ import 'avatar.dart';
 import 'board/board_view.dart';
 import 'chrome.dart';
 import 'dice_view.dart';
+import 'online/online_screen.dart';
 import 'online/online_status_bar.dart';
 import 'online/phrase_bar.dart';
 import 'overlay_card.dart';
@@ -118,7 +119,8 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
     if (_isOnline) {
       _controller
         ..addListener(_rememberOnline)
-        ..addListener(_scheduleAutoNext);
+        ..addListener(_scheduleAutoNext)
+        ..addListener(_reconnectOnDrop);
     }
     _controller.start();
   }
@@ -149,11 +151,12 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
   }
 
   /// Идущая онлайн-партия запоминается, чтобы вернуться в неё после
-  /// перезапуска; доигранный матч и аннулированная партия — забываются.
+  /// перезапуска; доигранный матч и разошедшаяся партия — забываются.
+  /// Обрыв связи партию не хоронит: в неё возвращаются.
   void _rememberOnline() {
     final OnlineMatch match = widget.online!;
     final bool done =
-        _controller.phase == TurnPhase.aborted ||
+        _controller.abortReason == MatchAbortReason.desync ||
         (_controller.phase == TurnPhase.finished && _controller.isMatchOver);
     final String? value = done
         ? null
@@ -163,6 +166,38 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
             _controller.score,
           ).encode();
     if (_settings.savedOnlineGame != value) _settings.savedOnlineGame = value;
+  }
+
+  /// Обрыв связи — сразу возвращаемся в ту же комнату тем же путём, что и
+  /// после перезапуска приложения.
+  void _reconnectOnDrop() {
+    if (_reconnecting ||
+        _controller.phase != TurnPhase.aborted ||
+        _controller.abortReason != MatchAbortReason.connection) {
+      return;
+    }
+    final DateTime now = DateTime.now();
+    final DateTime? last = _lastAutoReconnect;
+    // Снова оборвалось сразу после переподключения — дальше решает игрок, иначе петля.
+    if (last != null && now.difference(last) < const Duration(seconds: 30)) return;
+    _lastAutoReconnect = now;
+    _reconnect();
+  }
+
+  static DateTime? _lastAutoReconnect;
+  bool _reconnecting = false;
+
+  void _reconnect() {
+    if (_reconnecting) return;
+    setState(() => _reconnecting = true);
+    final SavedOnlineGame saved = SavedOnlineGame(
+      widget.online!.room.roomId,
+      widget.setup.localPlayer,
+      _controller.score,
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) unawaited(replaceScreen(context, OnlineScreen(rejoin: saved)));
+    });
   }
 
   @override
@@ -175,7 +210,8 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
     _autoNext?.cancel();
     _controller
       ..removeListener(_rememberOnline)
-      ..removeListener(_scheduleAutoNext);
+      ..removeListener(_scheduleAutoNext)
+      ..removeListener(_reconnectOnDrop);
     widget.online?.removeListener(_onOnlineChanged);
     WidgetsBinding.instance.removeObserver(this);
     if (widget.online != null) _voice?.dispose();
@@ -277,7 +313,7 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
                 ),
               if (_controller.phase == TurnPhase.finished && !_switchingGame)
                 Positioned.fill(child: _buildResultOverlay(text)),
-              if (_controller.phase == TurnPhase.aborted)
+              if (_controller.phase == TurnPhase.aborted && !_reconnecting)
                 Positioned.fill(child: _buildAbortOverlay(text)),
             ],
           ),
@@ -383,6 +419,10 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
         style: const TextStyle(color: NardaColors.textMuted),
       ),
       const SizedBox(height: 20),
+      if (_controller.abortReason == MatchAbortReason.connection) ...<Widget>[
+        FilledButton(onPressed: _reconnect, child: Text(text.actionReconnect)),
+        const SizedBox(height: 8),
+      ],
       FilledButton(
         onPressed: () => Navigator.of(context).maybePop(),
         child: Text(text.actionMenu),

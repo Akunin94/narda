@@ -67,8 +67,10 @@ class _OnlineScreenState extends State<OnlineScreen> {
   void _onLobbyChanged() {
     if (!mounted) return;
     setState(() {});
-    // Вернуться не вышло — партии больше нет, забываем её.
-    if (widget.rejoin != null && _lobby.stage == LobbyStage.failed) {
+    // Комнаты больше нет — забываем партию. Без сети — помним: вернёмся позже.
+    if (widget.rejoin != null &&
+        _lobby.stage == LobbyStage.failed &&
+        _lobby.failure == OnlineFailure.roomNotFound) {
       SettingsScope.of(context).savedOnlineGame = null;
     }
     final OnlineSession? session = _lobby.session;

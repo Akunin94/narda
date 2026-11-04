@@ -482,6 +482,9 @@ class AppTextUz extends AppText {
   String get diceStatsFair => 'Onlayn zarlar ikkala telefonning tasodifiy sonlaridan birga hosil qilinadi — ularni hech kim o\'zgartira olmaydi.';
 
   @override
+  String get actionReconnect => 'Qayta ulanish';
+
+  @override
   String get onlinePhrasesTitle => 'Iboralar';
 
   @override

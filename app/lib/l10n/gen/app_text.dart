@@ -1003,6 +1003,12 @@ abstract class AppText {
   /// **'Onlayn zarlar ikkala telefonning tasodifiy sonlaridan birga hosil qilinadi — ularni hech kim o\'zgartira olmaydi.'**
   String get diceStatsFair;
 
+  /// Кнопка: вернуться в онлайн-партию после обрыва связи
+  ///
+  /// In uz, this message translates to:
+  /// **'Qayta ulanish'**
+  String get actionReconnect;
+
   /// Заголовок панели готовых фраз
   ///
   /// In uz, this message translates to:
