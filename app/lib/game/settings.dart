@@ -59,8 +59,8 @@ class SettingsController extends ChangeNotifier {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     return SettingsController._(
       prefs,
-      autoMove: prefs.getBool(_keyAutoMove) ?? true,
-      showPips: prefs.getBool(_keyShowPips) ?? true,
+      autoMove: prefs.getBool(_keyAutoMove) ?? false,
+      showPips: prefs.getBool(_keyShowPips) ?? false,
       sound: prefs.getBool(_keySound) ?? true,
       vibration: prefs.getBool(_keyVibration) ?? true,
       localeCode: prefs.getString(_keyLocale),
