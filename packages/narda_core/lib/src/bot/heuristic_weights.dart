@@ -11,6 +11,7 @@ class HeuristicWeights {
     this.homeCoverage = 2.0,
     this.bearOffReady = 10.0,
     this.trapped = 2.0,
+    this.primeThreat = 1.0,
   });
 
   /// Вес суммарного pip-прогресса (расстояния до выброса).
@@ -41,6 +42,10 @@ class HeuristicWeights {
   /// Штраф за шашку за стеной соперника: `trapped * (длина - 3)` для стен от 4 пунктов.
   final double trapped;
 
+  /// Добавка к [trapped], когда стену можно законно достроить до 6: впереди
+  /// неё есть своя шашка (правило блока, §3).
+  final double primeThreat;
+
   HeuristicWeights copyWith({
     double? pip,
     double? borneOff,
@@ -51,6 +56,7 @@ class HeuristicWeights {
     double? homeCoverage,
     double? bearOffReady,
     double? trapped,
+    double? primeThreat,
   }) => HeuristicWeights(
     pip: pip ?? this.pip,
     borneOff: borneOff ?? this.borneOff,
@@ -61,5 +67,6 @@ class HeuristicWeights {
     homeCoverage: homeCoverage ?? this.homeCoverage,
     bearOffReady: bearOffReady ?? this.bearOffReady,
     trapped: trapped ?? this.trapped,
+    primeThreat: primeThreat ?? this.primeThreat,
   );
 }

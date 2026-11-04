@@ -70,8 +70,14 @@ class Evaluator {
   }
 
   /// Шашки [player], которым ещё предстоит пройти стену соперника из 4+ пунктов.
+  /// Своя шашка впереди стены разрешает сопернику достроить её до 6 — штраф выше.
   double _trapped(GameState state, Player player) {
     final opponent = player.opponent;
+    var onBoard = 0;
+    for (var abs = 1; abs <= Coords.pointCount; abs++) {
+      onBoard += state.checkersAt(player, abs);
+    }
+    final anyPrimeLegal = state.borneOff(player) > 0;
     var score = 0.0;
     var run = 0;
     var behind = 0;
@@ -82,7 +88,13 @@ class Evaluator {
         if (run == 0) trapped = behind;
         run++;
       } else {
-        if (run >= 4) score += weights.trapped * (run - 3) * trapped;
+        if (run >= 4) {
+          final primeLegal = anyPrimeLegal || onBoard - behind > 0;
+          score +=
+              (weights.trapped + (primeLegal ? weights.primeThreat : 0)) *
+              (run - 3) *
+              trapped;
+        }
         run = 0;
       }
       if (abs != null) behind += state.checkersAt(player, abs);
@@ -93,12 +105,18 @@ class Evaluator {
   double _stacksAndHome(GameState state, Player player) {
     final head = Coords.headAbs(player);
     var score = 0.0;
+    var homePoints = 0;
+    var rearmost = 0;
     for (var abs = 1; abs <= Coords.pointCount; abs++) {
       final count = state.checkersAt(player, abs);
       if (count == 0) continue;
       if (abs != head && count > 4) score -= weights.stack * (count - 4);
-      if (Coords.isHomeAbs(player, abs)) score += weights.homeCoverage;
+      if (Coords.isHomeAbs(player, abs)) homePoints++;
+      final own = Coords.toOwn(player, abs);
+      if (own > rearmost) rearmost = own;
     }
+    // Дом заполняем к выбросу, а не с первых ходов: иначе бот гонит одиночку в конец дома.
+    if (rearmost <= Coords.pointCount ~/ 2) score += weights.homeCoverage * homePoints;
     return score;
   }
 }

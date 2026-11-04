@@ -167,6 +167,42 @@ void main() {
     );
   });
 
+  test('одиночка в конце дома не получает бонуса за дом с первых ходов', () {
+    const evaluator = Evaluator();
+    const weights = HeuristicWeights();
+    GameState black(Map<int, int> checkers) => position(
+      turn: Player.black,
+      roll: const DiceRoll(6, 1),
+      white: <int, int>{24: 15},
+      black: checkers,
+    );
+    // Шашка с головы (абс. 12) дошла до своего пункта 2 (абс. 14): только pip и голова.
+    final gain =
+        evaluator.evaluate(black(<int, int>{12: 14, 14: 1}), Player.black) -
+        evaluator.evaluate(black(<int, int>{12: 15}), Player.black);
+    expect(gain, closeTo(22 * weights.pip + weights.headCheckers, 1e-9));
+  });
+
+  test('своя шашка впереди стены соперника — штраф за запертых выше', () {
+    GameState black(Map<int, int> checkers) => position(
+      turn: Player.black,
+      roll: const DiceRoll(6, 1),
+      // Стена белых на пунктах 20–16 чёрных: её можно достроить до 6.
+      white: <int, int>{8: 1, 7: 1, 6: 1, 5: 1, 4: 1, 24: 10},
+      black: checkers,
+    );
+    double threat(GameState state) =>
+        const Evaluator(HeuristicWeights(primeThreat: 0)).evaluate(state, Player.black) -
+        const Evaluator().evaluate(state, Player.black);
+    const weights = HeuristicWeights();
+    // Впереди никого — шесть подряд белым запрещены.
+    expect(threat(black(<int, int>{12: 15})), closeTo(0, 1e-9));
+    expect(
+      threat(black(<int, int>{12: 14, 13: 1})),
+      closeTo(weights.primeThreat * 2 * 14, 1e-9),
+    );
+  });
+
   test('без контакта бот выбрасывает, а не держит блок (T78)', () {
     final state = GameState.decode(
       '7,2,2,2,0,1,1,0,0,0,0,0,-6,-1,-3,-1,0,-1,0,0,0,0,0,0|0|3|b|6-2|6,2|78|0',
