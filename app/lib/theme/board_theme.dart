@@ -48,7 +48,7 @@ class BoardTheme {
   final Color ornament;
   final Color ornamentFill;
 
-  /// Золотая (или иная) подсветка легальных ходов.
+  /// Подсветка легальных ходов: яркий цвет, контрастный к пунктам темы.
   final Color highlight;
 
   final Color dieFace;
@@ -82,7 +82,7 @@ const BoardTheme klassikTheme = BoardTheme(
   checkerBlackEdge: Color(0xFF421009),
   ornament: Color(0xFFE8BC57),
   ornamentFill: Color(0xFFA9781F),
-  highlight: Color(0xFFE8BC57),
+  highlight: Color(0xFF3DE07F),
   dieFace: Color(0xFFF4E6C8),
   dieEdge: Color(0xFFB9975F),
   diePip: Color(0xFF421009),
@@ -104,7 +104,7 @@ const BoardTheme kokGumbazTheme = BoardTheme(
   checkerBlackEdge: Color(0xFF061C30),
   ornament: Color(0xFFEFE3C2),
   ornamentFill: Color(0xFF9FD5DE),
-  highlight: Color(0xFFF3C969),
+  highlight: Color(0xFFFFA726),
   dieFace: Color(0xFFF2F6F7),
   dieEdge: Color(0xFF8FA9B4),
   diePip: Color(0xFF0B2B45),
@@ -126,7 +126,7 @@ const BoardTheme zarTheme = BoardTheme(
   checkerBlackEdge: Color(0xFF0D0B0A),
   ornament: Color(0xFFF0CE7A),
   ornamentFill: Color(0xFFB98C42),
-  highlight: Color(0xFFF0CE7A),
+  highlight: Color(0xFF4FE3FF),
   dieFace: Color(0xFFEFE1BE),
   dieEdge: Color(0xFF9A7B3B),
   diePip: Color(0xFF2B2724),

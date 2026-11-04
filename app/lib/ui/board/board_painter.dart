@@ -182,21 +182,33 @@ class BoardPiecesPainter extends CustomPainter {
   void _paintDestinations(Canvas canvas) {
     if (destinations.isEmpty) return;
     final Player mover = state.turn;
-    final Paint glow = Paint()..color = theme.highlight.withValues(alpha: 0.28);
-    final Paint marker = strokePaint(theme.highlight, 2.5);
+    final double width = geometry.checkerRadius * 0.2;
+    final Paint glow = Paint()..color = theme.highlight.withValues(alpha: 0.3);
+    final Paint fill = Paint()..color = theme.highlight.withValues(alpha: 0.35);
+    // Тёмная обводка под маркером: виден и на светлых, и на тёмных пунктах.
+    final Paint halo = strokePaint(_halo, width * 2);
+    final Paint marker = strokePaint(theme.highlight, width);
     for (final int? abs in destinations) {
       if (abs == null) {
+        final RRect tray = geometry.trayShape(mover);
         canvas
-          ..drawRRect(geometry.trayShape(mover), glow)
-          ..drawRRect(geometry.trayShape(mover), marker);
+          ..drawRRect(tray, glow)
+          ..drawRRect(tray, halo)
+          ..drawRRect(tray, marker);
         continue;
       }
       canvas.drawPath(geometry.pointPath(abs), glow);
       final int count = state.checkersAt(mover, abs);
       final Offset center = geometry.checkerCenter(abs, count, count + 1);
-      canvas.drawCircle(center, geometry.checkerRadius * 0.9, marker);
+      final double radius = geometry.checkerRadius * 0.85;
+      canvas
+        ..drawCircle(center, radius, fill)
+        ..drawCircle(center, radius, halo)
+        ..drawCircle(center, radius, marker);
       if (chained.contains(abs)) {
-        canvas.drawCircle(center, geometry.checkerRadius * 0.55, marker);
+        canvas
+          ..drawCircle(center, radius * 0.5, halo)
+          ..drawCircle(center, radius * 0.5, marker);
       }
     }
   }
@@ -350,7 +362,13 @@ void paintChecker(
     strokePaint(edge.withValues(alpha: 0.35), radius * 0.08),
   );
   if (ring != null) {
-    canvas.drawCircle(center, radius * 1.08, strokePaint(ring, radius * 0.16));
+    canvas
+      ..drawCircle(
+        center,
+        radius * 1.08,
+        strokePaint(_halo.withValues(alpha: _halo.a * ring.a), radius * 0.4),
+      )
+      ..drawCircle(center, radius * 1.08, strokePaint(ring, radius * 0.2));
   }
   if (label != null) {
     paintCenteredText(
@@ -365,3 +383,6 @@ void paintChecker(
     );
   }
 }
+
+/// Подложка маркеров подсветки — контраст к любому цвету доски.
+const Color _halo = Color(0x99000000);
