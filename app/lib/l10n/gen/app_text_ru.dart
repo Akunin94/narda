@@ -64,7 +64,8 @@ class AppTextRu extends AppText {
   String get settingShowLastMove => 'Последний ход';
 
   @override
-  String get settingShowLastMoveHint => 'Подсвечивать на доске последний ход соперника';
+  String get settingShowLastMoveHint =>
+      'Подсвечивать на доске последний ход соперника';
 
   @override
   String get actionClose => 'Закрыть';

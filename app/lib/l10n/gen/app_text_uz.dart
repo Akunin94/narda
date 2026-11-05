@@ -64,7 +64,8 @@ class AppTextUz extends AppText {
   String get settingShowLastMove => 'Oxirgi yurish';
 
   @override
-  String get settingShowLastMoveHint => 'Raqibning oxirgi yurishi doskada belgilanadi';
+  String get settingShowLastMoveHint =>
+      'Raqibning oxirgi yurishi doskada belgilanadi';
 
   @override
   String get actionClose => 'Yopish';
