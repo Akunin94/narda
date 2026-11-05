@@ -109,6 +109,8 @@ class _BoardViewState extends State<BoardView>
       );
       return GestureDetector(
         behavior: HitTestBehavior.opaque,
+        // Шашку берём там, где палец коснулся, а не там, где жест распознан.
+        dragStartBehavior: DragStartBehavior.down,
         onTapUp: (TapUpDetails details) =>
             _handleTap(geometry, details.localPosition),
         onPanStart: (DragStartDetails details) =>
@@ -183,13 +185,24 @@ class _BoardViewState extends State<BoardView>
 
   void _handlePanStart(BoardGeometry geometry, Offset position) {
     if (!widget.interactive) return;
-    final int? abs = geometry.pointAt(position);
-    if (abs == null || !widget.movable.contains(abs)) return;
+    final int? abs = _movableNear(geometry, position);
+    if (abs == null) return;
     widget.onDragStart(abs);
     setState(() {
       _dragFrom = abs;
       _dragPosition = position;
     });
+  }
+
+  /// Пункт, с которого можно ходить, под пальцем или в полстолбца от него:
+  /// голову у края доски не нужно ловить точно.
+  int? _movableNear(BoardGeometry geometry, Offset position) {
+    final double shift = geometry.pointWidth / 2;
+    for (final double dx in <double>[0, -shift, shift]) {
+      final int? abs = geometry.pointAt(position.translate(dx, 0));
+      if (abs != null && widget.movable.contains(abs)) return abs;
+    }
+    return null;
   }
 
   void _handlePanEnd(BoardGeometry geometry) {
