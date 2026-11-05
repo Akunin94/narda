@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Crashlytics без своего Gradle-плагина (он требует google-services.json):
+     Dart-ошибки приходят и так, а без build id SDK падает на старте. -->
+<resources>
+    <string name="com.google.firebase.crashlytics.mapping_file_id" translatable="false">none</string>
+    <bool name="com.crashlytics.RequireBuildId">false</bool>
+</resources>

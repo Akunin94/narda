@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Crashlytics читает эти ресурсы по имени — сжатие ресурсов их не видит. -->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@string/com.google.firebase.crashlytics.mapping_file_id,@bool/com.crashlytics.RequireBuildId" />
