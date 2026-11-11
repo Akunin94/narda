@@ -270,9 +270,39 @@ void main() {
         first.session!.setup.localPlayer,
         isNot(second.session!.setup.localPlayer),
       );
+      expect(first.session!.rating, isNotNull, reason: 'быстрый матч рейтинговый');
+      expect(second.session!.rating, isNotNull);
 
       first.session!.match.dispose();
       second.session!.match.dispose();
+    });
+
+    test('партия с другом по коду не меняет рейтинг', () async {
+      final MemoryOnlineServer server = MemoryOnlineServer();
+      addTearDown(server.dispose);
+      final LobbyController host = LobbyController(
+        backend: MemoryOnlineBackend(server, uid: 'a'),
+        profile: ProfileController.inMemory(),
+      );
+      final LobbyController guest = LobbyController(
+        backend: MemoryOnlineBackend(server, uid: 'b'),
+        profile: ProfileController.inMemory(),
+      );
+      addTearDown(host.dispose);
+      addTearDown(guest.dispose);
+
+      unawaited(host.createRoom(MatchTarget.single));
+      await pump();
+      await guest.joinByCode(host.code!);
+      await pump();
+
+      expect(host.stage, LobbyStage.ready);
+      expect(guest.stage, LobbyStage.ready);
+      expect(host.session!.rating, isNull);
+      expect(guest.session!.rating, isNull);
+
+      host.session!.match.dispose();
+      guest.session!.match.dispose();
     });
 
     test('очередь пуста дольше срока — честно предлагаем бота', () async {
