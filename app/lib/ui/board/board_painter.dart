@@ -161,8 +161,10 @@ class BoardPiecesPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     _paintLastMove(canvas);
-    _paintDestinations(canvas);
+    _paintDestinationGlow(canvas);
     _paintCheckers(canvas);
+    // Поверх шашек: на высокой стопке маркер иначе прячется под ними.
+    _paintDestinations(canvas);
     _paintTrays(canvas);
     _paintMoving(canvas);
   }
@@ -177,6 +179,13 @@ class BoardPiecesPainter extends CustomPainter {
       canvas.drawPath(geometry.pointPath(move.fromAbs), paint);
       final int? toAbs = move.toAbs;
       if (toAbs != null) canvas.drawPath(geometry.pointPath(toAbs), paint);
+    }
+  }
+
+  void _paintDestinationGlow(Canvas canvas) {
+    final Paint glow = Paint()..color = theme.highlight.withValues(alpha: 0.3);
+    for (final int? abs in destinations) {
+      if (abs != null) canvas.drawPath(geometry.pointPath(abs), glow);
     }
   }
 
@@ -199,7 +208,6 @@ class BoardPiecesPainter extends CustomPainter {
         _paintPips(canvas, abs, tray.center);
         continue;
       }
-      canvas.drawPath(geometry.pointPath(abs), glow);
       final int count = state.checkersAt(mover, abs);
       final Offset center = geometry.checkerCenter(abs, count, count + 1);
       final double radius = geometry.checkerRadius * 0.85;
