@@ -267,7 +267,6 @@
   "onlineJoinRoom": "Войти по коду",
   "onlineCodeHint": "6-значный код",
   "onlineShareCode": "Отправьте код другу",
-  "onlineSendTelegram": "Отправить в Telegram",
   "onlineCopyCode": "Скопировать",
   "onlineCopied": "Скопировано",
   "onlinePrivateUnrated": "Игра с другом не влияет на рейтинг",

@@ -403,16 +403,14 @@ class AppTextUz extends AppText {
   String get onlineShareCode => 'Kodni do\'stingizga yuboring';
 
   @override
-  String get onlineSendTelegram => 'Telegram orqali yuborish';
-
-  @override
   String get onlineCopyCode => 'Nusxa olish';
 
   @override
   String get onlineCopied => 'Nusxa olindi';
 
   @override
-  String get onlinePrivateUnrated => 'Do\'st bilan o\'yin reytingga ta\'sir qilmaydi';
+  String get onlinePrivateUnrated =>
+      'Do\'st bilan o\'yin reytingga ta\'sir qilmaydi';
 
   @override
   String onlineInviteText(String code) {

@@ -401,9 +401,6 @@ class AppTextRu extends AppText {
   String get onlineShareCode => 'Отправьте код другу';
 
   @override
-  String get onlineSendTelegram => 'Отправить в Telegram';
-
-  @override
   String get onlineCopyCode => 'Скопировать';
 
   @override

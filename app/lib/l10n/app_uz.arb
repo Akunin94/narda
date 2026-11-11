@@ -385,9 +385,6 @@
   "onlineShareCode": "Kodni do'stingizga yuboring",
   "@onlineShareCode": { "description": "Продиктуйте код сопернику" },
 
-  "onlineSendTelegram": "Telegram orqali yuborish",
-  "@onlineSendTelegram": { "description": "Кнопка: отправить приглашение с кодом в Telegram" },
-
   "onlineCopyCode": "Nusxa olish",
   "@onlineCopyCode": { "description": "Кнопка: скопировать приглашение с кодом" },
 

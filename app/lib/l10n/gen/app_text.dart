@@ -847,12 +847,6 @@ abstract class AppText {
   /// **'Kodni do\'stingizga yuboring'**
   String get onlineShareCode;
 
-  /// Кнопка: отправить приглашение с кодом в Telegram
-  ///
-  /// In uz, this message translates to:
-  /// **'Telegram orqali yuborish'**
-  String get onlineSendTelegram;
-
   /// Кнопка: скопировать приглашение с кодом
   ///
   /// In uz, this message translates to:

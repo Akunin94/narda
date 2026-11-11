@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:narda_core/narda_core.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../app.dart';
 import '../../game/game_setup.dart';
@@ -210,15 +209,7 @@ class _OnlineScreenState extends State<OnlineScreen> {
   static const String _storeLink =
       'https://play.google.com/store/apps/details?id=uz.uzunnarda.narda';
 
-  /// Приглашение в Telegram: текст с кодом и ссылка на игру.
-  Future<void> _sendTelegram(AppText text) => launchUrl(
-    Uri.https('t.me', '/share/url', <String, String>{
-      'url': _storeLink,
-      'text': text.onlineInviteText(_lobby.code ?? ''),
-    }),
-    mode: LaunchMode.externalApplication,
-  );
-
+  /// Приглашение с кодом и ссылкой на игру — вставить в любой мессенджер.
   Future<void> _copyInvite(AppText text) async {
     await Clipboard.setData(
       ClipboardData(
@@ -250,12 +241,6 @@ class _OnlineScreenState extends State<OnlineScreen> {
     ),
     const SizedBox(height: 16),
     FilledButton.icon(
-      onPressed: () => _sendTelegram(text),
-      icon: const Icon(Icons.send),
-      label: Text(text.onlineSendTelegram),
-    ),
-    const SizedBox(height: 8),
-    OutlinedButton.icon(
       onPressed: () => _copyInvite(text),
       icon: const Icon(Icons.copy),
       label: Text(text.onlineCopyCode),
