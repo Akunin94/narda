@@ -10,8 +10,8 @@ import 'elo.dart';
 /// Сами аватары рисуются кодом — см. `ui/avatar.dart`.
 const int nardaAvatarCount = 8;
 
-/// Ник длиннее в комнату всё равно не поедет: правила базы режут на 24.
-const int nardaMaxNameLength = 16;
+/// Ник длиннее не пропустят правила базы (users/name не длиннее 32).
+const int nardaMaxNameLength = 32;
 
 /// Профиль игрока: ник, аватар и рейтинг Elo (§P5).
 @immutable
