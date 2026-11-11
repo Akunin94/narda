@@ -83,10 +83,12 @@ class _DiceViewState extends State<DiceView>
       builder: (BuildContext context, Widget? child) {
         final bool spinning =
             widget.rolling && (widget.pending || _controller.value < 1);
+        // Пока крутятся — всегда две: иначе четыре кости заранее выдают дубль.
+        final int count = spinning ? 2 : faces.length;
         return Row(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            for (int i = 0; i < faces.length; i++)
+            for (int i = 0; i < count; i++)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 3),
                 child: CustomPaint(
