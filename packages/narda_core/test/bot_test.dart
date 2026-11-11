@@ -176,11 +176,14 @@ void main() {
       white: <int, int>{24: 15},
       black: checkers,
     );
-    // Шашка с головы (абс. 12) дошла до своего пункта 2 (абс. 14): только pip и голова.
+    // Шашка с головы (абс. 12) дошла до своего пункта 2 (абс. 14): pip, голова и штраф за ранний дом.
     final gain =
         evaluator.evaluate(black(<int, int>{12: 14, 14: 1}), Player.black) -
         evaluator.evaluate(black(<int, int>{12: 15}), Player.black);
-    expect(gain, closeTo(22 * weights.pip + weights.headCheckers, 1e-9));
+    expect(
+      gain,
+      closeTo(22 * weights.pip + weights.headCheckers - weights.earlyHome * 14 / 15, 1e-9),
+    );
   });
 
   test('своя шашка впереди стены соперника — штраф за запертых выше', () {

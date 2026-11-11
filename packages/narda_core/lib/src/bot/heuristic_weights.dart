@@ -12,6 +12,7 @@ class HeuristicWeights {
     this.bearOffReady = 10.0,
     this.trapped = 2.0,
     this.primeThreat = 1.0,
+    this.earlyHome = 64.0,
   });
 
   /// Вес суммарного pip-прогресса (расстояния до выброса).
@@ -46,6 +47,10 @@ class HeuristicWeights {
   /// неё есть своя шашка (правило блока, §3).
   final double primeThreat;
 
+  /// Штраф за шашки в доме, пока остальные не вышли из стартовой четверти:
+  /// `earlyHome * вДоме * вСтарте / 15`. Ранний заход в дом выводит шашку из игры.
+  final double earlyHome;
+
   HeuristicWeights copyWith({
     double? pip,
     double? borneOff,
@@ -57,6 +62,7 @@ class HeuristicWeights {
     double? bearOffReady,
     double? trapped,
     double? primeThreat,
+    double? earlyHome,
   }) => HeuristicWeights(
     pip: pip ?? this.pip,
     borneOff: borneOff ?? this.borneOff,
@@ -68,5 +74,6 @@ class HeuristicWeights {
     bearOffReady: bearOffReady ?? this.bearOffReady,
     trapped: trapped ?? this.trapped,
     primeThreat: primeThreat ?? this.primeThreat,
+    earlyHome: earlyHome ?? this.earlyHome,
   );
 }

@@ -114,14 +114,21 @@ class Evaluator {
     var score = 0.0;
     var homePoints = 0;
     var rearmost = 0;
+    var inHome = 0;
+    var inStart = 0;
     for (var abs = 1; abs <= Coords.pointCount; abs++) {
       final count = state.checkersAt(player, abs);
       if (count == 0) continue;
       if (abs != head && count > 4) score -= weights.stack * (count - 4);
-      if (Coords.isHomeAbs(player, abs)) homePoints++;
+      if (Coords.isHomeAbs(player, abs)) {
+        homePoints++;
+        inHome += count;
+      }
       final own = Coords.toOwn(player, abs);
+      if (own > 18) inStart += count;
       if (own > rearmost) rearmost = own;
     }
+    score -= weights.earlyHome * inHome * inStart / GameState.checkersPerPlayer;
     // Дом заполняем к выбросу, а не с первых ходов: иначе бот гонит одиночку в конец дома.
     if (rearmost <= Coords.pointCount ~/ 2) score += weights.homeCoverage * homePoints;
     return score;
