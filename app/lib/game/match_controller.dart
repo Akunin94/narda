@@ -62,7 +62,8 @@ class AnimatedMove {
 /// Длительности партии. В тестах берётся [MatchTiming.instant].
 class MatchTiming {
   const MatchTiming({
-    this.dice = const Duration(milliseconds: 650),
+    // Кубики успевают долететь до доски и лечь (см. DiceThrow).
+    this.dice = const Duration(milliseconds: 1000),
     this.move = const Duration(milliseconds: 260),
     this.betweenMoves = const Duration(milliseconds: 70),
     this.beforeCommit = const Duration(milliseconds: 320),

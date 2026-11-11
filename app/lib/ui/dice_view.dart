@@ -91,7 +91,7 @@ class _DiceViewState extends State<DiceView>
                 padding: const EdgeInsets.symmetric(horizontal: 3),
                 child: CustomPaint(
                   size: Size.square(widget.dieSize),
-                  painter: _DiePainter(
+                  painter: DieFacePainter(
                     value: spinning
                         ? _spinFace(i, _controller.value)
                         : faces[i],
@@ -111,8 +111,9 @@ class _DiceViewState extends State<DiceView>
       1 + (((t * 16).floor() * 7) + index * 3) % 6;
 }
 
-class _DiePainter extends CustomPainter {
-  const _DiePainter({
+/// Грань кубика: квадрат с точками. Общая для костей в полосе и броска на доску.
+class DieFacePainter extends CustomPainter {
+  const DieFacePainter({
     required this.value,
     required this.dimmed,
     required this.theme,
@@ -174,7 +175,7 @@ class _DiePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_DiePainter oldDelegate) =>
+  bool shouldRepaint(DieFacePainter oldDelegate) =>
       oldDelegate.value != value ||
       oldDelegate.dimmed != dimmed ||
       oldDelegate.theme.id != theme.id;

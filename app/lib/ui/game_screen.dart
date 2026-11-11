@@ -23,6 +23,7 @@ import '../theme/board_theme.dart';
 import '../theme/narda_theme.dart';
 import 'avatar.dart';
 import 'board/board_view.dart';
+import 'board/dice_throw.dart';
 import 'chrome.dart';
 import 'dice_view.dart';
 import 'online/online_screen.dart';
@@ -386,7 +387,24 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
     ],
   );
 
-  Widget _buildBoard(BoardTheme theme) => BoardView(
+  /// Доска и поверх неё — бросок костей текущего хода.
+  Widget _buildBoard(BoardTheme theme) => Stack(
+    fit: StackFit.expand,
+    children: <Widget>[
+      _buildBoardView(theme),
+      DiceThrow(
+        roll:
+            _controller.phase == TurnPhase.rolling && !_controller.rollPending
+            ? _controller.state.roll
+            : null,
+        throwId: _controller.state.turnIndex,
+        fromBottom: _controller.state.turn == _controller.perspective,
+        theme: theme,
+      ),
+    ],
+  );
+
+  Widget _buildBoardView(BoardTheme theme) => BoardView(
     state: _controller.state,
     theme: theme,
     perspective: _controller.perspective,
