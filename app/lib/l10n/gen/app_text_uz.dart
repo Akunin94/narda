@@ -421,7 +421,8 @@ class AppTextUz extends AppText {
   String get onlineSearchingNow => 'Hozir raqib qidirmoqda:';
 
   @override
-  String get onlineNobodySearching => 'Hozir hech kim qidirmayapti — qidiruvni boshlang, sizni topishadi';
+  String get onlineNobodySearching =>
+      'Hozir hech kim qidirmayapti — qidiruvni boshlang, sizni topishadi';
 
   @override
   String get onlineSwitchAction => 'O\'tish';

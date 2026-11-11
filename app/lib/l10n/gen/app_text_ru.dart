@@ -165,7 +165,7 @@ class AppTextRu extends AppText {
   String get resultBlackWins => 'Выиграли чёрные';
 
   @override
-  String get resultOyin => 'Ойин — 1 очко';
+  String get resultOyin => 'Победа — 1 очко';
 
   @override
   String get resultMars => 'Марс — 2 очка';
@@ -341,7 +341,7 @@ class AppTextRu extends AppText {
 
   @override
   String get rulesResultBody =>
-      'Кто первым выбросил все 15 шашек — победил. Обычная победа — oyin, 1 очко; если соперник не выбросил ни одной — mars, 2 очка. Матч играется до 3, 5 или 7 очков.';
+      'Кто первым выбросил все 15 шашек — победил. Обычная победа — 1 очко; если соперник не выбросил ни одной — марс, 2 очка. Матч играется до 3, 5 или 7 очков.';
 
   @override
   String get labelScore => 'Счёт';
@@ -418,7 +418,8 @@ class AppTextRu extends AppText {
   String get onlineSearchingNow => 'Сейчас ищут соперника:';
 
   @override
-  String get onlineNobodySearching => 'Сейчас никто не ищет — начните поиск, вас найдут';
+  String get onlineNobodySearching =>
+      'Сейчас никто не ищет — начните поиск, вас найдут';
 
   @override
   String get onlineSwitchAction => 'Перейти';
