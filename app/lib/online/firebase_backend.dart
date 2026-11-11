@@ -90,28 +90,32 @@ class FirebaseOnlineBackend implements OnlineBackend {
     final DatabaseReference rooms = _db.ref('rooms');
     final String roomId = rooms.push().key!;
     final String code = generateRoomCode();
+    final Map<String, Object?> room = <String, Object?>{
+      'meta': RoomMeta(
+        code: code,
+        matchTarget: target,
+        status: RoomStatus.waiting,
+        hostUid: _me,
+      ).toJson()..['createdAt'] = ServerValue.timestamp,
+      'players': <String, Object?>{
+        _me: RoomPlayer.fromCard(
+          uid: _me,
+          color: Player.white,
+          card: card,
+        ).toJson(),
+      },
+      'presence': <String, Object?>{_me: true},
+    };
     try {
-      await rooms.child(roomId).set(<String, Object?>{
-        'meta': RoomMeta(
-          code: code,
-          matchTarget: target,
-          status: RoomStatus.waiting,
-          hostUid: _me,
-        ).toJson()..['createdAt'] = ServerValue.timestamp,
-        'players': <String, Object?>{
-          _me: RoomPlayer.fromCard(
-            uid: _me,
-            color: Player.white,
-            card: card,
-          ).toJson(),
-        },
-        'presence': <String, Object?>{_me: true},
-      });
+      await rooms.child(roomId).set(room);
       await _db.ref('codes/$code').set(roomId);
     } on FirebaseException {
       throw const OnlineUnavailable(OnlineFailure.network);
     }
-    return _FirebaseRoom(_db, roomId: roomId, uid: _me);
+    // Снимок сразу с кодом: подписка ещё не успела прислать комнату, а код
+    // нужно показать на экране прямо сейчас.
+    return _FirebaseRoom(_db, roomId: roomId, uid: _me)
+      .._snapshot = RoomSnapshot.fromJson(roomId, room);
   }
 
   @override
