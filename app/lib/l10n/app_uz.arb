@@ -382,8 +382,26 @@
   "onlineCodeHint": "6 xonali kod",
   "@onlineCodeHint": { "description": "Подсказка поля кода комнаты" },
 
-  "onlineShareCode": "Kodni raqibingizga ayting",
+  "onlineShareCode": "Kodni do'stingizga yuboring",
   "@onlineShareCode": { "description": "Продиктуйте код сопернику" },
+
+  "onlineSendTelegram": "Telegram orqali yuborish",
+  "@onlineSendTelegram": { "description": "Кнопка: отправить приглашение с кодом в Telegram" },
+
+  "onlineCopyCode": "Nusxa olish",
+  "@onlineCopyCode": { "description": "Кнопка: скопировать приглашение с кодом" },
+
+  "onlineCopied": "Nusxa olindi",
+  "@onlineCopied": { "description": "Подсказка после копирования приглашения" },
+
+  "onlinePrivateUnrated": "Do'st bilan o'yin reytingga ta'sir qilmaydi",
+  "@onlinePrivateUnrated": { "description": "Пояснение: партия по коду не рейтинговая" },
+
+  "onlineInviteText": "Men bilan Uzun narda o'ynang! Xona kodi: {code}",
+  "@onlineInviteText": {
+    "description": "Текст приглашения в приватную комнату",
+    "placeholders": { "code": { "type": "String" } }
+  },
 
   "onlineWaitingTitle": "Raqib kutilmoqda",
   "@onlineWaitingTitle": { "description": "Ждём второго игрока" },

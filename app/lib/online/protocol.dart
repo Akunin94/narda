@@ -197,9 +197,14 @@ class RoomMeta {
     required this.status,
     required this.hostUid,
     this.createdAt = 0,
+    this.ranked = false,
   });
 
   final String code;
+
+  /// Комната быстрого матча: на рейтинг влияет только она — с другом по коду
+  /// рейтинг не накрутить.
+  final bool ranked;
   final MatchTarget matchTarget;
   final RoomStatus status;
   final String hostUid;
@@ -211,6 +216,7 @@ class RoomMeta {
     'status': status.name,
     'hostUid': hostUid,
     'createdAt': createdAt,
+    if (ranked) 'ranked': true,
   };
 
   static RoomMeta? fromJson(Object? json) {
@@ -224,6 +230,7 @@ class RoomMeta {
       ),
       hostUid: json['hostUid'] is String ? json['hostUid'] as String : '',
       createdAt: asInt(json['createdAt']) ?? 0,
+      ranked: json['ranked'] == true,
     );
   }
 }

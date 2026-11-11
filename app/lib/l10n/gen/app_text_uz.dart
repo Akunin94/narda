@@ -400,7 +400,24 @@ class AppTextUz extends AppText {
   String get onlineCodeHint => '6 xonali kod';
 
   @override
-  String get onlineShareCode => 'Kodni raqibingizga ayting';
+  String get onlineShareCode => 'Kodni do\'stingizga yuboring';
+
+  @override
+  String get onlineSendTelegram => 'Telegram orqali yuborish';
+
+  @override
+  String get onlineCopyCode => 'Nusxa olish';
+
+  @override
+  String get onlineCopied => 'Nusxa olindi';
+
+  @override
+  String get onlinePrivateUnrated => 'Do\'st bilan o\'yin reytingga ta\'sir qilmaydi';
+
+  @override
+  String onlineInviteText(String code) {
+    return 'Men bilan Uzun narda o\'ynang! Xona kodi: $code';
+  }
 
   @override
   String get onlineWaitingTitle => 'Raqib kutilmoqda';

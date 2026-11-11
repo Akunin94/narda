@@ -46,7 +46,9 @@ class OnlineSession {
 
   final OnlineMatch match;
   final GameSetup setup;
-  final RatingService rating;
+
+  /// `null` — партия с другом по коду, рейтинг не меняется.
+  final RatingService? rating;
 }
 
 /// Вход в онлайн: приватная комната по коду и быстрый матч (§6).
@@ -201,7 +203,7 @@ class LobbyController extends ChangeNotifier {
 
     _session = OnlineSession(
       match: match,
-      rating: _rating,
+      rating: snapshot.meta?.ranked == true ? _rating : null,
       score: _score,
       setup: GameSetup.online(
         localPlayer: color,

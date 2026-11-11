@@ -398,7 +398,24 @@ class AppTextRu extends AppText {
   String get onlineCodeHint => '6-значный код';
 
   @override
-  String get onlineShareCode => 'Продиктуйте код сопернику';
+  String get onlineShareCode => 'Отправьте код другу';
+
+  @override
+  String get onlineSendTelegram => 'Отправить в Telegram';
+
+  @override
+  String get onlineCopyCode => 'Скопировать';
+
+  @override
+  String get onlineCopied => 'Скопировано';
+
+  @override
+  String get onlinePrivateUnrated => 'Игра с другом не влияет на рейтинг';
+
+  @override
+  String onlineInviteText(String code) {
+    return 'Сыграй со мной в Uzun narda! Код комнаты: $code';
+  }
 
   @override
   String get onlineWaitingTitle => 'Ждём соперника';

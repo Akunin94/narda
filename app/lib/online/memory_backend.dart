@@ -180,6 +180,7 @@ class MemoryOnlineBackend implements OnlineBackend {
       if (entry.value['target'] != target.points) continue;
       if (entry.value['roomId'] != null) continue;
       final RoomHandle host = await createRoom(target: target, card: card);
+      server.update(host.roomId, <String, Object?>{'meta/ranked': true});
       // Ожидающий видит номер комнаты и входит в неё вторым.
       entry.value['roomId'] = host.roomId;
       server.waiting.remove(entry.key)?.call(host.roomId);

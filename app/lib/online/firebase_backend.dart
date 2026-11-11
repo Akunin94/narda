@@ -353,6 +353,7 @@ class FirebaseOnlineBackend implements OnlineBackend {
         matchTarget: target,
         status: RoomStatus.playing,
         hostUid: _me,
+        ranked: true,
       ).toJson()..['createdAt'] = ServerValue.timestamp,
       'players': <String, Object?>{
         _me: RoomPlayer.fromCard(

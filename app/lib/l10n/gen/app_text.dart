@@ -844,8 +844,38 @@ abstract class AppText {
   /// Продиктуйте код сопернику
   ///
   /// In uz, this message translates to:
-  /// **'Kodni raqibingizga ayting'**
+  /// **'Kodni do\'stingizga yuboring'**
   String get onlineShareCode;
+
+  /// Кнопка: отправить приглашение с кодом в Telegram
+  ///
+  /// In uz, this message translates to:
+  /// **'Telegram orqali yuborish'**
+  String get onlineSendTelegram;
+
+  /// Кнопка: скопировать приглашение с кодом
+  ///
+  /// In uz, this message translates to:
+  /// **'Nusxa olish'**
+  String get onlineCopyCode;
+
+  /// Подсказка после копирования приглашения
+  ///
+  /// In uz, this message translates to:
+  /// **'Nusxa olindi'**
+  String get onlineCopied;
+
+  /// Пояснение: партия по коду не рейтинговая
+  ///
+  /// In uz, this message translates to:
+  /// **'Do\'st bilan o\'yin reytingga ta\'sir qilmaydi'**
+  String get onlinePrivateUnrated;
+
+  /// Текст приглашения в приватную комнату
+  ///
+  /// In uz, this message translates to:
+  /// **'Men bilan Uzun narda o\'ynang! Xona kodi: {code}'**
+  String onlineInviteText(String code);
 
   /// Ждём второго игрока
   ///

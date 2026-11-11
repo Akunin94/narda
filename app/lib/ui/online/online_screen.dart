@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:narda_core/narda_core.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../app.dart';
 import '../../game/game_setup.dart';
@@ -206,7 +207,31 @@ class _OnlineScreenState extends State<OnlineScreen> {
     ],
   );
 
-  /// Приватная комната создана: код диктуют сопернику и ждут его.
+  static const String _storeLink =
+      'https://play.google.com/store/apps/details?id=uz.uzunnarda.narda';
+
+  /// Приглашение в Telegram: текст с кодом и ссылка на игру.
+  Future<void> _sendTelegram(AppText text) => launchUrl(
+    Uri.https('t.me', '/share/url', <String, String>{
+      'url': _storeLink,
+      'text': text.onlineInviteText(_lobby.code ?? ''),
+    }),
+    mode: LaunchMode.externalApplication,
+  );
+
+  Future<void> _copyInvite(AppText text) async {
+    await Clipboard.setData(
+      ClipboardData(
+        text: '${text.onlineInviteText(_lobby.code ?? '')}\n$_storeLink',
+      ),
+    );
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(text.onlineCopied)));
+  }
+
+  /// Приватная комната создана: код отправляют другу и ждут его.
   Widget _waitingForCode(AppText text) => _centered(<Widget>[
     Text(
       text.onlineShareCode,
@@ -222,6 +247,24 @@ class _OnlineScreenState extends State<OnlineScreen> {
         fontWeight: FontWeight.w700,
         color: NardaColors.gold,
       ),
+    ),
+    const SizedBox(height: 16),
+    FilledButton.icon(
+      onPressed: () => _sendTelegram(text),
+      icon: const Icon(Icons.send),
+      label: Text(text.onlineSendTelegram),
+    ),
+    const SizedBox(height: 8),
+    OutlinedButton.icon(
+      onPressed: () => _copyInvite(text),
+      icon: const Icon(Icons.copy),
+      label: Text(text.onlineCopyCode),
+    ),
+    const SizedBox(height: 12),
+    Text(
+      text.onlinePrivateUnrated,
+      textAlign: TextAlign.center,
+      style: const TextStyle(fontSize: 12, color: NardaColors.textMuted),
     ),
     const SizedBox(height: 24),
     _spinner,
