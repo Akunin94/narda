@@ -82,11 +82,17 @@ class Evaluator {
     var run = 0;
     var behind = 0;
     var trapped = 0;
+    var gap = false;
+    bool theirs(int own) =>
+        own >= 1 && state.checkersAt(opponent, Coords.toAbsolute(player, own)) > 0;
     for (var own = Coords.pointCount; own >= 0; own--) {
       final abs = own == 0 ? null : Coords.toAbsolute(player, own);
       if (abs != null && state.checkersAt(opponent, abs) > 0) {
         if (run == 0) trapped = behind;
         run++;
+      } else if (run > 0 && !gap && abs != null && state.checkersAt(player, abs) == 0 && theirs(own - 1)) {
+        // Одна пустая дыра в стене — соперник закроет её следующим ходом.
+        gap = true;
       } else {
         if (run >= 4) {
           final primeLegal = anyPrimeLegal || onBoard - behind > 0;
@@ -96,6 +102,7 @@ class Evaluator {
               trapped;
         }
         run = 0;
+        gap = false;
       }
       if (abs != null) behind += state.checkersAt(player, abs);
     }

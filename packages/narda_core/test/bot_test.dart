@@ -210,4 +210,17 @@ void main() {
     final best = HeuristicBot(level: BotLevel.kuchli, seed: 1).choose(state)!;
     expect(state.applySequence(best).borneOff(Player.black), 5);
   });
+
+  test('не уводит шашку из единственной дыры в стене соперника', () {
+    // Белые держат 5 из 6 пунктов за головой чёрных, свободен только абс. 9.
+    final state = position(
+      turn: Player.black,
+      roll: const DiceRoll(6, 3),
+      white: <int, int>{11: 2, 10: 2, 8: 2, 7: 2, 6: 2, 19: 1, 1: 1, 13: 1, 5: 1, 20: 1},
+      black: <int, int>{12: 11, 17: 1, 3: 1, 21: 1, 23: 1},
+      turnIndex: 20,
+    );
+    final best = HeuristicBot(level: BotLevel.kuchli, seed: 1).choose(state)!;
+    expect(layout(state.applySequence(best), Player.black)[9], greaterThan(0));
+  });
 }
