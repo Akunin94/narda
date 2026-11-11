@@ -125,7 +125,7 @@
             "moves": {
               "$index": {
                 ".write": "auth !== null && !data.exists() && newData.child('uid').val() === auth.uid",
-                ".validate": "newData.hasChildren(['uid', 'dice', 'seq'])"
+                ".validate": "newData.hasChildren(['uid', 'dice'])"
               }
             }
           }
