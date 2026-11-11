@@ -131,7 +131,7 @@ void main() {
       profile.name = '   ';
       expect(profile.name, 'Anvar', reason: 'пустой ник не затирает прежний');
 
-      profile.name = 'Juda uzun taxallus yozildi';
+      profile.name = 'Juda uzun taxallus yozildi, sigmaydi ham';
       expect(profile.name.length, nardaMaxNameLength);
 
       profile.avatar = 99;
