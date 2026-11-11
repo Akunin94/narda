@@ -871,6 +871,30 @@ abstract class AppText {
   /// **'Men bilan Uzun narda o\'ynang! Xona kodi: {code}'**
   String onlineInviteText(String code);
 
+  /// Подпись перед списком форматов, где ждут игроки
+  ///
+  /// In uz, this message translates to:
+  /// **'Hozir raqib qidirmoqda:'**
+  String get onlineSearchingNow;
+
+  /// Очередь пуста
+  ///
+  /// In uz, this message translates to:
+  /// **'Hozir hech kim qidirmayapti — qidiruvni boshlang, sizni topishadi'**
+  String get onlineNobodySearching;
+
+  /// Кнопка: искать в формате, где ждёт соперник
+  ///
+  /// In uz, this message translates to:
+  /// **'O\'tish'**
+  String get onlineSwitchAction;
+
+  /// Во время поиска: в другом формате ждёт соперник
+  ///
+  /// In uz, this message translates to:
+  /// **'«{format}» formatida raqib kutmoqda. O\'tasizmi?'**
+  String onlineSwitchFormat(String format);
+
   /// Ждём второго игрока
   ///
   /// In uz, this message translates to:

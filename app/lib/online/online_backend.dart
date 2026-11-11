@@ -35,6 +35,9 @@ abstract interface class OnlineBackend {
   /// Снимает игрока с очереди быстрого матча.
   Future<void> cancelQuickMatch();
 
+  /// Кто сейчас ищет соперника: очки формата -> сколько ждут (без нас).
+  Stream<Map<int, int>> searchingCounts();
+
   /// Публикует профиль и рейтинг в общий список `users/{uid}` (§P5).
   /// uid записи задаёт сам бэкенд — чужую строку переписать нельзя.
   Future<void> publishProfile({

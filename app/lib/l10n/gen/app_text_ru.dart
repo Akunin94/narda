@@ -415,6 +415,20 @@ class AppTextRu extends AppText {
   }
 
   @override
+  String get onlineSearchingNow => 'Сейчас ищут соперника:';
+
+  @override
+  String get onlineNobodySearching => 'Сейчас никто не ищет — начните поиск, вас найдут';
+
+  @override
+  String get onlineSwitchAction => 'Перейти';
+
+  @override
+  String onlineSwitchFormat(String format) {
+    return 'Соперник ждёт в формате «$format». Перейти?';
+  }
+
+  @override
   String get onlineWaitingTitle => 'Ждём соперника';
 
   @override

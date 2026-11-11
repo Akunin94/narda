@@ -277,6 +277,29 @@ void main() {
       second.session!.match.dispose();
     });
 
+    test('лобби видит, в каком формате ждут соперника', () async {
+      final MemoryOnlineServer server = MemoryOnlineServer();
+      addTearDown(server.dispose);
+      final LobbyController waiting = LobbyController(
+        backend: MemoryOnlineBackend(server, uid: 'a'),
+        profile: ProfileController.inMemory(),
+      );
+      final LobbyController watching = LobbyController(
+        backend: MemoryOnlineBackend(server, uid: 'b'),
+        profile: ProfileController.inMemory(),
+      );
+      addTearDown(waiting.dispose);
+      addTearDown(watching.dispose);
+
+      unawaited(waiting.quickMatch(MatchTarget.to5));
+      await pump();
+      watching.watchSearching();
+      await pump();
+
+      expect(watching.searchingCounts, <int, int>{5: 1});
+      await waiting.cancel();
+    });
+
     test('партия с другом по коду не меняет рейтинг', () async {
       final MemoryOnlineServer server = MemoryOnlineServer();
       addTearDown(server.dispose);
@@ -718,6 +741,10 @@ class _UnavailableBackend implements OnlineBackend {
 
   @override
   Future<void> cancelQuickMatch() async {}
+
+  @override
+  Stream<Map<int, int>> searchingCounts() =>
+      const Stream<Map<int, int>>.empty();
 
   @override
   Future<void> publishProfile({

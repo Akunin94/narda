@@ -438,6 +438,58 @@ class FirebaseOnlineBackend implements OnlineBackend {
   }
 
   @override
+  Stream<Map<int, int>> searchingCounts() {
+    late final StreamController<Map<int, int>> out;
+    StreamSubscription<DatabaseEvent>? watch;
+    Timer? tick;
+    bool cancelled = false;
+    Object? queue;
+    out = StreamController<Map<int, int>>(
+      onListen: () async {
+        final Duration offset;
+        try {
+          await signIn();
+          offset = await serverTimeOffset();
+        } on Object {
+          return; // Онлайн недоступен — счётчиков просто нет.
+        }
+        if (cancelled) return;
+        void emit() {
+          if (out.isClosed) return;
+          final int now =
+              DateTime.now().millisecondsSinceEpoch + offset.inMilliseconds;
+          final Map<int, int> counts = <int, int>{};
+          childrenOf(queue).forEach((String uid, Object? entry) {
+            final Map<String, Object?> waiting = childrenOf(entry);
+            final int? target = asInt(waiting['target']);
+            if (uid == _me || target == null || waiting['roomId'] != null) {
+              return;
+            }
+            if (now - (asInt(waiting['ts']) ?? 0) >= _queueStale.inMilliseconds) {
+              return;
+            }
+            counts[target] = (counts[target] ?? 0) + 1;
+          });
+          out.add(counts);
+        }
+
+        watch = _db.ref('matchmaking').onValue.listen((DatabaseEvent event) {
+          queue = event.snapshot.value;
+          emit();
+        }, onError: (Object _) {});
+        // Брошенные записи стареют без событий базы — пересчёт по таймеру.
+        tick = Timer.periodic(_queuePulse, (_) => emit());
+      },
+      onCancel: () {
+        cancelled = true;
+        tick?.cancel();
+        return watch?.cancel();
+      },
+    );
+    return out.stream;
+  }
+
+  @override
   Future<void> cancelQuickMatch() async {
     await _leaveQueue();
     final Completer<RoomHandle?>? completer = _queue;

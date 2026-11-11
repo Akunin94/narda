@@ -194,6 +194,17 @@ class MemoryOnlineBackend implements OnlineBackend {
     return completer.future;
   }
 
+  @override
+  Stream<Map<int, int>> searchingCounts() {
+    final Map<int, int> counts = <int, int>{};
+    server.queue.forEach((String waiting, Map<String, Object?> entry) {
+      final Object? target = entry['target'];
+      if (waiting == uid || target is! int || entry['roomId'] != null) return;
+      counts[target] = (counts[target] ?? 0) + 1;
+    });
+    return Stream<Map<int, int>>.value(counts);
+  }
+
   void _pair(Completer<RoomHandle?> completer, String roomId, PlayerCard card) {
     if (completer.isCompleted) return;
     _queueWait = null;

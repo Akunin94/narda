@@ -12,6 +12,7 @@ import '../../l10n/gen/app_text.dart';
 import '../../online/firebase_backend.dart';
 import '../../online/lobby_controller.dart';
 import '../../online/online_backend.dart';
+import '../../online/protocol.dart';
 import '../../theme/narda_theme.dart';
 import '../chrome.dart';
 import '../game_screen.dart';
@@ -52,6 +53,8 @@ class _OnlineScreenState extends State<OnlineScreen> {
     _lobby.addListener(_onLobbyChanged);
     if (widget.rejoin case final SavedOnlineGame saved) {
       unawaited(_lobby.rejoin(saved.roomId, score: saved.score));
+    } else {
+      _lobby.watchSearching();
     }
   }
 
@@ -167,7 +170,9 @@ class _OnlineScreenState extends State<OnlineScreen> {
           onChanged: (MatchTarget target) => settings.matchTarget = target,
         ),
       ),
-      const SizedBox(height: 28),
+      const SizedBox(height: 12),
+      _searchingNow(text, settings),
+      const SizedBox(height: 20),
       FilledButton(
         onPressed: () => _lobby.quickMatch(settings.matchTarget),
         child: Text(text.onlineQuickMatch),
@@ -270,6 +275,19 @@ class _OnlineScreenState extends State<OnlineScreen> {
           text.onlineSearching,
           style: const TextStyle(fontSize: 18, color: NardaColors.textPrimary),
         ),
+        if (_otherFormat(settings) case final MatchTarget other) ...<Widget>[
+          const SizedBox(height: 28),
+          Text(
+            text.onlineSwitchFormat(_formatLabel(text, other)),
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: NardaColors.textPrimary),
+          ),
+          const SizedBox(height: 12),
+          FilledButton(
+            onPressed: () => _switchFormat(settings, other),
+            child: Text(text.onlineSwitchAction),
+          ),
+        ],
         if (_lobby.botOfferVisible) ...<Widget>[
           const SizedBox(height: 28),
           Text(
@@ -286,6 +304,63 @@ class _OnlineScreenState extends State<OnlineScreen> {
         const SizedBox(height: 32),
         _cancelButton(text),
       ]);
+
+  String _formatLabel(AppText text, MatchTarget target) =>
+      target == MatchTarget.single
+      ? text.matchSingle
+      : text.matchToPoints(target.points);
+
+  /// Кто в каком формате ищет соперника — онлайн выглядит живым, а формат
+  /// с ожидающим можно выбрать одним касанием.
+  Widget _searchingNow(AppText text, SettingsController settings) {
+    final List<MapEntry<int, int>> busy =
+        _lobby.searchingCounts.entries
+            .where((MapEntry<int, int> entry) => entry.value > 0)
+            .toList()
+          ..sort((MapEntry<int, int> a, MapEntry<int, int> b) => a.key - b.key);
+    const TextStyle muted = TextStyle(fontSize: 12, color: NardaColors.textMuted);
+    if (busy.isEmpty) {
+      return Text(
+        text.onlineNobodySearching,
+        textAlign: TextAlign.center,
+        style: muted,
+      );
+    }
+    return Wrap(
+      alignment: WrapAlignment.center,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: 8,
+      runSpacing: 4,
+      children: <Widget>[
+        Text(text.onlineSearchingNow, style: muted),
+        for (final MapEntry<int, int> entry in busy)
+          ActionChip(
+            avatar: const Icon(Icons.person_search, size: 16),
+            label: Text(
+              '${_formatLabel(text, matchTargetFromPoints(entry.key))} · ${entry.value}',
+            ),
+            onPressed: () =>
+                settings.matchTarget = matchTargetFromPoints(entry.key),
+          ),
+      ],
+    );
+  }
+
+  /// Во время поиска: в нашем формате никого, а в другом соперник ждёт.
+  MatchTarget? _otherFormat(SettingsController settings) {
+    final Map<int, int> counts = _lobby.searchingCounts;
+    if ((counts[settings.matchTarget.points] ?? 0) > 0) return null;
+    for (final MapEntry<int, int> entry in counts.entries) {
+      if (entry.value > 0) return matchTargetFromPoints(entry.key);
+    }
+    return null;
+  }
+
+  Future<void> _switchFormat(SettingsController settings, MatchTarget target) async {
+    await _lobby.cancel();
+    settings.matchTarget = target;
+    await _lobby.quickMatch(target);
+  }
 
   Widget _busy(String label) => _centered(<Widget>[
     _spinner,

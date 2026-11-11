@@ -78,6 +78,22 @@ class LobbyController extends ChangeNotifier {
   bool _disposed = false;
   Timer? _botOfferTimer;
   StreamSubscription<RoomSnapshot>? _watch;
+  StreamSubscription<Map<int, int>>? _countsWatch;
+  Map<int, int> _searchingCounts = const <int, int>{};
+
+  /// Кто сейчас ищет соперника: очки формата -> сколько ждут.
+  Map<int, int> get searchingCounts => _searchingCounts;
+
+  /// Следить за очередью: экран показывает, в каком формате ищут другие.
+  void watchSearching() {
+    _countsWatch ??= _backend.searchingCounts().listen(
+      (Map<int, int> counts) {
+        _searchingCounts = counts;
+        _notify();
+      },
+      onError: (Object _) {},
+    );
+  }
 
   LobbyStage get stage => _stage;
 
@@ -175,6 +191,7 @@ class LobbyController extends ChangeNotifier {
     _disposed = true;
     _botOfferTimer?.cancel();
     unawaited(_watch?.cancel());
+    unawaited(_countsWatch?.cancel());
     _backend.dispose();
     super.dispose();
   }

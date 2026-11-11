@@ -418,6 +418,20 @@ class AppTextUz extends AppText {
   }
 
   @override
+  String get onlineSearchingNow => 'Hozir raqib qidirmoqda:';
+
+  @override
+  String get onlineNobodySearching => 'Hozir hech kim qidirmayapti — qidiruvni boshlang, sizni topishadi';
+
+  @override
+  String get onlineSwitchAction => 'O\'tish';
+
+  @override
+  String onlineSwitchFormat(String format) {
+    return '«$format» formatida raqib kutmoqda. O\'tasizmi?';
+  }
+
+  @override
   String get onlineWaitingTitle => 'Raqib kutilmoqda';
 
   @override

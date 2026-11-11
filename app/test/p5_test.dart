@@ -450,6 +450,10 @@ class _FailingBackend implements OnlineBackend {
   Future<void> cancelQuickMatch() async {}
 
   @override
+  Stream<Map<int, int>> searchingCounts() =>
+      const Stream<Map<int, int>>.empty();
+
+  @override
   Future<void> publishProfile({
     required PlayerCard card,
     required int games,

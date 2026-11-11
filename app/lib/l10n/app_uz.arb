@@ -400,6 +400,21 @@
     "placeholders": { "code": { "type": "String" } }
   },
 
+  "onlineSearchingNow": "Hozir raqib qidirmoqda:",
+  "@onlineSearchingNow": { "description": "Подпись перед списком форматов, где ждут игроки" },
+
+  "onlineNobodySearching": "Hozir hech kim qidirmayapti — qidiruvni boshlang, sizni topishadi",
+  "@onlineNobodySearching": { "description": "Очередь пуста" },
+
+  "onlineSwitchAction": "O'tish",
+  "@onlineSwitchAction": { "description": "Кнопка: искать в формате, где ждёт соперник" },
+
+  "onlineSwitchFormat": "«{format}» formatida raqib kutmoqda. O'tasizmi?",
+  "@onlineSwitchFormat": {
+    "description": "Во время поиска: в другом формате ждёт соперник",
+    "placeholders": { "format": { "type": "String" } }
+  },
+
   "onlineWaitingTitle": "Raqib kutilmoqda",
   "@onlineWaitingTitle": { "description": "Ждём второго игрока" },
 
