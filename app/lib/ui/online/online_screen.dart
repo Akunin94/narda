@@ -14,6 +14,7 @@ import '../../online/lobby_controller.dart';
 import '../../online/online_backend.dart';
 import '../../online/protocol.dart';
 import '../../theme/narda_theme.dart';
+import '../ad_banner.dart';
 import '../chrome.dart';
 import '../game_screen.dart';
 import '../home_screen.dart';
@@ -138,6 +139,11 @@ class _OnlineScreenState extends State<OnlineScreen> {
         backgroundColor: NardaColors.background,
         title: Text(text.onlineTitle),
       ),
+      // Баннер только пока ждём: в меню онлайна, в поиске и над кодом комнаты.
+      bottomNavigationBar: switch (_lobby.stage) {
+        LobbyStage.connecting || LobbyStage.ready => null,
+        _ => const Center(heightFactor: 1, child: AdBanner()),
+      },
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),

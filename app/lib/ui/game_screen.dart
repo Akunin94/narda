@@ -69,7 +69,8 @@ class GameScreen extends StatefulWidget {
 class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
   late final SettingsController _settings = SettingsScope.of(context);
   late final StatsStore _stats = StatsScope.of(context);
-  late final AdsController _ads = AdsScope.of(context);
+  // Берётся сразу: в dispose (реклама после онлайн-матча) дерево уже недоступно.
+  late AdsController _ads;
   late final ProfileController _profile = ProfileScope.of(context);
 
   /// Голос в онлайне; микрофон включается только кнопкой.
@@ -113,6 +114,7 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _ads = AdsScope.of(context);
     if (_started) return;
     _started = true;
     widget.online?.addListener(_onOnlineChanged);
@@ -208,6 +210,10 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
 
   @override
   void dispose() {
+    // Онлайн-матч доигран и игрок ушёл с доски — соперника уже никто не ждёт.
+    if (_isOnline && _controller.isMatchOver) {
+      unawaited(_ads.maybeShowInterstitial());
+    }
     _autoNext?.cancel();
     _controller
       ..removeListener(_rememberOnline)

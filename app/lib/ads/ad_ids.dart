@@ -19,6 +19,7 @@ abstract final class AdIds {
   static const String testInterstitial =
       'ca-app-pub-3940256099942544/1033173712';
   static const String testRewarded = 'ca-app-pub-3940256099942544/5224354917';
+  static const String testBanner = 'ca-app-pub-3940256099942544/6300978111';
 
   static const String _releaseInterstitial = String.fromEnvironment(
     'ADMOB_INTERSTITIAL',
@@ -26,11 +27,15 @@ abstract final class AdIds {
   static const String _releaseRewarded = String.fromEnvironment(
     'ADMOB_REWARDED',
   );
+  static const String _releaseBanner = String.fromEnvironment('ADMOB_BANNER');
 
   static String get interstitial =>
       kReleaseMode ? _releaseInterstitial : testInterstitial;
 
   static String get rewarded => kReleaseMode ? _releaseRewarded : testRewarded;
+
+  /// Баннер только на экранах ожидания онлайна — во время партии его нет.
+  static String get banner => kReleaseMode ? _releaseBanner : testBanner;
 
   /// Есть ли вообще с чем работать: в релизе без `--dart-define` — нет.
   static bool get configured => interstitial.isNotEmpty || rewarded.isNotEmpty;
