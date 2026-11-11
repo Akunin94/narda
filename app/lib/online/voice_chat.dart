@@ -60,13 +60,23 @@ class VoiceChat extends ChangeNotifier {
       .then((_) => step())
       .catchError((Object error) => debugPrint('narda voice: $error'));
 
+  /// Микрофон уже открывался в этом запуске приложения.
+  static bool _micWarm = false;
+
+  Future<MediaStream> _openMic() => navigator.mediaDevices.getUserMedia(
+    <String, Object>{'audio': true, 'video': false},
+  );
+
   Future<void> _enable() async {
-    final MediaStream mic;
+    MediaStream mic;
     try {
-      mic = await navigator.mediaDevices.getUserMedia(<String, Object>{
-        'audio': true,
-        'video': false,
-      });
+      mic = await _openMic();
+      if (!_micWarm) {
+        // Первый поток сразу после выдачи разрешения на части телефонов (Honor) немой.
+        await _release(mic);
+        mic = await _openMic();
+        _micWarm = true;
+      }
     } on Object {
       _denied = true;
       _notify();
