@@ -35,7 +35,7 @@
 
         "meta": {
           "status": {
-            ".write": "auth !== null && data.parent().parent().child('players').child(auth.uid).exists()",
+            ".write": "auth !== null && newData.parent().parent().child('players').child(auth.uid).exists()",
             ".validate": "newData.isString()"
           }
         },
