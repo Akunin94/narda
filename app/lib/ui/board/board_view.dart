@@ -17,7 +17,7 @@ class BoardView extends StatefulWidget {
     required this.perspective,
     required this.selected,
     required this.destinations,
-    this.chained = const <int?>{},
+    this.pips = const <int?, int>{},
     required this.movable,
     required this.lastMoves,
     required this.animated,
@@ -34,7 +34,7 @@ class BoardView extends StatefulWidget {
   final Player perspective;
   final int? selected;
   final List<int?> destinations;
-  final Set<int?> chained;
+  final Map<int?, int> pips;
   final Set<int> movable;
   final List<Move> lastMoves;
   final AnimatedMove? animated;
@@ -142,7 +142,7 @@ class _BoardViewState extends State<BoardView>
                   state: widget.state,
                   selected: widget.selected,
                   destinations: widget.destinations,
-                  chained: widget.chained,
+                  pips: widget.pips,
                   movable: widget.movable,
                   lastMoves: widget.lastMoves,
                   flying: _flying,

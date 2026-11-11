@@ -121,7 +121,7 @@ class BoardPiecesPainter extends CustomPainter {
     required this.state,
     required this.selected,
     required this.destinations,
-    this.chained = const <int?>{},
+    this.pips = const <int?, int>{},
     required this.movable,
     required this.lastMoves,
     required this.flying,
@@ -141,7 +141,8 @@ class BoardPiecesPainter extends CustomPainter {
   final List<int?> destinations;
 
   /// Цели, куда шашка дойдёт несколькими перемещениями — рисуются двойным кольцом.
-  final Set<int?> chained;
+  /// Очки костей на ход к каждой цели из [destinations].
+  final Map<int?, int> pips;
 
   /// Пункты, с которых сейчас можно ходить.
   final Set<int> movable;
@@ -184,7 +185,7 @@ class BoardPiecesPainter extends CustomPainter {
     final Player mover = state.turn;
     final double width = geometry.checkerRadius * 0.2;
     final Paint glow = Paint()..color = theme.highlight.withValues(alpha: 0.3);
-    final Paint fill = Paint()..color = theme.highlight.withValues(alpha: 0.35);
+    final Paint fill = Paint()..color = theme.highlight.withValues(alpha: 0.9);
     // Тёмная обводка под маркером: виден и на светлых, и на тёмных пунктах.
     final Paint halo = strokePaint(_halo, width * 2);
     final Paint marker = strokePaint(theme.highlight, width);
@@ -195,6 +196,7 @@ class BoardPiecesPainter extends CustomPainter {
           ..drawRRect(tray, glow)
           ..drawRRect(tray, halo)
           ..drawRRect(tray, marker);
+        _paintPips(canvas, abs, tray.center);
         continue;
       }
       canvas.drawPath(geometry.pointPath(abs), glow);
@@ -205,12 +207,24 @@ class BoardPiecesPainter extends CustomPainter {
         ..drawCircle(center, radius, fill)
         ..drawCircle(center, radius, halo)
         ..drawCircle(center, radius, marker);
-      if (chained.contains(abs)) {
-        canvas
-          ..drawCircle(center, radius * 0.5, halo)
-          ..drawCircle(center, radius * 0.5, marker);
-      }
+      _paintPips(canvas, abs, center);
     }
+  }
+
+  /// Сколько очков костей уйдёт на ход в эту цель: 3, 4 или 7 при 3-4.
+  void _paintPips(Canvas canvas, int? abs, Offset center) {
+    final int? value = pips[abs];
+    if (value == null) return;
+    paintCenteredText(
+      canvas,
+      '$value',
+      center,
+      TextStyle(
+        color: const Color(0xE6000000),
+        fontSize: geometry.checkerRadius * 0.95,
+        fontWeight: FontWeight.w800,
+      ),
+    );
   }
 
   void _paintCheckers(Canvas canvas) {
@@ -360,6 +374,17 @@ void paintChecker(
     center,
     radius * 0.5,
     strokePaint(edge.withValues(alpha: 0.35), radius * 0.08),
+  );
+  // Контрастный ободок: шашка отделяется от пункта любого цвета.
+  canvas.drawCircle(
+    center,
+    radius * 0.97,
+    strokePaint(
+      face.computeLuminance() > 0.4
+          ? const Color(0x8C000000)
+          : const Color(0x73FFFFFF),
+      radius * 0.07,
+    ),
   );
   if (ring != null) {
     canvas

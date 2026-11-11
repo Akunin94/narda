@@ -84,6 +84,8 @@ void main() {
 
     controller.tapPoint(24);
     expect(controller.chainedDestinations, <int?>{13});
+    // На кружках — очки костей: 6, 5 и 11 за ход одной шашкой.
+    expect(controller.destinationPips, <int?, int>{18: 6, 19: 5, 13: 11});
     controller.tapPoint(13);
     await settle();
 

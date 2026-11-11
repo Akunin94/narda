@@ -392,7 +392,7 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
     perspective: _controller.perspective,
     selected: _controller.selected,
     destinations: _controller.destinations,
-    chained: _controller.chainedDestinations,
+    pips: _controller.destinationPips,
     movable: _controller.movableSources.toSet(),
     lastMoves: _settings.showLastMove
         ? _controller.lastTurnMoves

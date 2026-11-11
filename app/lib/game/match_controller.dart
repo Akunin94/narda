@@ -221,6 +221,12 @@ class MatchController extends ChangeNotifier {
   /// Куда может пойти выбранная шашка; `null` в списке — выброс.
   List<int?> get destinations => _paths.keys.toList();
 
+  /// Сколько очков костей уйдёт на ход к каждой цели из [destinations].
+  Map<int?, int> get destinationPips => <int?, int>{
+    for (final MapEntry<int?, List<Move>> entry in _paths.entries)
+      entry.key: entry.value.fold<int>(0, (int sum, Move move) => sum + move.die),
+  };
+
   /// Цели из [destinations], куда шашка дойдёт только за несколько перемещений.
   Set<int?> get chainedDestinations => <int?>{
     for (final MapEntry<int?, List<Move>> entry in _paths.entries)
