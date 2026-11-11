@@ -133,6 +133,11 @@ class MatchController extends ChangeNotifier {
   SavedBotGame? _resume;
 
   TurnPhase _phase = TurnPhase.rolling;
+
+  /// Бросок ещё согласуется с соперником: на костях пока заглушка.
+  bool _rollPending = false;
+
+  bool get rollPending => _rollPending;
   TurnPlanner? _planner;
   GameResult? _result;
   MatchAbortReason? _abortReason;
@@ -410,6 +415,7 @@ class MatchController extends ChangeNotifier {
   /// или восстановленная реплеем журнала после реконнекта (§6).
   Future<void> _startShared(TurnCoordinator coordinator, int generation) async {
     _phase = TurnPhase.rolling;
+    _rollPending = true;
     // Пока ведущий согласовывает первый ход, доске нужна хоть какая-то
     // позиция: показываем стартовую расстановку. Ходить в ней нельзя —
     // фаза `rolling` не пускает, а через мгновение придёт настоящая.
@@ -452,6 +458,7 @@ class MatchController extends ChangeNotifier {
       return;
     }
     _phase = TurnPhase.rolling;
+    _rollPending = _coordinator != null;
     _feedback.dice();
     _notify();
 
@@ -516,10 +523,12 @@ class MatchController extends ChangeNotifier {
     try {
       roll = await coordinator.roll(_game.state);
     } on Object {
+      _rollPending = false;
       _abort(MatchAbortReason.connection);
       return false;
     }
     if (_isStale(generation)) return false;
+    _rollPending = false;
     _game.restore(
       _game.state.copyWith(
         roll: roll,

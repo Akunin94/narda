@@ -508,6 +508,7 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
             roll: state.roll,
             remaining: state.remainingDice,
             rolling: _controller.phase == TurnPhase.rolling,
+            pending: _controller.rollPending,
             theme: theme,
           )
         : null;

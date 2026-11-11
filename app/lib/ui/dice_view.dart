@@ -13,8 +13,12 @@ class DiceView extends StatefulWidget {
     required this.remaining,
     required this.rolling,
     required this.theme,
+    this.pending = false,
     this.dieSize = 30,
   });
+
+  /// Бросок ещё не известен (онлайн ждёт соперника): крутим, пока не придёт.
+  final bool pending;
 
   final DiceRoll roll;
   final List<int> remaining;
@@ -36,14 +40,24 @@ class _DiceViewState extends State<DiceView>
   @override
   void initState() {
     super.initState();
-    if (widget.rolling) _controller.forward(from: 0);
+    if (widget.rolling) {
+      widget.pending ? _controller.repeat() : _controller.forward(from: 0);
+    }
   }
 
   @override
   void didUpdateWidget(DiceView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.rolling && !oldWidget.rolling) _controller.forward(from: 0);
-    if (!widget.rolling && _controller.isAnimating) _controller.stop();
+    if (!widget.rolling) {
+      if (_controller.isAnimating) _controller.stop();
+    } else if (widget.pending) {
+      if (!oldWidget.pending || !_controller.isAnimating) _controller.repeat();
+    } else if (!oldWidget.rolling) {
+      _controller.forward(from: 0);
+    } else if (oldWidget.pending) {
+      // Бросок пришёл — докручиваем текущий оборот и показываем его.
+      _controller.forward(from: _controller.value);
+    }
   }
 
   @override
@@ -67,7 +81,8 @@ class _DiceViewState extends State<DiceView>
     return AnimatedBuilder(
       animation: _controller,
       builder: (BuildContext context, Widget? child) {
-        final bool spinning = widget.rolling && _controller.value < 1;
+        final bool spinning =
+            widget.rolling && (widget.pending || _controller.value < 1);
         return Row(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
