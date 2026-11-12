@@ -253,6 +253,15 @@
   "themesTitle": "Doska ko'rinishi",
   "@themesTitle": { "description": "Заголовок экрана тем" },
 
+  "updateRequiredTitle": "Yangi versiya chiqdi",
+  "@updateRequiredTitle": { "description": "Принудительное обновление: заголовок" },
+
+  "updateRequiredBody": "Bu versiya eskirgan. Davom etish uchun o'yinni Google Play'da yangilang.",
+  "@updateRequiredBody": { "description": "Принудительное обновление: пояснение" },
+
+  "updateRequiredAction": "Yangilash",
+  "@updateRequiredAction": { "description": "Принудительное обновление: кнопка в Google Play" },
+
   "themeYogoch": "Yog'och",
   "@themeYogoch": { "description": "Тема: живая деревянная доска" },
 

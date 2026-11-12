@@ -149,6 +149,15 @@
   "themesTitle": "Оформление доски",
   "@themesTitle": { "description": "Заголовок экрана тем" },
 
+  "updateRequiredTitle": "Вышла новая версия",
+  "@updateRequiredTitle": { "description": "Принудительное обновление: заголовок" },
+
+  "updateRequiredBody": "Эта версия устарела. Обновите игру в Google Play, чтобы продолжить.",
+  "@updateRequiredBody": { "description": "Принудительное обновление: пояснение" },
+
+  "updateRequiredAction": "Обновить",
+  "@updateRequiredAction": { "description": "Принудительное обновление: кнопка в Google Play" },
+
   "themeYogoch": "Дерево",
   "@themeYogoch": { "description": "Тема: живая деревянная доска" },
 

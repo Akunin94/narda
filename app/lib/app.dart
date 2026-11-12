@@ -7,6 +7,7 @@ import 'l10n/gen/app_text.dart';
 import 'profile/profile.dart';
 import 'theme/narda_theme.dart';
 import 'ui/home_screen.dart';
+import 'ui/update_gate.dart';
 
 /// Контроллер, положенный в дерево scope'ом [S].
 ///
@@ -122,6 +123,8 @@ class NardaApp extends StatelessWidget {
                   : Locale(settings.localeCode!),
               localeListResolutionCallback: resolveNardaLocale,
               home: home ?? const HomeScreen(),
+              builder: (BuildContext context, Widget? child) =>
+                  UpdateGate(child: child!),
             ),
           ),
         ),

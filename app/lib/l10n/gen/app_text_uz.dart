@@ -265,6 +265,16 @@ class AppTextUz extends AppText {
   String get themesTitle => 'Doska ko\'rinishi';
 
   @override
+  String get updateRequiredTitle => 'Yangi versiya chiqdi';
+
+  @override
+  String get updateRequiredBody =>
+      'Bu versiya eskirgan. Davom etish uchun o\'yinni Google Play\'da yangilang.';
+
+  @override
+  String get updateRequiredAction => 'Yangilash';
+
+  @override
   String get themeYogoch => 'Yog\'och';
 
   @override

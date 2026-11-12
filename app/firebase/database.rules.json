@@ -3,6 +3,10 @@
     ".read": false,
     ".write": false,
 
+    "config": {
+      ".read": true
+    },
+
     "codes": {
       "$code": {
         ".read": "auth !== null",

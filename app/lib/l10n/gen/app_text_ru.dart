@@ -264,6 +264,16 @@ class AppTextRu extends AppText {
   String get themesTitle => 'Оформление доски';
 
   @override
+  String get updateRequiredTitle => 'Вышла новая версия';
+
+  @override
+  String get updateRequiredBody =>
+      'Эта версия устарела. Обновите игру в Google Play, чтобы продолжить.';
+
+  @override
+  String get updateRequiredAction => 'Обновить';
+
+  @override
   String get themeYogoch => 'Дерево';
 
   @override

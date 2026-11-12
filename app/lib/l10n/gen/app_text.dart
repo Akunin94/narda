@@ -601,6 +601,24 @@ abstract class AppText {
   /// **'Doska ko\'rinishi'**
   String get themesTitle;
 
+  /// Принудительное обновление: заголовок
+  ///
+  /// In uz, this message translates to:
+  /// **'Yangi versiya chiqdi'**
+  String get updateRequiredTitle;
+
+  /// Принудительное обновление: пояснение
+  ///
+  /// In uz, this message translates to:
+  /// **'Bu versiya eskirgan. Davom etish uchun o\'yinni Google Play\'da yangilang.'**
+  String get updateRequiredBody;
+
+  /// Принудительное обновление: кнопка в Google Play
+  ///
+  /// In uz, this message translates to:
+  /// **'Yangilash'**
+  String get updateRequiredAction;
+
   /// Тема: живая деревянная доска
   ///
   /// In uz, this message translates to:

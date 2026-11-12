@@ -18,6 +18,7 @@ import '../ad_banner.dart';
 import '../chrome.dart';
 import '../game_screen.dart';
 import '../home_screen.dart';
+import '../update_gate.dart';
 import 'leaderboard_screen.dart';
 import 'online_failure.dart';
 
@@ -217,14 +218,11 @@ class _OnlineScreenState extends State<OnlineScreen> {
     ],
   );
 
-  static const String _storeLink =
-      'https://play.google.com/store/apps/details?id=uz.uzunnarda.narda';
-
   /// Приглашение с кодом и ссылкой на игру — вставить в любой мессенджер.
   Future<void> _copyInvite(AppText text) async {
     await Clipboard.setData(
       ClipboardData(
-        text: '${text.onlineInviteText(_lobby.code ?? '')}\n$_storeLink',
+        text: '${text.onlineInviteText(_lobby.code ?? '')}\n$playStoreLink',
       ),
     );
     if (!mounted) return;
