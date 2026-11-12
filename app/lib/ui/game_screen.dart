@@ -403,6 +403,9 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
             _controller.phase == TurnPhase.rolling && !_controller.rollPending
             ? _controller.state.roll
             : null,
+        resting: _controller.rollPending || _controller.state.isFinished
+            ? null
+            : _controller.state.roll,
         throwId: _controller.state.turnIndex,
         fromBottom: _controller.state.turn == _controller.perspective,
         theme: theme,

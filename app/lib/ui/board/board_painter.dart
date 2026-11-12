@@ -19,6 +19,10 @@ class BoardBackgroundPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    if (theme.wooden) {
+      _paintWooden(canvas, size);
+      return;
+    }
     final Rect board = Offset.zero & size;
     canvas.drawRRect(
       RRect.fromRectAndRadius(board, Radius.circular(geometry.frame * 0.7)),
@@ -81,6 +85,131 @@ class BoardBackgroundPainter extends CustomPainter {
       path,
       strokePaint(theme.frameDark.withValues(alpha: 0.35), 1),
     );
+  }
+
+  /// Деревянный кейс: рамка, две створки, латунные петли, пункты-инкрустация с лунками.
+  void _paintWooden(Canvas canvas, Size size) {
+    final Rect board = Offset.zero & size;
+    final double frame = geometry.frame;
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(board, Radius.circular(frame * 0.5)),
+      Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: <Color>[theme.frameLight, theme.frameDark],
+        ).createShader(board),
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(board.deflate(1), Radius.circular(frame * 0.5)),
+      strokePaint(Colors.white.withValues(alpha: 0.12), 1.5),
+    );
+
+    final Rect inner = geometry.inner;
+    final Rect bar = geometry.bar;
+    final Paint surface = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: <Color>[theme.feltLight, theme.feltDark],
+      ).createShader(inner);
+    for (final Rect half in <Rect>[
+      Rect.fromLTRB(inner.left, inner.top, bar.left, inner.bottom),
+      Rect.fromLTRB(bar.right, inner.top, inner.right, inner.bottom),
+    ]) {
+      canvas.drawRect(half, surface);
+    }
+    _paintGrain(canvas, inner);
+
+    for (final Player player in Player.values) {
+      canvas.drawRRect(
+        geometry.trayShape(player),
+        Paint()..color = theme.frameDark.withValues(alpha: 0.4),
+      );
+    }
+    for (int abs = 1; abs <= Coords.pointCount; abs++) {
+      _paintInlay(canvas, abs);
+    }
+
+    // Створки утоплены в рамку: тень по краю каждой.
+    final Paint rim = strokePaint(Colors.black.withValues(alpha: 0.35), 3);
+    canvas
+      ..drawRect(Rect.fromLTRB(inner.left, inner.top, bar.left, inner.bottom), rim)
+      ..drawRect(Rect.fromLTRB(bar.right, inner.top, inner.right, inner.bottom), rim);
+
+    canvas.drawRect(
+      bar,
+      Paint()
+        ..shader = LinearGradient(
+          colors: <Color>[theme.frameDark, theme.frameLight, theme.frameDark],
+        ).createShader(bar),
+    );
+    for (final double at in <double>[0.14, 0.86]) {
+      _paintHinge(canvas, Offset(bar.center.dx, inner.top + inner.height * at));
+    }
+  }
+
+  /// Пункт-инкрустация: светлый клин с тонкой обводкой и лунка у основания.
+  void _paintInlay(Canvas canvas, int abs) {
+    final Rect rect = geometry.pointRect(abs);
+    final bool bottom = geometry.isBottom(abs);
+    final bool light = (geometry.columnOf(abs) + (bottom ? 0 : 1)).isEven;
+    final Path path = geometry.pointPath(abs);
+    final Color color = light ? theme.pointLight : theme.pointDark;
+    canvas
+      ..drawPath(
+        path,
+        Paint()
+          ..shader = LinearGradient(
+            begin: bottom ? Alignment.bottomCenter : Alignment.topCenter,
+            end: bottom ? Alignment.topCenter : Alignment.bottomCenter,
+            colors: <Color>[color, Color.lerp(color, theme.feltDark, 0.35)!],
+          ).createShader(rect),
+      )
+      ..drawPath(path, strokePaint(theme.frameDark.withValues(alpha: 0.45), 1.2));
+
+    final double radius = geometry.checkerRadius * 0.62;
+    final Offset center = geometry.checkerCenter(abs, 0, 1);
+    canvas
+      ..drawCircle(center, radius, Paint()..color = theme.feltDark.withValues(alpha: 0.35))
+      ..drawCircle(center, radius, strokePaint(theme.frameDark.withValues(alpha: 0.4), 1.2))
+      ..drawArc(
+        Rect.fromCircle(center: center, radius: radius),
+        0.2,
+        math.pi * 0.8,
+        false,
+        strokePaint(Colors.white.withValues(alpha: 0.35), 1),
+      );
+  }
+
+  /// Латунная петля поперёк «корешка» доски.
+  void _paintHinge(Canvas canvas, Offset center) {
+    final double width = geometry.barWidth * 1.5;
+    final double height = geometry.inner.height * 0.08;
+    final Rect rect = Rect.fromCenter(center: center, width: width, height: height);
+    canvas
+      ..drawRRect(
+        RRect.fromRectAndRadius(rect, Radius.circular(width * 0.12)),
+        Paint()
+          ..shader = const LinearGradient(
+            colors: <Color>[Color(0xFF8A6A25), Color(0xFFE2C26A), Color(0xFF8A6A25)],
+          ).createShader(rect),
+      )
+      ..drawLine(
+        rect.topCenter,
+        rect.bottomCenter,
+        strokePaint(const Color(0xFF5E4515), 1.2),
+      );
+    final Paint screw = Paint()..color = const Color(0xFF6B4F1A);
+    for (final double dx in <double>[-0.25, 0.25]) {
+      for (final double dy in <double>[-0.3, 0.3]) {
+        canvas.drawCircle(
+          center + Offset(width * dx, height * dy),
+          width * 0.06,
+          screw,
+        );
+      }
+    }
   }
 
   /// Древесные волокна: детерминированный рисунок, одинаковый на каждом кадре.

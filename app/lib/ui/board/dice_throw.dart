@@ -5,10 +5,11 @@ import 'package:narda_core/narda_core.dart';
 
 import '../../theme/board_theme.dart';
 import '../dice_view.dart';
+import 'board_geometry.dart';
 
 /// Бросок костей на доску: два кубика влетают со стороны ходящего,
-/// кувыркаются в 3D, отскакивают и показывают выпавшее. Только анимация:
-/// числа хода по-прежнему в полосе игрока.
+/// кувыркаются в 3D, отскакивают и отъезжают на середину доски, уменьшаясь.
+/// Там лежат весь ход, как настоящие. Числа хода по-прежнему в полосе игрока.
 class DiceThrow extends StatefulWidget {
   const DiceThrow({
     super.key,
@@ -16,10 +17,14 @@ class DiceThrow extends StatefulWidget {
     required this.throwId,
     required this.fromBottom,
     required this.theme,
+    this.resting,
   });
 
   /// Что выпало; `null` — бросать нечего (бросок ещё не известен или прошёл).
   final DiceRoll? roll;
+
+  /// Кости, лежащие на середине доски между бросками; `null` — убрать.
+  final DiceRoll? resting;
 
   /// Номер хода: новый номер — новый бросок.
   final int throwId;
@@ -36,7 +41,7 @@ class _DiceThrowState extends State<DiceThrow>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 1300),
+    duration: const Duration(milliseconds: 1700),
   );
 
   DiceRoll? _roll;
@@ -76,24 +81,21 @@ class _DiceThrowState extends State<DiceThrow>
     child: AnimatedBuilder(
       animation: _controller,
       builder: (BuildContext context, Widget? child) {
-        final DiceRoll? roll = _roll;
-        final double t = _controller.value;
-        if (roll == null || !_controller.isAnimating) {
-          return const SizedBox.shrink();
-        }
+        final bool flying = _controller.isAnimating && _roll != null;
+        final DiceRoll? roll = flying ? _roll : widget.resting;
+        if (roll == null) return const SizedBox.shrink();
+        final double t = flying ? _controller.value : 1;
         return LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
             final Size size = constraints.biggest;
             final double side = size.shortestSide * 0.12;
-            final double opacity = t < 0.85 ? 1 : (1 - t) / 0.15;
-            return Opacity(
-              opacity: opacity.clamp(0.0, 1.0),
-              child: Stack(
-                children: <Widget>[
-                  for (int i = 0; i < 2; i++)
-                    ..._die(i, i == 0 ? roll.a : roll.b, t, size, side),
-                ],
-              ),
+            // Та же раскладка, что у доски: нужна середина «корешка».
+            final Rect bar = BoardGeometry(size: size, perspective: Player.white).bar;
+            return Stack(
+              children: <Widget>[
+                for (int i = 0; i < 2; i++)
+                  ..._die(i, i == 0 ? roll.a : roll.b, t, size, side, bar),
+              ],
             );
           },
         );
@@ -102,8 +104,19 @@ class _DiceThrowState extends State<DiceThrow>
   );
 
   /// Тень и кубик номер [index] в момент [t] броска.
-  List<Widget> _die(int index, int value, double t, Size size, double side) {
-    final double flight = Curves.easeOutCubic.transform(math.min(t / 0.75, 1));
+  List<Widget> _die(
+    int index,
+    int value,
+    double t,
+    Size size,
+    double thrownSide,
+    Rect bar,
+  ) {
+    final double flight = Curves.easeOutCubic.transform(math.min(t / 0.6, 1));
+    // После отскоков кубики отъезжают на корешок и мельчают до его ширины.
+    final double settle = Curves.easeInOut.transform(((t - 0.75) / 0.25).clamp(0, 1));
+    final double rest = math.max(bar.width * 1.25, 20);
+    final double side = thrownSide + (rest - thrownSide) * settle;
     final double sign = _fromBottom ? 1 : -1;
     final Offset start = Offset(
       size.width * (0.88 - 0.1 * index),
@@ -113,14 +126,23 @@ class _DiceThrowState extends State<DiceThrow>
       size.width * (0.6 + 0.16 * index),
       size.height * (0.5 + sign * (0.2 + 0.05 * index)),
     );
-    final Offset position = Offset.lerp(start, land, flight)!;
+    final Offset resting = Offset(
+      bar.center.dx,
+      bar.center.dy + (index == 0 ? -1 : 1) * (rest / 2 + 2),
+    );
+    final Offset position = Offset.lerp(
+      Offset.lerp(start, land, flight)!,
+      resting,
+      settle,
+    )!;
     // Высота над доской: три затухающих отскока.
     final double hop =
         math.sin(flight * math.pi * 3).abs() *
         math.pow(1 - flight, 1.5).toDouble();
     final double spin = 1 - flight;
     final Matrix4 rotation = Matrix4.rotationZ(
-      spin * math.pi * (index.isEven ? 1.5 : -1.5) + (index.isEven ? 0.25 : -0.35),
+      spin * math.pi * (index.isEven ? 1.5 : -1.5) +
+          (index.isEven ? 0.25 : -0.35) * (1 - settle),
     ).multiplied(Matrix4.rotationY(spin * math.pi * 2 * (3 - index)))
         .multiplied(Matrix4.rotationX(spin * math.pi * 2 * (2 + index)))
         .multiplied(_base[value]!);

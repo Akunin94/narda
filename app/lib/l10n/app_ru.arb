@@ -149,6 +149,9 @@
   "themesTitle": "Оформление доски",
   "@themesTitle": { "description": "Заголовок экрана тем" },
 
+  "themeYogoch": "Дерево",
+  "@themeYogoch": { "description": "Тема: живая деревянная доска" },
+
   "themeKlassik": "Классика",
   "@themeKlassik": { "description": "Тема: классика" },
 

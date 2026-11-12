@@ -601,6 +601,12 @@ abstract class AppText {
   /// **'Doska ko\'rinishi'**
   String get themesTitle;
 
+  /// Тема: живая деревянная доска
+  ///
+  /// In uz, this message translates to:
+  /// **'Yog\'och'**
+  String get themeYogoch;
+
   /// Тема: классика
   ///
   /// In uz, this message translates to:

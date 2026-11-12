@@ -264,6 +264,9 @@ class AppTextRu extends AppText {
   String get themesTitle => 'Оформление доски';
 
   @override
+  String get themeYogoch => 'Дерево';
+
+  @override
   String get themeKlassik => 'Классика';
 
   @override

@@ -253,6 +253,9 @@
   "themesTitle": "Doska ko'rinishi",
   "@themesTitle": { "description": "Заголовок экрана тем" },
 
+  "themeYogoch": "Yog'och",
+  "@themeYogoch": { "description": "Тема: живая деревянная доска" },
+
   "themeKlassik": "Klassik",
   "@themeKlassik": { "description": "Тема: классика" },
 

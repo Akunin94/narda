@@ -69,7 +69,7 @@ class SettingsController extends ChangeNotifier {
       sound: prefs.getBool(_keySound) ?? true,
       vibration: prefs.getBool(_keyVibration) ?? true,
       localeCode: prefs.getString(_keyLocale),
-      boardThemeId: prefs.getString(_keyBoardTheme) ?? klassikTheme.id,
+      boardThemeId: prefs.getString(_keyBoardTheme) ?? yogochTheme.id,
       botLevel: _enumAt(
         BotLevel.values,
         prefs.getInt(_keyBotLevel),

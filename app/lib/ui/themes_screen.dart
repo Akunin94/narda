@@ -83,6 +83,7 @@ class _ThemesScreenState extends State<ThemesScreen> {
   ).showSnackBar(SnackBar(content: Text(message)));
 
   String _themeName(AppText text, BoardTheme theme) => switch (theme.id) {
+    'yogoch' => text.themeYogoch,
     'kok_gumbaz' => text.themeKokGumbaz,
     'zar' => text.themeZar,
     _ => text.themeKlassik,

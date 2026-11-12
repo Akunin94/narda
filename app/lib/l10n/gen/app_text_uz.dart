@@ -265,6 +265,9 @@ class AppTextUz extends AppText {
   String get themesTitle => 'Doska ko\'rinishi';
 
   @override
+  String get themeYogoch => 'Yog\'och';
+
+  @override
   String get themeKlassik => 'Klassik';
 
   @override

@@ -25,6 +25,7 @@ class BoardTheme {
     required this.dieFace,
     required this.dieEdge,
     required this.diePip,
+    this.wooden = false,
   });
 
   /// Ключ темы: он же ключ строки локализации и ключ разблокировки в настройках.
@@ -55,6 +56,9 @@ class BoardTheme {
   final Color dieEdge;
   final Color diePip;
 
+  /// Живая деревянная доска: инкрустированные пункты, лунки и петли вместо орнамента.
+  final bool wooden;
+
   Color checkerFace(Player player) =>
       player == Player.white ? checkerWhiteFace : checkerBlackFace;
 
@@ -65,6 +69,29 @@ class BoardTheme {
   Color checkerLabel(Player player) =>
       player == Player.white ? checkerBlackEdge : checkerWhiteFace;
 }
+
+/// «Yog'och» — как настоящий деревянный кейс: светлое дерево, пункты-инкрустация.
+const BoardTheme yogochTheme = BoardTheme(
+  id: 'yogoch',
+  free: true,
+  wooden: true,
+  frameDark: Color(0xFF4A2814),
+  frameLight: Color(0xFF7E4B26),
+  feltDark: Color(0xFFB27A3E),
+  feltLight: Color(0xFFCF9A5A),
+  pointLight: Color(0xFFE2BC82),
+  pointDark: Color(0xFFD6AD70),
+  checkerWhiteFace: Color(0xFFF3E7CB),
+  checkerWhiteEdge: Color(0xFFB8975E),
+  checkerBlackFace: Color(0xFF9C2A22),
+  checkerBlackEdge: Color(0xFF55130D),
+  ornament: Color(0xFFD9B26A),
+  ornamentFill: Color(0xFFB08A3E),
+  highlight: Color(0xFF4FD8FF),
+  dieFace: Color(0xFFF6EEDB),
+  dieEdge: Color(0xFFB8975E),
+  diePip: Color(0xFF3A1A0E),
+);
 
 /// Классика — тёплое дерево, кремовые и тёмно-красные шашки (§7).
 const BoardTheme klassikTheme = BoardTheme(
@@ -137,6 +164,7 @@ const BoardTheme zarTheme = BoardTheme(
 
 /// Все темы: классика первой (§P3 — «2 темы + классика»).
 const List<BoardTheme> boardThemes = <BoardTheme>[
+  yogochTheme,
   klassikTheme,
   kokGumbazTheme,
   zarTheme,
