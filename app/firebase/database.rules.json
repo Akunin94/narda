@@ -99,7 +99,7 @@
 
         "outcome": {
           ".write": "auth !== null && data.parent().child('players').child(auth.uid).exists() && (!data.exists() || newData.child('gameIndex').val() > data.child('gameIndex').val())",
-          ".validate": "newData.hasChildren(['winnerUid', 'reason', 'gameIndex'])"
+          ".validate": "newData.hasChildren(['winnerUid', 'reason', 'gameIndex']) && data.parent().child('players').child(newData.child('winnerUid').val()).exists() && (newData.child('reason').val() !== 'resign' || newData.child('winnerUid').val() !== auth.uid) && (newData.child('reason').val() !== 'resignSingle' || (newData.child('winnerUid').val() === auth.uid && data.parent().child('offer/from').val() !== auth.uid && data.parent().child('offer/game').val() === newData.child('gameIndex').val()))"
         },
 
         "games": {
