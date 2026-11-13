@@ -475,14 +475,14 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
         ),
       );
 
-  Widget _buildTopBar(AppText text) => Row(
-    children: <Widget>[
-      IconButton(
+  Widget _buildTopBar(AppText text) => LayoutBuilder(
+    builder: (BuildContext context, BoxConstraints constraints) {
+      final Widget back = IconButton(
         onPressed: () => Navigator.of(context).maybePop(),
         icon: const Icon(Icons.arrow_back),
         color: NardaColors.textMuted,
-      ),
-      Expanded(
+      );
+      final Widget status = Expanded(
         child: Column(
           children: <Widget>[
             Text(
@@ -505,20 +505,47 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
               ),
           ],
         ),
-      ),
-      IconButton(
-        onPressed: () => _showDiceStats(text),
-        icon: const Icon(Icons.casino_outlined),
-        tooltip: text.diceStatsTitle,
-        color: NardaColors.textMuted,
-      ),
-      IconButton(
-        onPressed: _controller.isOver ? null : () => _confirmResign(text),
-        icon: const Icon(Icons.flag_outlined),
-        tooltip: text.actionResign,
-        color: NardaColors.textMuted,
-      ),
-    ],
+      );
+      final List<Widget> actions = <Widget>[
+        // Звук — в одно касание прямо из партии, не только в настройках меню.
+        IconButton(
+          onPressed: () => setState(() => _settings.sound = !_settings.sound),
+          icon: Icon(
+            _settings.sound
+                ? Icons.volume_up_outlined
+                : Icons.volume_off_outlined,
+          ),
+          tooltip: text.settingSound,
+          color: NardaColors.textMuted,
+          visualDensity: VisualDensity.compact,
+        ),
+        IconButton(
+          onPressed: () => _showDiceStats(text),
+          icon: const Icon(Icons.casino_outlined),
+          tooltip: text.diceStatsTitle,
+          color: NardaColors.textMuted,
+          visualDensity: VisualDensity.compact,
+        ),
+        IconButton(
+          onPressed: _controller.isOver ? null : () => _confirmResign(text),
+          icon: const Icon(Icons.flag_outlined),
+          tooltip: text.actionResign,
+          color: NardaColors.textMuted,
+          visualDensity: VisualDensity.compact,
+        ),
+      ];
+      // В узкой панели альбома кнопки уходят второй строкой: статус не ломается.
+      if (constraints.maxWidth < 320) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Row(children: <Widget>[back, status]),
+            Row(mainAxisAlignment: MainAxisAlignment.center, children: actions),
+          ],
+        );
+      }
+      return Row(children: <Widget>[back, status, ...actions]);
+    },
   );
 
   /// [compact] — узкая панель альбома: кубики уходят на вторую строку,
