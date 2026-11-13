@@ -69,6 +69,21 @@ void main() {
       );
     });
 
+    test('серия весомее одной партии: K растёт как корень из длины', () {
+      int gain(int points) =>
+          eloUpdated(
+            rating: 1200,
+            opponentRating: 1200,
+            won: true,
+            ratedGames: 30,
+            matchPoints: points,
+          ) -
+          1200;
+      expect(gain(1), 16);
+      expect(gain(3), 28);
+      expect(gain(7), 42);
+    });
+
     test('изменения симметричны: сколько один взял, столько другой отдал', () {
       const int a = 1340;
       const int b = 1185;

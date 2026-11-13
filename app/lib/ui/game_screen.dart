@@ -253,6 +253,7 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
     final RatingChange change = await rating.applyMatch(
       opponentRating: match.opponentRating,
       won: _controller.score.winner == widget.setup.localPlayer,
+      matchPoints: widget.setup.target.points,
     );
     if (mounted) setState(() => _ratingChange = change);
   }

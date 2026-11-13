@@ -144,6 +144,7 @@ class ProfileController extends ChangeNotifier {
   RatingChange applyMatchResult({
     required int opponentRating,
     required bool won,
+    int matchPoints = 1,
   }) {
     final int before = _profile.rating;
     final int after = eloUpdated(
@@ -151,6 +152,7 @@ class ProfileController extends ChangeNotifier {
       opponentRating: opponentRating,
       won: won,
       ratedGames: _profile.ratedGames,
+      matchPoints: matchPoints,
     );
     _update(
       _profile.copyWith(

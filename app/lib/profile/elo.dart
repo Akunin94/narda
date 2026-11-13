@@ -55,18 +55,22 @@ int eloK({
 
 /// Новый рейтинг после матча. Считается по итогу матча целиком (§3.4:
 /// одиночная партия или серия до 3 / 5 / 7), а не по каждой партии серии.
+/// Длинная серия весомее: K растёт как √[matchPoints], как в FIBS.
 int eloUpdated({
   required int rating,
   required int opponentRating,
   required bool won,
   required int ratedGames,
+  int matchPoints = 1,
   EloConfig config = defaultElo,
 }) {
   final double expected = eloExpected(
     rating: rating,
     opponentRating: opponentRating,
   );
-  final int k = eloK(rating: rating, ratedGames: ratedGames, config: config);
+  final double k =
+      eloK(rating: rating, ratedGames: ratedGames, config: config) *
+      math.sqrt(matchPoints);
   final int next = (rating + k * ((won ? 1 : 0) - expected)).round();
   return math.max(config.floor, next);
 }

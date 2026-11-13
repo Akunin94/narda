@@ -25,10 +25,12 @@ class RatingService {
   Future<RatingChange> applyMatch({
     required int opponentRating,
     required bool won,
+    int matchPoints = 1,
   }) async {
     final RatingChange change = _profile.applyMatchResult(
       opponentRating: opponentRating,
       won: won,
+      matchPoints: matchPoints,
     );
     await publish();
     return change;
