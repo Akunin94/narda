@@ -549,6 +549,30 @@ class AppTextRu extends AppText {
   String get phraseRahmat => 'Спасибо, хорошая игра';
 
   @override
+  String get phraseMikrofon => 'Включи микрофон, поболтаем 🎤';
+
+  @override
+  String get phraseQoyil => 'Красиво!';
+
+  @override
+  String get phraseOmadKuldi => 'Повезло с кубиками!';
+
+  @override
+  String get phraseTezroq => 'Ходи чуть быстрее, пожалуйста';
+
+  @override
+  String get phraseDaqiqa => 'Минутку, сейчас вернусь';
+
+  @override
+  String get phraseAloqa => 'Извини, связь пропадала';
+
+  @override
+  String get phraseYana => 'Ещё партию?';
+
+  @override
+  String get phraseXayr => 'Пока!';
+
+  @override
   String onlineSecondsLeft(int seconds) {
     return '$seconds с';
   }

@@ -707,10 +707,20 @@ String generateRoomCode([Random? random]) {
 
 /// Общение без свободного чата: только эти фразы и эмодзи (§6).
 const List<String> quickPhraseIds = <String>[
+  'mikrofon',
   'salom',
-  'yaxshiYurish',
   'omad',
+  'yaxshiYurish',
+  'qoyil',
+  'omadKuldi',
+  'tezroq',
+  'daqiqa',
+  'aloqa',
+  'yana',
   'rahmat',
+  'xayr',
 ];
 
-const List<String> quickEmoji = <String>['👍', '😄', '😮', '🎲'];
+const List<String> quickEmoji = <String>[
+  '👍', '😄', '😂', '😮', '😅', '😎', '🔥', '🎲', '🤝', '🙏', '😢', '👋',
+];

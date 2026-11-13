@@ -321,6 +321,14 @@
   "phraseYaxshiYurish": "Хороший ход!",
   "phraseOmad": "Удачи!",
   "phraseRahmat": "Спасибо, хорошая игра",
+  "phraseMikrofon": "Включи микрофон, поболтаем 🎤",
+  "phraseQoyil": "Красиво!",
+  "phraseOmadKuldi": "Повезло с кубиками!",
+  "phraseTezroq": "Ходи чуть быстрее, пожалуйста",
+  "phraseDaqiqa": "Минутку, сейчас вернусь",
+  "phraseAloqa": "Извини, связь пропадала",
+  "phraseYana": "Ещё партию?",
+  "phraseXayr": "Пока!",
 
   "onlineSecondsLeft": "{seconds} с",
   "@onlineSecondsLeft": {

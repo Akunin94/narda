@@ -29,8 +29,9 @@ Future<void> showPhraseSheet(
             ),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 12),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            // Эмодзи переносятся на вторую строку на узких экранах.
+            child: Wrap(
+              alignment: WrapAlignment.center,
               children: <Widget>[
                 for (final String emoji in quickEmoji)
                   IconButton(
@@ -54,6 +55,14 @@ String phraseText(AppText text, String id) => switch (id) {
   'yaxshiYurish' => text.phraseYaxshiYurish,
   'omad' => text.phraseOmad,
   'rahmat' => text.phraseRahmat,
+  'mikrofon' => text.phraseMikrofon,
+  'qoyil' => text.phraseQoyil,
+  'omadKuldi' => text.phraseOmadKuldi,
+  'tezroq' => text.phraseTezroq,
+  'daqiqa' => text.phraseDaqiqa,
+  'aloqa' => text.phraseAloqa,
+  'yana' => text.phraseYana,
+  'xayr' => text.phraseXayr,
   // Эмодзи приходят как есть.
   _ => id,
 };

@@ -551,6 +551,30 @@ class AppTextUz extends AppText {
   String get phraseRahmat => 'Rahmat, yaxshi o\'yin';
 
   @override
+  String get phraseMikrofon => 'Mikrofonni yoqing, gaplashamiz 🎤';
+
+  @override
+  String get phraseQoyil => 'Qoyil!';
+
+  @override
+  String get phraseOmadKuldi => 'Zar sizga kulib boqdi!';
+
+  @override
+  String get phraseTezroq => 'Biroz tezroq yuring, iltimos';
+
+  @override
+  String get phraseDaqiqa => 'Bir daqiqa, hozir qaytaman';
+
+  @override
+  String get phraseAloqa => 'Kechirasiz, internet uzildi';
+
+  @override
+  String get phraseYana => 'Yana bir o\'yin?';
+
+  @override
+  String get phraseXayr => 'Xayr!';
+
+  @override
   String onlineSecondsLeft(int seconds) {
     return '$seconds s';
   }

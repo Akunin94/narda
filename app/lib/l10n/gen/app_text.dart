@@ -1123,6 +1123,54 @@ abstract class AppText {
   /// **'Rahmat, yaxshi o\'yin'**
   String get phraseRahmat;
 
+  /// Готовая фраза: просьба включить микрофон
+  ///
+  /// In uz, this message translates to:
+  /// **'Mikrofonni yoqing, gaplashamiz 🎤'**
+  String get phraseMikrofon;
+
+  /// Готовая фраза: похвала
+  ///
+  /// In uz, this message translates to:
+  /// **'Qoyil!'**
+  String get phraseQoyil;
+
+  /// Готовая фраза: повезло с кубиками
+  ///
+  /// In uz, this message translates to:
+  /// **'Zar sizga kulib boqdi!'**
+  String get phraseOmadKuldi;
+
+  /// Готовая фраза: просьба ходить быстрее
+  ///
+  /// In uz, this message translates to:
+  /// **'Biroz tezroq yuring, iltimos'**
+  String get phraseTezroq;
+
+  /// Готовая фраза: отойду на минутку
+  ///
+  /// In uz, this message translates to:
+  /// **'Bir daqiqa, hozir qaytaman'**
+  String get phraseDaqiqa;
+
+  /// Готовая фраза: извинение за связь
+  ///
+  /// In uz, this message translates to:
+  /// **'Kechirasiz, internet uzildi'**
+  String get phraseAloqa;
+
+  /// Готовая фраза: предложить ещё игру
+  ///
+  /// In uz, this message translates to:
+  /// **'Yana bir o\'yin?'**
+  String get phraseYana;
+
+  /// Готовая фраза: прощание
+  ///
+  /// In uz, this message translates to:
+  /// **'Xayr!'**
+  String get phraseXayr;
+
   /// Сколько секунд осталось на ход
   ///
   /// In uz, this message translates to:

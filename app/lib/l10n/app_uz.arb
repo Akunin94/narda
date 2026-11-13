@@ -529,6 +529,30 @@
   "phraseRahmat": "Rahmat, yaxshi o'yin",
   "@phraseRahmat": { "description": "Готовая фраза: спасибо за игру" },
 
+  "phraseMikrofon": "Mikrofonni yoqing, gaplashamiz 🎤",
+  "@phraseMikrofon": { "description": "Готовая фраза: просьба включить микрофон" },
+
+  "phraseQoyil": "Qoyil!",
+  "@phraseQoyil": { "description": "Готовая фраза: похвала" },
+
+  "phraseOmadKuldi": "Zar sizga kulib boqdi!",
+  "@phraseOmadKuldi": { "description": "Готовая фраза: повезло с кубиками" },
+
+  "phraseTezroq": "Biroz tezroq yuring, iltimos",
+  "@phraseTezroq": { "description": "Готовая фраза: просьба ходить быстрее" },
+
+  "phraseDaqiqa": "Bir daqiqa, hozir qaytaman",
+  "@phraseDaqiqa": { "description": "Готовая фраза: отойду на минутку" },
+
+  "phraseAloqa": "Kechirasiz, internet uzildi",
+  "@phraseAloqa": { "description": "Готовая фраза: извинение за связь" },
+
+  "phraseYana": "Yana bir o'yin?",
+  "@phraseYana": { "description": "Готовая фраза: предложить ещё игру" },
+
+  "phraseXayr": "Xayr!",
+  "@phraseXayr": { "description": "Готовая фраза: прощание" },
+
   "onlineSecondsLeft": "{seconds} s",
   "@onlineSecondsLeft": {
     "description": "Сколько секунд осталось на ход",
