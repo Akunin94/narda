@@ -422,7 +422,7 @@ class RoomSnapshot {
     this.games = const <int, RoomGame>{},
     this.outcome,
     this.presence = const <String, bool>{},
-    this.chat = const <String, String>{},
+    this.chat = const <String, ChatLine>{},
     this.rematch = const <String, int>{},
     this.voice = const <String, VoiceSignal>{},
     this.offer,
@@ -440,7 +440,7 @@ class RoomSnapshot {
   final Map<String, bool> presence;
 
   /// Последняя фраза каждого игрока.
-  final Map<String, String> chat;
+  final Map<String, ChatLine> chat;
 
   /// Заявки на реванш: uid -> номер партии, с которой игрок готов начать
   /// новый матч в этой же комнате (§P5).
@@ -508,11 +508,16 @@ class RoomSnapshot {
         return face != null && face >= 1 && face <= 6 ? face : null;
       });
 
-  static String? _phrase(String _, Object? json) {
+  static ChatLine? _phrase(String _, Object? json) {
     final Object? phrase = childOf(json, 'phrase');
-    return phrase is String ? phrase : null;
+    return phrase is String
+        ? (phrase: phrase, ts: asInt(childOf(json, 'ts')) ?? 0)
+        : null;
   }
 }
+
+/// Фраза чата и серверное время отправки: по нему отличаем новую от старой.
+typedef ChatLine = ({String phrase, int ts});
 
 /// Предложение сдаться на 1 очко. Действует, пока не сменился ход [move]
 /// партии [game] — дальше считается отклонённым.

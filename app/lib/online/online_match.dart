@@ -100,6 +100,7 @@ class OnlineMatch extends ChangeNotifier implements TurnCoordinator {
   int _finishedGame = -1;
   String? _phrase;
   int _phraseAt = 0;
+  ChatLine? _lastLine;
 
   @override
   Stream<MatchSignal> get signals => _signals.stream;
@@ -465,10 +466,16 @@ class OnlineMatch extends ChangeNotifier implements TurnCoordinator {
     if (uid != null) {
       final bool online = snapshot.presence[uid] ?? false;
       _absentSince = online ? null : (_absentSince ?? _serverNow());
-      final String? phrase = snapshot.chat[uid];
-      if (phrase != null && phrase != _phrase) {
-        _phrase = phrase;
-        _phraseAt = _serverNow();
+      // Фраза всплывает один раз: при новой отправке, а не на каждом снимке
+      // комнаты после того, как погасла. Старая (вход в комнату) не всплывает.
+      final ChatLine? line = snapshot.chat[uid];
+      if (line != null && line != _lastLine) {
+        _lastLine = line;
+        if (line.ts == 0 ||
+            _serverNow() - line.ts < phraseLifetime.inMilliseconds) {
+          _phrase = line.phrase;
+          _phraseAt = _serverNow();
+        }
       }
     }
 
