@@ -5,11 +5,14 @@ import 'package:firebase_database/firebase_database.dart';
 
 import 'firebase_config.dart';
 
-/// Минимальная сборка, с которой ещё можно играть: `config/minBuild` в базе.
-/// Поднимается вручную в консоли Firebase, когда старые версии ломают онлайн.
+/// Минимальная сборка, с которой ещё можно играть: `config/minBuild` в базе,
+/// и пояснение к обновлению `config/updateNote` (строка или {uz, ru}).
+/// Оба поднимаются вручную в консоли Firebase.
+typedef MinBuildConfig = ({int minBuild, Object? note});
+
 abstract final class MinBuild {
   /// `null` — узнать не удалось (нет ключей, нет сети): играть можно.
-  static Future<int?> fetch() async {
+  static Future<MinBuildConfig?> fetch() async {
     if (!OnlineConfig.isConfigured) return null;
     try {
       final FirebaseApp app = Firebase.apps.isEmpty
@@ -18,11 +21,22 @@ abstract final class MinBuild {
       final DataSnapshot snapshot = await FirebaseDatabase.instanceFor(
         app: app,
         databaseURL: OnlineConfig.databaseUrl,
-      ).ref('config/minBuild').get().timeout(const Duration(seconds: 8));
-      final Object? value = snapshot.value;
-      return value is int ? value : null;
+      ).ref('config').get().timeout(const Duration(seconds: 8));
+      final Object? config = snapshot.value;
+      if (config is! Map) return null;
+      final Object? minBuild = config['minBuild'];
+      return minBuild is int
+          ? (minBuild: minBuild, note: config['updateNote'])
+          : null;
     } on Object {
       return null;
     }
   }
+}
+
+/// Пояснение на языке [lang]: строка — одна на всех, карта — по языкам,
+/// без нужного языка берётся узбекский. Пустое — `null`.
+String? updateNote(Object? note, String lang) {
+  final Object? text = note is Map ? (note[lang] ?? note['uz']) : note;
+  return text is String && text.trim().isNotEmpty ? text.trim() : null;
 }

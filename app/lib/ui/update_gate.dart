@@ -25,6 +25,7 @@ class UpdateGate extends StatefulWidget {
 
 class _UpdateGateState extends State<UpdateGate> with WidgetsBindingObserver {
   bool _outdated = false;
+  Object? _note;
 
   @override
   void initState() {
@@ -45,23 +46,31 @@ class _UpdateGateState extends State<UpdateGate> with WidgetsBindingObserver {
   }
 
   Future<void> _check() async {
-    final int? minimum = await MinBuild.fetch();
-    if (minimum == null) return;
+    final MinBuildConfig? config = await MinBuild.fetch();
+    if (config == null) return;
     final PackageInfo info = await PackageInfo.fromPlatform();
     final int? build = int.tryParse(info.buildNumber);
     if (build == null || !mounted) return;
-    setState(() => _outdated = build < minimum);
+    setState(() {
+      _outdated = build < config.minBuild;
+      _note = config.note;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     if (!_outdated) return widget.child;
     final AppText text = AppText.of(context);
+    final String? note = updateNote(
+      _note,
+      Localizations.localeOf(context).languageCode,
+    );
     return Material(
       color: NardaColors.background,
       child: SafeArea(
         child: Center(
-          child: Padding(
+          // Пояснение может быть длинным, а в альбоме экран низкий.
+          child: SingleChildScrollView(
             padding: const EdgeInsets.all(32),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -87,6 +96,22 @@ class _UpdateGateState extends State<UpdateGate> with WidgetsBindingObserver {
                   textAlign: TextAlign.center,
                   style: const TextStyle(color: NardaColors.textMuted),
                 ),
+                if (note != null) ...<Widget>[
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: NardaColors.surface,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: NardaColors.goldDeep),
+                    ),
+                    child: Text(
+                      note,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: NardaColors.textPrimary),
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 28),
                 FilledButton(
                   onPressed: () => launchUrl(
